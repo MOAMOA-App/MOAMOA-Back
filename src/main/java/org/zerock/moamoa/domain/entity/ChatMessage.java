@@ -25,7 +25,7 @@ public class ChatMessage {
     @Column(name = "sender_id", nullable = false)
     private Long senderId;
 
-    @Column(name = "message", nullable = false)
+    @Column(name = "message", nullable = false, length = 254)
     private String message;
 
     @Column(name = "read_or_not", nullable = false)

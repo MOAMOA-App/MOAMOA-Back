@@ -13,6 +13,10 @@ import java.time.LocalDateTime;
 @Table(name= "block_users")
 @ToString
 public class UserBlocked {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @ManyToOne  // 외래키 어노테이션 뭐써야되는지 모르곘음... 이거맞겟지
     @JoinColumn(name="id")
     private User userID;    // 회원ID
@@ -24,8 +28,17 @@ public class UserBlocked {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
