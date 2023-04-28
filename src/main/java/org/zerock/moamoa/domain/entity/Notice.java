@@ -5,7 +5,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.security.Timestamp;
 import java.time.LocalDateTime;
 
 //@AllArgsConstructor
@@ -13,9 +12,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name= "notifications")
+@Table(name= "notice")
 @ToString
-public class Notification {
+public class Notice {
     @Id // 기본키로 설정한다.
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 데이터를 저장할 때 값 1씩 자동으로 증가
     private Long NID;
