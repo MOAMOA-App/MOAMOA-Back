@@ -1,9 +1,10 @@
-package org.zerock.moamoa;
+package org.zerock.moamoa.service;
 
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.repository.MoamoaRepository;
 
 import javax.transaction.Transactional;
 import java.util.List;

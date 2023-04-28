@@ -1,13 +1,13 @@
-package org.zerock.moamoa;
+package org.zerock.moamoa.controller;
 
 
 import java.util.List;
-import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.zerock.moamoa.service.MoamoaService;
 import org.zerock.moamoa.domain.entity.User;
 
 @RequiredArgsConstructor
