@@ -4,6 +4,8 @@ import lombok.ToString;
 import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -42,21 +44,19 @@ public class Goods {
 
     @Column(length = 254, nullable = false)
     private String description; //text
-
+    @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    @CreatedDate
     @Column(name = "dead_date", nullable = false)
     private LocalDateTime deadDate;
 
-    @PrePersist
-    protected void onCreate2() {
-        this.deadDate = LocalDateTime.now();
-    }
+    @LastModifiedDate
+    @Column(name = "modified_date", nullable = false)
+    private LocalDateTime modifiedDate;
+
+
     @Column(length = 200, nullable = false)
     private int sell_count;
     @Column(length = 200, nullable = false)
