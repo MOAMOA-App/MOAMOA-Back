@@ -1,19 +1,22 @@
 package org.zerock.moamoa.domain.entity;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 //@AllArgsConstructor
 //@NoArgsConstructor
-@Getter
-@Setter
 @Entity
-@Table(name= "notices")
-@ToString
+@Table(name= "notice")
+@Data   // @Getter @Setter @ToString @EqualsAndHashCode @RequiredArgsConstructor @Value 합침
+        // @EqualsAndHashCode: equals()메소드와 hashCode()메소드를 생성해준다.
+        // @RequiredArgsConstructor: 초기화안된 final 필드나 @NonNull이 붙은 필드에 대해 생성자를 만들어 준다
 public class Notice {
     @Id // 기본키로 설정한다.
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 데이터를 저장할 때 값 1씩 자동으로 증가

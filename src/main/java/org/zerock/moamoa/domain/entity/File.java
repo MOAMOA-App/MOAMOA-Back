@@ -1,6 +1,7 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.*;
+import lombok.Data;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -9,10 +10,10 @@ import java.time.LocalDateTime;
 //categores-my_categories : N:M   카테고리당 여러 관심 카테고리, 관심 카테고리 안에 여러 카테고리
 //files-goods_images : 1:1        이미지 하나당 파일 하나
 //goods_images-goods : N:1        상품 하나당 이미지 여러개
+
 @Entity
 @Table(name = "files")
 @Data
-
 public class File {
     @Id
     @GeneratedValue
@@ -31,11 +32,11 @@ public class File {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @OneToOne(mappedBy = "file")
-    private ProductImage product_images;
+    @OneToOne(mappedBy = "file")    // GoodsImage에서 onetoone으로 join-> mappedBy를 통해 양방향으로 연결
+    private ProductImage goodsImage;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+//    @PrePersist
+//    protected void onCreate() {
+//        this.createdAt = LocalDateTime.now();
+//    }
 }
