@@ -27,7 +27,7 @@ public class ChatMessage {
     @JoinColumn(name = "user_id")
     private User sender;
 
-    @Column(name = "message", nullable = false, length = 254)
+    @Column(name = "messages", nullable = false, length = 254)
     private String message;
 
     @Column(name = "read_or_not", nullable = false)

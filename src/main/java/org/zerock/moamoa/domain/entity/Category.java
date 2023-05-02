@@ -12,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name= "category")
+@Table(name= "categories")
 @ToString
 public class Category {
         @Id
@@ -22,10 +22,10 @@ public class Category {
         @Column(length = 20, nullable = false)
         private String name;
 
-        @ManyToMany
-        @JoinTable(name = "cate_mycate",
-                joinColumns = @JoinColumn(name = "cate_id"),
-                inverseJoinColumns = @JoinColumn(name = "mycate_id"))
-        private List<MyCategory> my_categories = new ArrayList<>();
+//        @ManyToMany
+//        @JoinTable(name = "cate_mycate",
+//                joinColumns = @JoinColumn(name = "cate_id"),
+//                inverseJoinColumns = @JoinColumn(name = "mycate_id"))
+//        private List<MyCategory> my_categories = new ArrayList<>();
     }
 

@@ -9,7 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
-@Table(name= "wish_list")
+@Table(name= "wish_lists")
 @Entity
 @Data
 public class WishList {
@@ -19,7 +19,7 @@ public class WishList {
 
     @OneToOne
     @JoinColumn(name = "product_id",nullable = false)
-    private Goods productId;
+    private Product productId;
 
     @Column(name = "user_id",length = 11, nullable = false)
     private Long userId;

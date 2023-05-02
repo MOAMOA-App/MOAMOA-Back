@@ -1,13 +1,8 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 //file-users : N:1                유저 한명당 여러 파일
 //my_categories-users : 1:1       유저 한명당 하나의 관심 카테고리
@@ -16,8 +11,8 @@ import java.util.List;
 //goods_images-goods : N:1        상품 하나당 이미지 여러개
 @Entity
 @Table(name = "files")
-@Getter
-@Setter
+@Data
+
 public class File {
     @Id
     @GeneratedValue
@@ -37,7 +32,7 @@ public class File {
     private LocalDateTime createdAt;
 
     @OneToOne(mappedBy = "file")
-    private GoodsImage goods_images;
+    private ProductImage product_images;
 
     @PrePersist
     protected void onCreate() {
