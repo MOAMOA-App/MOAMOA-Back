@@ -44,7 +44,7 @@ class UserServiceTest {
 
     @Test
     void removeUser() {
-        userService.removeUser(Long.valueOf(2));
+        userService.removeUser(Long.valueOf(3));
     }
 
     @Test

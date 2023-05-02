@@ -1,10 +1,9 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.Data;
-import lombok.ToString;
+
+import lombok.*;
+
 import javax.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Table(name = "my_categories")

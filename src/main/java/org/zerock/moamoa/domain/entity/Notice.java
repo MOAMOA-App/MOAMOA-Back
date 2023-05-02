@@ -1,8 +1,8 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
+
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -12,6 +12,8 @@ import java.util.List;
 
 //@AllArgsConstructor
 //@NoArgsConstructor
+
+@Data
 @Entity
 @Table(name= "notice")
 @Data   // @Getter @Setter @ToString @EqualsAndHashCode @RequiredArgsConstructor @Value 합침
