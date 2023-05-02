@@ -3,7 +3,6 @@ package org.zerock.moamoa.domain.entity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -39,7 +38,6 @@ public class Notice {
     @Column(name = "reference_id", nullable = false)
     private Long referenceID;
 
-    @CreatedDate
     @Column(name = "send_date", nullable = false)
     private LocalDateTime sendDate;
 

@@ -1,9 +1,6 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
@@ -11,27 +8,25 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Table(name= "chat_rooms")
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
-@Table(name= "chat_room")
+@Data
 public class ChatRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "product_id", nullable = false)
-    private Long ProductId;
+    @OneToOne
+    @JoinColumn(name = "product_id")
+    private Goods goodsId;
 
-    @Column(name = "user_id", nullable = false)
-    private Long UserId;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User userId;
 
-
-
-    @OneToMany(mappedBy = "chatRoom")
-    private List<ChatMessage> messages = new ArrayList<>();
+    @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY)
+    private List<ChatMessage> messages;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false)
