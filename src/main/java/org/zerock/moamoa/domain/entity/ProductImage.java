@@ -4,8 +4,11 @@ package org.zerock.moamoa.domain.entity;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "goods_image")
-public class GoodsImage {
+@Table(name = "product_images")
+public class ProductImage {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
 
         @OneToOne
         @JoinColumn(name = "file_id", nullable = false)
@@ -13,6 +16,7 @@ public class GoodsImage {
 
         @ManyToOne
         @JoinColumn(name="product_id", nullable = false)
-        private Goods goods;
+        private Product product;
     }
+
 

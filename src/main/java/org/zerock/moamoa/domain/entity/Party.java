@@ -14,14 +14,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name= "party")
+@Table(name= "parties")
 public class Party {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "goods_id", nullable = false)
-    private Long goodsId;
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
 
     @Column(name = "buyer_id", nullable = false)
     private Long buyerId;

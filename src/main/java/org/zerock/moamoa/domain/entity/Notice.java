@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name= "notice")
+@Table(name= "notices")
 @ToString
 public class Notice {
     @Id // 기본키로 설정한다.

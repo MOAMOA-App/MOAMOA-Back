@@ -19,13 +19,14 @@ public class ChatRoom {
 
     @OneToOne
     @JoinColumn(name = "product_id")
-    private Goods goodsId;
+    private Product productId;
 
     @OneToOne
     @JoinColumn(name = "user_id")
     private User userId;
 
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY)
+
     private List<ChatMessage> messages;
 
     @CreatedDate
