@@ -1,24 +1,23 @@
 package org.zerock.moamoa.domain.entity;
 
+
 import lombok.*;
+
 import javax.persistence.*;
 
+@Entity
+@Table(name = "my_categories")
+@Data
 public class MyCategory {
+    @Id
+    @GeneratedValue
+    private Long id;
 
-    @Entity
-    @Table(name = "my_categories")
-    public class My_categories {
-        @Id
-        @GeneratedValue
-        private Long id;
+    @OneToOne
+    @JoinColumn(name="user_id", nullable = false)
+    private User users;
 
-        @OneToOne
-        @JoinColumn(name="user_id", nullable = false)
-        private User users;
-
-        @ManyToOne
-        @JoinColumn(name="id2", nullable = true)
-        private Category categories;
-
-    }
+    @ManyToOne
+    @JoinColumn(name="cate_id", nullable = true)
+    private Category categories;
 }
