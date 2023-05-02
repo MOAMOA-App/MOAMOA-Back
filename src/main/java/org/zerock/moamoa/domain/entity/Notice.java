@@ -1,7 +1,6 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -9,8 +8,7 @@ import java.time.LocalDateTime;
 
 //@AllArgsConstructor
 //@NoArgsConstructor
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name= "notices")
 @ToString

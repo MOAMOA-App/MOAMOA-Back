@@ -1,6 +1,6 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.ToString;
+import lombok.*;
 import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,8 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name= "announces")
 @ToString
