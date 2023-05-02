@@ -1,43 +1,54 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.ToString;
+import lombok.*;
+
 import javax.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-@Getter
-@Setter
+
+import org.springframework.data.annotation.CreatedDate;
+import java.time.LocalDateTime;
+
+@Table(name= "users")
 @Entity
-@Table(name= "user")
-@ToString
+@Data
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long UID;
+    private Long id;
 
-    @Column(length = 11, nullable = false)
-    private String login_type;
-    @Column(length = 254, nullable = false)
+    @Column(name = "login_type", length = 11, nullable = false)
+    private String loginType;
+
+    @Column(name = "token", length = 254, nullable = false)
     private String token;
 
-    @Column(length = 32, nullable = false)
+    @Column(name = "name", length = 32, nullable = false)
     private String name;
 
-    @Column(length = 50, nullable = false)
+    @Column(name = "email", length = 50, nullable = false)
     private String email;
 
-    @Column(length = 32, nullable = false)
+    @Column(name = "phone", length = 32)
     private String phone;
 
-    @Column(length = 32, nullable = false)
+    @Column(name = "nick", length = 32, nullable = false)
     private String nick;
 
-    @Column(length = 32, nullable = false)
-    private String prof_img;
+    @Column(name = "prof_img", length = 32, nullable = false)
+    private String profImg;
 
-    @Column(length = 200, nullable = false)
-    private String joindate;
+    @Column(name = "address", length=254)
+    private String address;
+
+    @Column(name = "detailed_address", length=254)
+    private String detailAddress;
 
 
+    @Column(name = "joindate")
+    private LocalDateTime joinDate;
+    @PrePersist
+    protected void onCreate() {
+        this.joinDate = LocalDateTime.now();
+    }
 //
 //    @Id // 기본키로 설정한다.
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
