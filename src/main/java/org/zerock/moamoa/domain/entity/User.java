@@ -1,7 +1,6 @@
 package org.zerock.moamoa.domain.entity;
 
 import lombok.*;
-
 import javax.persistence.*;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -96,7 +95,7 @@ public class User {
 //    @Column(name = "login_type", length = 11, nullable = false)
 //    private String loginType;
 //
-//    @Column(name = "token", length = 255, nullable = false)
+//    @Column(name = "token", length = 254, nullable = false)
 //    private String loginToken;
 //
 //    @Column(name = "name", length = 11, nullable = false)
@@ -114,15 +113,16 @@ public class User {
 //    @Column(name = "prof_img", length = 50, nullable = false)
 //    private String profImg;
 //
-//    @Column(name = "user_addr", length = 255, nullable = false)
+//    @Column(name = "user_addr", length = 254, nullable = false)
 //    private String userAddr;
 //
-//    @Column(name = "detail_addr", length = 255, nullable = false)
+//    @Column(name = "detail_addr", length = 254, nullable = false)
 //    private String userDetailAddr;
 //
-//    @Column(name = "active", length = 255, nullable = false)
+//    @Column(name = "active", length = 254, nullable = false)
 //    private String active;
 //
+//    @CreatedDate
 //    @Column(name = "joindate", nullable = false)
 //    private LocalDateTime joinDate;
 //

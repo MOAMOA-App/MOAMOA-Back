@@ -23,8 +23,12 @@ public class WishList {
 
     @Column(name = "user_id",length = 11, nullable = false)
     private Long userId;
-
-    @CreatedDate
+    
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
