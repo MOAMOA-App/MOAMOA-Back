@@ -13,7 +13,6 @@ import java.util.List;
 //@AllArgsConstructor
 //@NoArgsConstructor
 
-@Data
 @Entity
 @Table(name= "notice")
 @Data   // @Getter @Setter @ToString @EqualsAndHashCode @RequiredArgsConstructor @Value 합침

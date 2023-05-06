@@ -16,27 +16,25 @@ import java.time.LocalDateTime;
 @Data
 public class File {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name="user_id", nullable = false)
     private User users;
 
-    @Column(length = 50, nullable = false)
+    @Column(name="type", length = 50, nullable = false)
     private String type;
-
-    @Column(nullable = false)
-    private String name;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @OneToOne(mappedBy = "file")    // GoodsImage에서 onetoone으로 join-> mappedBy를 통해 양방향으로 연결
-    private ProductImage goodsImage;
+    @JoinColumn(name = "name", nullable = false)
+    @OneToOne(mappedBy = "product_images")    // GoodsImage에서 onetoone으로 join-> mappedBy를 통해 양방향으로 연결
+    private ProductImage productImage;
 
-//    @PrePersist
-//    protected void onCreate() {
-//        this.createdAt = LocalDateTime.now();
-//    }
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
