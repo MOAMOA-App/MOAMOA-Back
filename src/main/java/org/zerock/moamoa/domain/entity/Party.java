@@ -28,8 +28,11 @@ public class Party {
     @Column(name = "count", nullable = false)
     private int count;
 
-    @CreatedDate
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
