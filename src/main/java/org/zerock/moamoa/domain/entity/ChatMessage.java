@@ -24,17 +24,22 @@ public class ChatMessage {
     private ChatRoom chatRoom;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "sender_id")
     private User sender;
 
-    @Column(name = "messages", nullable = false, length = 254)
+    @Column(name = "message", nullable = false, length = 254)
     private String message;
 
     @Column(name = "read_or_not", nullable = false)
     private boolean readOrNot;
 
-    @CreatedDate
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
 }
