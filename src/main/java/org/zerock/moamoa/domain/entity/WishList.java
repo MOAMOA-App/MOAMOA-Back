@@ -17,11 +17,12 @@ public class WishList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne(targetEntity = Product.class)
     @JoinColumn(name = "product_id",nullable = false)
     private Product productId;
 
-    @Column(name = "user_id",length = 11, nullable = false)
+    @OneToOne(targetEntity = User.class)
+    @JoinColumn(name = "user_id", nullable = false)
     private Long userId;
     
     @Column(name = "created_at", nullable = false)

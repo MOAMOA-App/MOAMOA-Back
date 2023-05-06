@@ -17,19 +17,24 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "product_id")
     private Product productId;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User userId;
 
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY)
-
     private List<ChatMessage> messages;
 
-    @CreatedDate
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
 }

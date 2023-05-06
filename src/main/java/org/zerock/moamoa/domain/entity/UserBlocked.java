@@ -14,15 +14,15 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 public class UserBlocked {
+    //DB상에서의 id명이 user_id로 되어 있어서 맞출 필요가 있음
+    //id에 user_id를 그대로 넣는 경우
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @ManyToOne(targetEntity = User.class)
     @JoinColumn(name = "target_id")
     User target;
 
-    @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
