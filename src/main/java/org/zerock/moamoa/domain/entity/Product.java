@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long UID;
+    private Long id;
 
     @Column(length = 11, nullable = false)
     private Long seller_id;
@@ -42,15 +42,15 @@ public class Product {
 
     @Column(length = 254, nullable = false)
     private String description; //text
-    @CreatedDate
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @CreatedDate
+
     @Column(name = "dead_date", nullable = false)
     private LocalDateTime deadDate;
 
-    @LastModifiedDate
+
     @Column(name = "modified_date", nullable = false)
     private LocalDateTime modifiedDate;
 
@@ -62,5 +62,11 @@ public class Product {
     @Column(length = 32, nullable = false)
     private String choice_send;
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.deadDate = LocalDateTime.now();
+        this.modifiedDate = LocalDateTime.now();
+    }
 
 }

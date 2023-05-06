@@ -17,13 +17,22 @@ public class Announce {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 11, nullable = false)
+    @Column(name = "product_id", nullable = false)
     private Long productId;
+
+    @Column(name = "buyer_id", nullable = false)
+    private Long buyerId;
+
+
+
     @Column(name = "announce_content", nullable = false)
     private String announceContent;
-
-
     @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
