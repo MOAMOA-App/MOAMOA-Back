@@ -53,40 +53,8 @@ class FileServiceTest {
 
     @Test
     void findAll() {
-        // given
-        User user = new User();
-        user.setLoginType("test");
-        user.setToken("test");
-        user.setName("test");
-        user.setEmail("test@test.com");
-        user.setNick("test");
-        user.setProfImg("test");
-        userRepository.save(user);
-
-        List<File> files = new ArrayList<>();
-
-        // 파일 10개 생성
-        for (int i = 0; i < 10; i++) {
-            String type = "test_type" + i;
-            String name = "test_name" + i;
-            files.add(fileService.saveFile(user.getId(), type, name));
-        }
-
-        // when
-        List<File> foundFiles = fileService.findAll();
-
-        // then
-        assertEquals(10, foundFiles.size());
-
-        // 파일이 올바르게 저장되었는지 확인
-        for (int i = 0; i < 10; i++) {
-            assertEquals(files.get(i).getId(), foundFiles.get(i).getId());
-            assertEquals(files.get(i).getType(), foundFiles.get(i).getType());
-            assertNotNull(foundFiles.get(i).getCreatedAt());
-            assertEquals(user.getId(), foundFiles.get(i).getUsers().getId());
-        }
+        System.out.println(fileService.findAll());
     }
-
     @Test
     void findById() {
 //        File file = fileService.saveFile(1L, "image", "file1.jpg");

@@ -10,14 +10,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Table(name= "parties")
+@Table(name = "parties")
 public class Party {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "product_id", nullable = false)
-    private Long productId;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     @Column(name = "buyer_id", nullable = false)
     private Long buyerId;
@@ -28,9 +29,9 @@ public class Party {
     @Column(name = "count", nullable = false)
     private int count;
 
-
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

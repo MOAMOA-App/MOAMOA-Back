@@ -1,66 +1,72 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.ToString;
-import javax.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Data
 @Entity
-@Table(name= "products")
-@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 11, nullable = false)
-    private Long seller_id;
-    @Column(length = 11, nullable = false)
-    private Long category_id;
+//    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+//    private List<Party> parties;
 
-    @Column(length = 254, nullable = false)
-    private String selling_area;
+    @ManyToOne // Many = Board, User = One 한명의 유저는 여러개의 게시글을 쓸 수 있다.
+    @JoinColumn(name="seller_id") // foreign key (userId) references User (id)
+    private User user; // DB는 오브젝트를 저장할 수 없다. FK, 자바는 오브젝트를 저장할 수 있다. //참조 할 테이블
 
-    @Column(length = 254, nullable = false)
-    private String detail_area;
 
-    @Column(length = 100, nullable = false)
+
+    @Column(name = "category_id", nullable = false)
+    private Long categoryId;
+
+    @Column(name = "selling_area", nullable = false, length = 254)
+    private String sellingArea;
+
+    @Column(name = "detail_area", nullable = false, length = 254)
+    private String detailArea;
+
+    @Column(name = "title", nullable = false, length = 100)
     private String title;
 
-    @Column(length = 32, nullable = false)
+    @Column(name = "status", nullable = false, length = 32)
     private String status;
 
-    @Column(length = 200, nullable = false)
-    private int sell_price;
+    @Column(name = "sell_price", nullable = false)
+    private int sellPrice;
 
-    @Column(length = 200, nullable = false)
-    private int view_count;
+    @Column(name = "view_count", nullable = false)
+    private int viewCount;
 
-    @Column(length = 254, nullable = false)
-    private String description; //text
+    @Column(name = "description", nullable = false, length = 254)
+    private String description;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-
     @Column(name = "dead_date", nullable = false)
     private LocalDateTime deadDate;
-
 
     @Column(name = "modified_date", nullable = false)
     private LocalDateTime modifiedDate;
 
+    @Column(name = "sell_count", nullable = false)
+    private int sellCount;
 
-    @Column(length = 200, nullable = false)
-    private int sell_count;
-    @Column(length = 200, nullable = false)
-    private int max_count;
-    @Column(length = 32, nullable = false)
-    private String choice_send;
+    @Column(name = "max_count", nullable = false)
+    private int maxCount;
+
+    @Column(name = "choice_send", nullable = false, length = 32)
+    private String choiceSend;
 
     @PrePersist
     protected void onCreate() {
@@ -68,5 +74,4 @@ public class Product {
         this.deadDate = LocalDateTime.now();
         this.modifiedDate = LocalDateTime.now();
     }
-
 }

@@ -29,10 +29,9 @@ public class File {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @JoinColumn(name = "name", nullable = false)
-    @OneToOne(mappedBy = "product_images")    // GoodsImage에서 onetoone으로 join-> mappedBy를 통해 양방향으로 연결
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "name")
     private ProductImage productImage;
-
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
