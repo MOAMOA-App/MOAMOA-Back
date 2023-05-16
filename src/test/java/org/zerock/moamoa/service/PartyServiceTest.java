@@ -5,11 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.zerock.moamoa.domain.entity.Party;
+import org.zerock.moamoa.domain.entity.*;
 import org.zerock.moamoa.repository.PartyRepository;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class PartyServiceTest {
@@ -27,26 +30,25 @@ class PartyServiceTest {
     void  findAll(){
         System.out.println(partyService.findAll());
     }
-
     @Test
     void saveParty() {
-        for(int i = 0 ; i < 10 ; i ++){
-            String temp = Integer.toString(i);
-            Party party = new Party();
+        // Mocked Product and User
+        int i = 1;
+        String temp = Integer.toString(1);
+        Product product = new Product();
 
-            party.setProductId(Long.valueOf(i));
-            party.setBuyerId(Long.valueOf(i));
+        // Mocked User
+        Party party = new Party();
+        User user = new User();
+//        party.set(21L);
 
-            party.setAddress(temp);
-            party.setCount(i);
-
-
-            partyService.saveParty(party);
-        }
-
-
+        party.setProduct(product);
+        party.setAddress(temp);
+        party.setBuyerId(31L);
+        partyService.saveParty(party, product.getId());
 
     }
+
 
     @Test
     void removeParty() {

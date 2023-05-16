@@ -16,5 +16,4 @@ public class ProductImage {
         @ManyToOne(targetEntity = File.class)
         @JoinColumn(name="file_id", nullable = false)
         private File file;
-    }
-
+}
