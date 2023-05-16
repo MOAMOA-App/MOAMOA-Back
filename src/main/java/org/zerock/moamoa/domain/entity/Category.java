@@ -9,16 +9,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
-@Entity
 @Table(name= "categories")
-@ToString
+@Entity
+@Data
 public class Category {
         @Id
-        @GeneratedValue
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         private long id;
 
-        @Column(length = 20, nullable = false)
+        @Column(name = "name", length = 20, nullable = false)
         private String name;
 
 //        @ManyToMany
@@ -26,5 +25,5 @@ public class Category {
 //                joinColumns = @JoinColumn(name = "cate_id"),
 //                inverseJoinColumns = @JoinColumn(name = "mycate_id"))
 //        private List<MyCategory> my_categories = new ArrayList<>();
-    }
+}
 
