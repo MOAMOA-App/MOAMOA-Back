@@ -21,7 +21,6 @@ public class UserService {
     }
 
 
-
     @Transactional
     public Optional<User> findById(Long id){
         return this.userRepository.findById(id);
@@ -33,22 +32,34 @@ public class UserService {
     }
 
     @Transactional
+    public User saveUser(String logintype, String token,String name, String nick, String profImg, String email, String phone, String detailAddress){
+        User user = new User();
+        user.setLoginType(logintype);
+        user.setToken(token);
+        user.setName(name);
+        user.setNick(nick);
+        user.setProfImg(profImg);
+        user.setEmail(email);
+        user.setPhone(phone);
+        user.setDetailAddress(detailAddress);
+
+        return saveUser(user);
+    }
+    @Transactional
     public User saveUser(User user){
         return this.userRepository.save(user);
     }
 
     @Transactional
     public void removeUser(Long id){
-        User user = userRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("해당 아이템이 없습니다. id=" + id));
+        User user = findById(id).orElseThrow(()->new IllegalArgumentException("해당 아이템이 없습니다. id=" + id));
 
         this.userRepository.delete(user);
     }
 
     @Transactional
     public User updateUser(Long id, String name){
-        User user = userRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("해당 아이템이 없습니다. id=" + id));
+        User user = this.userRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 아이템이 없습니다. id=" + id));
 
         user.setName(name);
         return this.userRepository.save(user);

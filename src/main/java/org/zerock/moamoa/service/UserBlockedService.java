@@ -14,12 +14,12 @@ import java.util.Optional;
 @Service
 public class UserBlockedService {
     private final UserBlockedRepository userBlockedRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public UserBlockedService(UserBlockedRepository userBlockedRepository, UserRepository userRepository) {
+    public UserBlockedService(UserBlockedRepository userBlockedRepository, UserService userService) {
         this.userBlockedRepository = userBlockedRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
 
@@ -34,30 +34,21 @@ public class UserBlockedService {
     }
 
     @Transactional
-    public UserBlocked saveUserBlocked(Long id, Long target_id){
-        User target = userRepository.findById(target_id).orElseThrow(() -> new RuntimeException("차단 대상이 존재하지 않습니다."));
+    public UserBlocked saveUserBlocked(Long user_id, Long target_id){
+        User user = userService.findById(user_id)
+                .orElseThrow(()->new IllegalArgumentException("사용자 id를 검색할 수 없습니다."));
+        User target = userService.findById(target_id).orElseThrow(() -> new RuntimeException("차단 대상이 존재하지 않습니다."));
         UserBlocked userBlocked = new UserBlocked();
-        userBlocked.setId(id);
+        userBlocked.setUser(user);
         userBlocked.setTarget(target);
         return this.userBlockedRepository.save(userBlocked);
     }
 
-    /*
     @Transactional
     public void removeUserBlocked(Long id){
-        User user = userRepository.findById(id)
+        UserBlocked user = userBlockedRepository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("해당 아이템이 없습니다. id=" + id));
-
-        this.userRepository.delete(user);
+        this.userBlockedRepository.delete(user);
     }
 
-    @Transactional
-    public User updateUserBlocked(Long id, String name){
-        User user = userRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("해당 아이템이 없습니다. id=" + id));
-
-        user.setName(name);
-        return this.userRepository.save(user);
-    }
-    */
 }

@@ -20,7 +20,7 @@ public class WishList {
 
     @OneToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
-    private Long userId;
+    private User userId;
     
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
