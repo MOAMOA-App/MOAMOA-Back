@@ -6,10 +6,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.zerock.moamoa.domain.entity.Product;
+import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.ProductRepository;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @SpringBootTest
 class ProductServiceTest {
@@ -30,38 +32,33 @@ class ProductServiceTest {
 
     @Test
     void saveProduct() {
-        for(int i = 0 ; i < 10 ; i ++){
-            String temp = Integer.toString(i);
-            Product product = new Product();
+        int i = 1;
+        String temp = Integer.toString(1);
+        Product product = new Product();
 
+        // Mocked User
+        User user = new User();
+        user.setId(41L);
 
-            product.setSeller_id(Long.valueOf(i));
-            product.setCategory_id(Long.valueOf(i));
+        product.setUser(user);
+        product.setCategoryId(Long.valueOf(i));
+        product.setSellingArea(temp);
+        product.setDetailArea(temp);
+        product.setTitle(temp);
+        product.setStatus(temp);
+        product.setSellPrice(i);
+        product.setViewCount(i);
+        product.setDescription(temp);
+        product.setSellCount(0);
+        product.setMaxCount(i);
+        product.setChoiceSend(temp);
 
-            product.setSelling_area(temp);
-            product.setDetail_area(temp);
-            product.setTitle(temp);
-            product.setStatus(temp);
-            product.setSell_price(i);
-            product.setView_count(i);
-            product.setDescription(temp);
-            product.setSell_count(0);
-            product.setMax_count(i);
-            product.setChoice_send(temp);
-
-
-
-
-            productService.saveProduct(product);
-        }
-
-
-
+        productService.saveProduct(product, user.getId());
     }
 
     @Test
     void removeProduct() {
-        productService.removeProduct(Long.valueOf(2));
+        productService.removeProduct(Long.valueOf(21));
     }
 
     @Test
