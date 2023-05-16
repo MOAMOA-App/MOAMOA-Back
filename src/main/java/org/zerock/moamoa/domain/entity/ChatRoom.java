@@ -22,6 +22,10 @@ public class ChatRoom {
     private Product productId;
 
     @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private User sellerId;
+
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User userId;
 
