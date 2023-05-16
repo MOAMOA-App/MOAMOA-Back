@@ -1,5 +1,6 @@
 package org.zerock.moamoa.service;
 
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,24 +17,37 @@ import java.util.Optional;
 @Transactional
 public class FileService {
     private final FileRepository fileRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public FileService(FileRepository fileRepository, UserRepository userRepository) {
+    public FileService(FileRepository fileRepository, UserService userService) {
         this.fileRepository = fileRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @Transactional
-    public File saveFile(Long userId, String type, String name) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user id: " + userId));
+    public File saveFile(File file, Long userId
+//            Long userId, String type, String name
+    ) throws NotFoundException {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("Invalid user id: " + userId));
+//
+//        File file = new File();
+//        file.setUsers(user);
+//        file.setType(type);
+//        file.setCreatedAt(LocalDateTime.now());
 
-        File file = new File();
+//        return fileRepository.save(file);
+
+//        User user = userService.findById(userId);
+//
+//        file.setUsers(user);
+//        return fileRepository.save(file);
+
+        Optional<User> optionalUser = userService.findById(userId);
+        User user = optionalUser.orElseThrow(() -> new NotFoundException("User not found"));
+
         file.setUsers(user);
-        file.setType(type);
-        file.setCreatedAt(LocalDateTime.now());
-
         return fileRepository.save(file);
     }
 

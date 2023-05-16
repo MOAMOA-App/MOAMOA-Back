@@ -5,12 +5,12 @@ import lombok.*;
 
 import javax.persistence.*;
 
-@Entity
 @Table(name = "my_categories")
+@Entity
 @Data
 public class MyCategory {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
