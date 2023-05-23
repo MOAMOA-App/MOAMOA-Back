@@ -42,9 +42,9 @@ public class PartyService {
 
 
     @Transactional
-    public Party saveParty(Party party, Long prodouctId) {
-        Product product = productRepository.findById(prodouctId)
-                .orElseThrow(() -> new IllegalArgumentException("Seller not found"));
+    public Party saveParty(Party party, Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("productId not found"));
 
         party.setProduct(product);
 

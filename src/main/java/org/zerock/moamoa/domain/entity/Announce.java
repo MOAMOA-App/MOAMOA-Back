@@ -17,12 +17,13 @@ public class Announce {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "product_id", nullable = false)
-    private Long productId;
+    @OneToMany
+    @JoinColumn(name = "product_id")
+    private Product product;
 
-    @Column(name = "buyer_id", nullable = false)
-    private Long buyerId;
-
+    @OneToMany
+    @JoinColumn(name = "buyer_id")
+    private User buyerId;
 
 
     @Column(name = "announce_content", nullable = false)

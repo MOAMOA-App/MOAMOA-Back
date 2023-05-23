@@ -4,8 +4,11 @@ package org.zerock.moamoa.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.zerock.moamoa.domain.entity.Announce;
+import org.zerock.moamoa.domain.entity.Product;
+import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.AnnounceRepository;
 import org.zerock.moamoa.repository.ProductRepository;
+import org.zerock.moamoa.repository.UserRepository;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -16,10 +19,14 @@ import java.util.Optional;
 @Transactional
 public class AnnounceService {
     private final AnnounceRepository announceRepository;
-
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
     @Autowired
-    public AnnounceService(AnnounceRepository announceRepository) {
+    public AnnounceService(AnnounceRepository announceRepository, ProductRepository productRepository, UserRepository userRepository) {
         this.announceRepository = announceRepository;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
+
     }
 
 
@@ -35,7 +42,16 @@ public class AnnounceService {
     }
 
     @Transactional
-    public Announce saveAnnounce(Announce announce){
+    public Announce saveAnnounce(Announce announce, Long productId, Long buyerId){
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("productId not found"));
+        User user = userRepository.findById(buyerId)
+                .orElseThrow(() -> new IllegalArgumentException("productId not found"));
+
+        announce.setProduct(product);
+        announce.setBuyerId(user);
+
         return this.announceRepository.save(announce);
     }
 

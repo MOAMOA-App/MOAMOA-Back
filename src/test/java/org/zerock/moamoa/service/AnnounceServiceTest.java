@@ -6,6 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.zerock.moamoa.domain.entity.Announce;
+import org.zerock.moamoa.domain.entity.Party;
+import org.zerock.moamoa.domain.entity.Product;
+import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.AnnounceRepository;
 
 import javax.persistence.*;
@@ -30,19 +33,25 @@ class AnnounceServiceTest {
 
     @Test
     void saveAnnounce() {
-        for(int i = 0 ; i < 10 ; i ++){
-            String temp = Integer.toString(i);
-            Announce announce = new Announce();
+        // Mocked Product and User
+        int i = 1;
+        String temp = Integer.toString(1);
+        Product product = new Product();
+        User user = new User();
+        Announce announce = new Announce();
+        product.setId(22L);
 
-            announce.setBuyerId(Long.valueOf(i));
-            announce.setProductId(Long.valueOf(i));
-            announce.setAnnounceContent(temp);
+        announce.setProduct(product);
+        announce.setBuyerId(user);
 
 
+        Long productId = 21L; // productId 변수 선언 및 값 할당
 
-            announceService.saveAnnounce(announce);
-        }
+        announce.setAnnounceContent(temp);
 
+        announceService.saveAnnounce(announce, 22L, 21L);
+
+//        partyService.saveParty(party, product.getId());
 
 
     }

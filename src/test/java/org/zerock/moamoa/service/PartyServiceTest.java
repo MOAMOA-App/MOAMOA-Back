@@ -37,22 +37,25 @@ class PartyServiceTest {
         String temp = Integer.toString(1);
         Product product = new Product();
 
-        // Mocked User
         Party party = new Party();
-        User user = new User();
-//        party.set(21L);
+        product.setId(22L);
 
         party.setProduct(product);
+
+
+        Long productId = 21L; // productId 변수 선언 및 값 할당
+
         party.setAddress(temp);
-        party.setBuyerId(31L);
-        partyService.saveParty(party, product.getId());
+        party.setCount(i);
+        party.setBuyerId(41L);
 
+        partyService.saveParty(party, 22L);
+
+//        partyService.saveParty(party, product.getId());
     }
-
-
     @Test
     void removeParty() {
-        partyService.removeParty(Long.valueOf(2));
+        partyService.removeParty(Long.valueOf(21));
     }
 
     @Test
