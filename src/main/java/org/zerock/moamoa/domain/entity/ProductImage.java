@@ -13,7 +13,15 @@ public class ProductImage {
         @Id
         private Long id;
 
-        @ManyToOne(targetEntity = File.class)
-        @JoinColumn(name="file_id", nullable = false)
-        private File file;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "product_id", nullable = false)
+        private Product product;
+
+        //private File file;
+        public void setProduct(Product product) {
+                this.product = product;
+                if (!product.getProductImages().contains(this)) {
+                        product.getProductImages().add(this);
+                }
+        }
 }

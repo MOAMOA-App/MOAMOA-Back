@@ -17,14 +17,9 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-//    private List<Party> parties;
-
     @ManyToOne // Many = Board, User = One 한명의 유저는 여러개의 게시글을 쓸 수 있다.
     @JoinColumn(name="seller_id") // foreign key (userId) references User (id)
     private User user; // DB는 오브젝트를 저장할 수 없다. FK, 자바는 오브젝트를 저장할 수 있다. //참조 할 테이블
-
-
 
     @Column(name = "category_id", nullable = false)
     private Long categoryId;
@@ -53,11 +48,11 @@ public class Product {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "dead_date", nullable = false)
-    private LocalDateTime deadDate;
+    @Column(name = "finished_at", nullable = false)
+    private LocalDateTime finishedAt;
 
-    @Column(name = "modified_date", nullable = false)
-    private LocalDateTime modifiedDate;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @Column(name = "sell_count", nullable = false)
     private int sellCount;
@@ -68,10 +63,45 @@ public class Product {
     @Column(name = "choice_send", nullable = false, length = 32)
     private String choiceSend;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<Announce> announces;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<Party> parties;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductImage> productImages;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.deadDate = LocalDateTime.now();
-        this.modifiedDate = LocalDateTime.now();
+        this.finishedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void addAnnounce(Announce announce) {
+        announces.add(announce);
+        announce.setProduct(this);
+    }
+
+    public void removeAnnounce(Announce announce) {
+        announces.remove(announce);
+    }
+    public void addParty(Party party) {
+        parties.add(party);
+        party.setProduct(this);
+    }
+
+    public void removeParty(Party party) {
+        parties.remove(party);
+    }
+
+    public void addProductImages(ProductImage productImage) {
+        productImages.add(productImage);
+        productImage.setProduct(this);
+    }
+
+    public void removeProductImages(ProductImage productImage) {
+        productImages.remove(productImage);
     }
 }

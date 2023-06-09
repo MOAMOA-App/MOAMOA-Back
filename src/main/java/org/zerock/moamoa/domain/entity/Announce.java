@@ -8,25 +8,24 @@ import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
-@Data
 @Entity
 @Table(name= "announces")
-@ToString
+@Data
 public class Announce {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "product_id", nullable = false)
-    private Long productId;
-
-    @Column(name = "buyer_id", nullable = false)
-    private Long buyerId;
 
 
+    @Column(name = "is_lock", nullable = false)
+    private boolean lock;
 
-    @Column(name = "announce_content", nullable = false)
-    private String announceContent;
+
+    @Column(name = "contents", nullable = false)
+    private String contents;
+
+
     @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -34,5 +33,16 @@ public class Announce {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    public void setProduct(Product product) {
+        this.product = product;
+        if (!product.getAnnounces().contains(this)) {
+            product.getAnnounces().add(this);
+        }
     }
 }

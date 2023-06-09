@@ -3,12 +3,16 @@ package org.zerock.moamoa.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.zerock.moamoa.domain.DTO.AnnounceDTO;
+import org.zerock.moamoa.domain.DTO.PartyDTO;
+import org.zerock.moamoa.domain.DTO.ProductDTO;
 import org.zerock.moamoa.domain.entity.*;
 import org.zerock.moamoa.repository.PartyRepository;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,22 +21,27 @@ import java.util.Optional;
 @Transactional
 public class PartyService {
     private final PartyRepository partyRepository;
-    private final ProductRepository productRepository;
-    private final UserRepository userRepository;
-
     private final ProductService productService;
 
     @Autowired
-    public PartyService(PartyRepository partyRepository, ProductRepository productRepository, UserRepository userRepository, ProductService productService) {
+    public PartyService(PartyRepository partyRepository, ProductService productService) {
         this.partyRepository = partyRepository;
-        this.productRepository = productRepository;
-        this.userRepository = userRepository;
         this.productService = productService;
     }
 
     @Transactional
-    public Optional<Party> findById(Long id){
-        return this.partyRepository.findById(id);
+    public PartyDTO getById(Long id) {
+        return convertToDTO(findById(id));
+    }
+
+    @Transactional
+    public List<PartyDTO> getList() {
+        return partyDTOS(findAll());
+    }
+
+    @Transactional
+    public Party findById(Long id) {
+        return partyRepository.findById(id).orElse(new Party());
     }
 
     @Transactional
@@ -40,31 +49,54 @@ public class PartyService {
         return this.partyRepository.findAll();
     }
 
+    public List<PartyDTO> getByProduct(Long pid){
+        List<Party> parties = productService.findById(pid).getParties();
+        List<PartyDTO> partyDTOS = new ArrayList<>();
+        for (Party party : parties) {
+            PartyDTO partyDTO = convertToDTO(party);
+            partyDTOS.add(partyDTO);
+        }
+        return partyDTOS;
+    }
+
+
 
     @Transactional
-    public Party saveParty(Party party, Long prodouctId) {
-        Product product = productRepository.findById(prodouctId)
-                .orElseThrow(() -> new IllegalArgumentException("Seller not found"));
-
+    public Party saveParty(Party party, Long pid) {
+        Product product = productService.findById(pid);
         party.setProduct(product);
-
-        return partyRepository.save(party); }
-
-    @Transactional
-    public void removeParty(Long id){
-        Party party = partyRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("해당 아이템이 없습니다. id=" + id));
-
-        this.partyRepository.delete(party);
+        return partyRepository.save(party);
     }
 
     @Transactional
-    public Party updateParty(Long id, String productId){
-        Party party = partyRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("해당 아이템이 없습니다. id=" + id));
-
-        party.setId(id);
-        return this.partyRepository.save(party);
+    public boolean removeParty(Long id){
+        Party party = findById(id);
+        if(party.getId() != null){
+            party.getBuyer().removeParty(party);
+            party.getProduct().removeParty(party);
+            partyRepository.delete(party);
+            return true;
+        }
+        return false;
     }
 
+    @Transactional
+    public Party updateParty(Party party){
+        Party temp = findById(party.getId());
+        temp.setAddress(party.getAddress());
+        temp.setCount(party.getCount());
+        return this.partyRepository.save(temp);
+    }
+
+    private List<PartyDTO> partyDTOS(List<Party> parties){
+        List<PartyDTO> partyDTOList = new ArrayList<>();
+        for (Party party: parties) {
+            partyDTOList.add(convertToDTO(party));
+        }
+        return partyDTOList;
+    }
+
+    private PartyDTO convertToDTO(Party party) {
+        return new PartyDTO(party);
+    }
 }
