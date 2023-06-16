@@ -18,6 +18,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -50,7 +51,7 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Page<Product> searchProducts(String title, String description, List<String> categories, List<String> statuses, String orderBy, String sortOrder, int pageNo, int pageSize) {
+    public List<ProductDTO> searchProducts(String title, String description, List<String> categories, List<String> statuses, String orderBy, String sortOrder, int pageNo, int pageSize) {
         Specification<Product> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -75,10 +76,12 @@ public class ProductService {
         } else {
             sort = Sort.by(Sort.Direction.ASC, orderBy);
         }
-
         PageRequest pageRequest = PageRequest.of(pageNo, pageSize, sort);
-
-        return productRepository.findAll(spec, pageRequest);
+        Page<Product> resultPage = productRepository.findAll(spec, pageRequest);
+        List<ProductDTO> resultList = resultPage.getContent().stream()
+                .map(product -> new ProductDTO(product))
+            .collect(Collectors.toList());
+        return resultList;
     }
 
 
