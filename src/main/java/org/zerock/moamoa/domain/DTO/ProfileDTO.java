@@ -11,5 +11,4 @@ public class ProfileDTO {
     private String nick;
 
     private String profImg;
-
 }

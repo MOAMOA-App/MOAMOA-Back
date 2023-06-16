@@ -22,6 +22,9 @@ public class MyCategoryService {
 
     @Transactional
     public void saveMyCategory(List<Category> categories, User user) {
+        // 이전에 저장된 MyCategory 엔티티 삭제
+        myCategoryRepository.deleteAll();
+
         List<MyCategory> myCategories = new ArrayList<>();
         for (Category category : categories) {
             MyCategory myCategory = new MyCategory();
