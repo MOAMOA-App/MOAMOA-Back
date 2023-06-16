@@ -25,13 +25,21 @@ class CategoryServiceTest {
 
     @Test
     void saveCategory() {
-        for(int i = 0 ; i < 10 ; i ++){
-            String temp = Integer.toString(i);
-            Category category = new Category();
-            category.setName(temp);
+        Category category = new Category();
+        category.setName("Test Category");
 
-            categoryService.saveCategory(category);
-        }
+        Category savedCategory = categoryService.saveCategory(category);
+
+        // 저장된 카테고리의 ID를 확인할 수 있는지 테스트
+        assertNotNull(savedCategory.getId());
+
+        // 저장된 카테고리의 이름이 예상과 일치하는지 테스트
+        assertEquals("Test Category", savedCategory.getName());
+
+        // 실제 데이터베이스에서 해당 카테고리를 조회하여 확인
+        Category retrievedCategory = categoryRepository.findById(savedCategory.getId()).orElse(null);
+        assertNotNull(retrievedCategory);
+        assertEquals("Test Category", retrievedCategory.getName());
     }
 
     @Test
