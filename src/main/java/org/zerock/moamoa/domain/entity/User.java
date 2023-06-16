@@ -17,7 +17,7 @@ public class User {
     @Column(name = "login_type", length = 11, nullable = false)
     private String loginType;
 
-    @Column(name = "token", length = 254, nullable = false)
+    @Column(name = "token", length = 254)
     private String token;
 
     @Column(name = "name", length = 32, nullable = false)
@@ -26,13 +26,16 @@ public class User {
     @Column(name = "email", length = 50, nullable = false)
     private String email;
 
+    @Column(name = "password", length = 128, nullable = false)
+    private String password;
+
     @Column(name = "phone", length = 32)
     private String phone;
 
     @Column(name = "nick", length = 32, nullable = false)
     private String nick;
 
-    @Column(name = "prof_img", length = 32, nullable = false)
+    @Column(name = "prof_img", length = 32)
     private String profImg;
 
     @Column(name = "address", length=254)
@@ -41,9 +44,9 @@ public class User {
     @Column(name = "detailed_address", length=254)
     private String detailAddress;
 
-
     @Column(name = "joindate")
     private LocalDateTime joinDate;
+
     @PrePersist
     protected void onCreate() {
         this.joinDate = LocalDateTime.now();

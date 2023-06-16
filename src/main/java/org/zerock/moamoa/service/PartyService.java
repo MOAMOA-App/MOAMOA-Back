@@ -88,6 +88,10 @@ public class PartyService {
         return this.partyRepository.save(temp);
     }
 
+    public List<PartyDTO> getByBuyer(User buyer) {
+        return partyDTOS(partyRepository.findByBuyer(buyer));
+    }
+
     private List<PartyDTO> partyDTOS(List<Party> parties){
         List<PartyDTO> partyDTOList = new ArrayList<>();
         for (Party party: parties) {

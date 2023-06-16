@@ -5,13 +5,12 @@ import lombok.Data;
 
 import javax.persistence.*;
 
-//product_id : N:1      유저 한명당 여러 파일
 @Entity
 @Data
 @Table(name = "product_images")
 public class ProductImage {
         @Id
-        private Long id;
+        private String id;
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "product_id", nullable = false)

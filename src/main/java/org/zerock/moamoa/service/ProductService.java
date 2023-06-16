@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 import org.zerock.moamoa.domain.DTO.ProductDTO;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
+import org.zerock.moamoa.repository.WishListRepository;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
@@ -26,10 +28,12 @@ import java.util.stream.Collectors;
 public class ProductService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final WishListRepository wishListRepository;
     @Autowired
-    public ProductService(ProductRepository productRepository, UserRepository userRepository) {
+    public ProductService(ProductRepository productRepository, UserRepository userRepository, WishListRepository wishListRepository) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.wishListRepository = wishListRepository;
     }
 
     @Transactional
@@ -137,4 +141,24 @@ public class ProductService {
         return new ProductDTO(product);
     }
 
+    public List<ProductDTO> getProductsByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+        List<Product> products = productRepository.findByUser(user);
+        return productDTOS(products);
+    }
+
+    public List<ProductDTO> getProductsByWishListUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자를 찾을 수 없습니다."));
+
+        List<WishList> wishLists = wishListRepository.findByUserId(user);
+        List<Long> productIds = wishLists.stream()
+                .map(wishList -> wishList.getProductId().getId())
+                .collect(Collectors.toList());
+
+        List<Product> products = productRepository.findAllById(productIds);
+        return productDTOS(products);
+    }
 }
