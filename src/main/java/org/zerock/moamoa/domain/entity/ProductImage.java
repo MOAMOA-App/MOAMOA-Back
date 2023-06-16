@@ -16,7 +16,6 @@ public class ProductImage {
         @JoinColumn(name = "product_id", nullable = false)
         private Product product;
 
-        //private File file;
         public void setProduct(Product product) {
                 this.product = product;
                 if (!product.getProductImages().contains(this)) {

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 public class AnnounceDTO {
     private Long id;
-    private int lock;
+    private Boolean lock;
     private String contents;
     private LocalDateTime createdAt;
 

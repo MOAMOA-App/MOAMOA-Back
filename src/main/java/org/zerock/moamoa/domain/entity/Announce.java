@@ -19,7 +19,7 @@ public class Announce {
 
 
     @Column(name = "is_lock", nullable = false)
-    private boolean lock;
+    private Boolean lock;
 
 
     @Column(name = "contents", nullable = false)

@@ -4,10 +4,13 @@ import lombok.Data;
 import org.zerock.moamoa.domain.entity.Announce;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.service.ProductService;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Data
 public class ProductDTO {
     private Long id;
@@ -42,9 +45,10 @@ public class ProductDTO {
 
     private String choiceSend;
 
+    private List<AnnounceDTO> announces;
+
     public ProductDTO(Product p){
         id = p.getId();
-        user = p.getUser();
         categoryId = p.getCategoryId();
         sellingArea = p.getSellingArea();
         detailArea = p.getDetailArea();
@@ -58,5 +62,11 @@ public class ProductDTO {
         sellCount = p.getSellCount();
         maxCount = p.getMaxCount();
         choiceSend = p.getChoiceSend();
+
+        user = p.getUser();
+
+        announces = p.getAnnounces().stream()
+                .map(announce -> new AnnounceDTO(announce))
+                .collect(Collectors.toList());
     }
 }
