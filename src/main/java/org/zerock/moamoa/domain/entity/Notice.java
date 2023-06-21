@@ -24,7 +24,7 @@ public class Notice {
     private Long id;
 
     @ManyToOne  // 외래키 어노테이션
-    @JoinColumn(name="id")
+    @JoinColumn(name="sender_id")
     private User senderID;    // 회원ID(보내는)
 
     @Column(name = "receiver_id", nullable = false) // id가 아닌 다른 칼럼에는 @Column 붙여 표현할 수 있음

@@ -40,8 +40,10 @@ public class WishListService {
     public WishList saveWish(Long user_id, Long product_id){
         WishList wishList = new WishList();
         User user = userService.findById(user_id).orElseThrow(()->new IllegalArgumentException("해당 사용자가 없습니다. id=" + user_id));
-        Product product = productService.findById(product_id).orElseThrow(()->new IllegalArgumentException("해당 상품이 없습니다. id=" + product_id));
-        wishList.setUserId(user);
+        Product product = productService.findById(product_id);
+        if (product == null) {
+            throw new IllegalArgumentException("해당 상품이 없습니다. id=" + product_id);
+        }        wishList.setUserId(user);
         wishList.setProductId(product);
         return wishListRepository.save(wishList);
     }

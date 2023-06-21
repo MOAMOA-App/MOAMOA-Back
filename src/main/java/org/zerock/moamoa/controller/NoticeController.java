@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/reminder")    // API명세 보고 작성함!!!
+@RequestMapping("/reminder")
 public class NoticeController {
     private final NoticeService noticeService;
 
@@ -28,7 +28,7 @@ public class NoticeController {
      * @param userId
      * @return
      */
-    @GetMapping("/reminder/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<List<NoticeDTO>> getReminderNotices(@PathVariable("id") Long userId) {
         // noticeService를 통해 getReminderNotices 메서드를 호출
         // -> 해당 사용자의 알림 리스트를 받아옴
@@ -52,7 +52,7 @@ public class NoticeController {
      * @param senderID
      * @return
      */
-    @PostMapping("/reminder/{referenceID}/{receiverID}")
+    @PostMapping("/{referenceID}/{receiverID}")
     public ResponseEntity<String> sendReminderNotice(@PathVariable("referenceID") Long referenceID,
                                                      @PathVariable("receiverID") Long receiverID,
                                                      @RequestParam("senderID") Long senderID) {
@@ -74,7 +74,7 @@ public class NoticeController {
      * @param receiverId
      * @return
      */
-    @PutMapping("/state/{noticeId}/{receiverId}")
+    @PutMapping("/{noticeId}/{receiverId}")
     public ResponseEntity<String> updateNoticeReadState(@PathVariable("noticeId") Long noticeId,
                                                         @PathVariable("receiverId") Long receiverId) {
         noticeService.updateNoticeReadState(noticeId, receiverId);
@@ -86,7 +86,7 @@ public class NoticeController {
      * @param noticeId
      * @return
      */
-    @DeleteMapping("/reminder/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<String> removeNotice(@PathVariable("id") Long noticeId) {
         noticeService.removeNotice(noticeId);
         return ResponseEntity.ok("Notice deleted successfully");
