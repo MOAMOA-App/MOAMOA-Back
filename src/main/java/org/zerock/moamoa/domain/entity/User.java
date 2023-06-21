@@ -5,6 +5,7 @@ import javax.persistence.*;
 
 import org.springframework.data.annotation.CreatedDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Table(name= "users")
 @Entity
@@ -47,9 +48,21 @@ public class User {
     @Column(name = "joindate")
     private LocalDateTime joinDate;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Party> parties;
+
     @PrePersist
     protected void onCreate() {
         this.joinDate = LocalDateTime.now();
+    }
+
+    public void addParty(Party party) {
+        parties.add(party);
+        party.setUser(this);
+    }
+
+    public void removeParty(Party party) {
+        parties.remove(party);
     }
 //
 //    @Id // 기본키로 설정한다.

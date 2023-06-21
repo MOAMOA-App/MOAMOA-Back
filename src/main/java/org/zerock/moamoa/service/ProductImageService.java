@@ -33,7 +33,6 @@ public class ProductImageService {
                 .orElseThrow(() -> new FileNotFoundException("File not found with id " + fileId));
 
         ProductImage productImage = new ProductImage();
-        productImage.setFile(file);
 
         return productImageRepository.save(productImage);
     }
@@ -43,12 +42,7 @@ public class ProductImageService {
         ProductImage productImage = productImageRepository.findById(productImageId)
                 .orElseThrow(() -> new FileNotFoundException("ProductImage not found with id " + productImageId));
 
-        File file = productImage.getFile();
 
-        // 제거할 ProductImage와 연관된 File 제거
-        productImage.setFile(null);
-        file.setProductImage(null);
-        fileRepository.save(file);
 
         // ProductImage 제거
         productImageRepository.delete(productImage);
