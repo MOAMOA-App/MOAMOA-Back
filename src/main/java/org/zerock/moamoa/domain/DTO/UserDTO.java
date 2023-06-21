@@ -19,6 +19,8 @@ public class UserDTO {
 
     private String profImg;
 
+    private String email;
+
     private String address;
 
     private String detailAddress;
@@ -30,6 +32,7 @@ public class UserDTO {
         phone = user.getPhone();
         nick = user.getNick();
         profImg = user.getProfImg();
+        email = user.getEmail();
         address = user.getAddress();
         detailAddress = user.getDetailAddress();
     }

@@ -10,7 +10,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 @Configuration
-@PropertySource("classpath:email.properties")
+@PropertySource("classpath:application.properties")
 public class EmailConfig {  // 이메일 발송을 위한 JavaMailSender 설정을 제공
     // JavaMailSender 인터페이스를 구현한 JavaMailSenderImpl 객체를 생성하고 필요한 속성들을 설정하여 반환
 
