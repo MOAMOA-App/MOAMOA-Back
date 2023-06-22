@@ -30,9 +30,6 @@ public class User {
     @Column(name = "password", length = 128, nullable = false)
     private String password;
 
-    @Column(name = "phone", length = 32)
-    private String phone;
-
     @Column(name = "nick", length = 32, nullable = false)
     private String nick;
 
@@ -45,10 +42,10 @@ public class User {
     @Column(name = "detailed_address", length=254)
     private String detailAddress;
 
-    @Column(name = "joindate")
+    @Column(name = "updated_at")
     private LocalDateTime joinDate;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
     private List<Party> parties;
 
     @PrePersist

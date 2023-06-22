@@ -1,9 +1,10 @@
 package org.zerock.moamoa.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.zerock.moamoa.domain.DTO.AnnounceDTO;
 import org.zerock.moamoa.domain.entity.Announce;
 import org.zerock.moamoa.service.AnnounceService;
@@ -18,42 +19,27 @@ public class AnnounceController {
     private final AnnounceService announceService;
 
     @PostMapping("/product/{pid}/announce")
-    public Object saveAnnounce(@PathVariable Long pid,
-                               @RequestParam() String contents,
-                               @RequestParam() boolean lock){
-        Map<String, Long> response = new HashMap<>();
-        Announce announce = new Announce();
-        announce.setLock(lock);
-        announce.setContents(contents);
+    public Long saveAnnounce(@PathVariable Long pid,
+                               @RequestBody Announce announce){
+
         Long result = announceService.saveAnnounce(announce, pid);
-        if(result == -1){
-            return ResponseEntity.badRequest().body("Announce 저장에 실패했습니다.");
-        }
-        response.put("id", announceService.saveAnnounce(announce, pid));
-        return ResponseEntity.ok(response);
+        if(result != -1){
+            return result;
+        }else throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/product/{pid}/announce")
-    public Object getList(@PathVariable Long pid, Model model){
-        Map<String, List<AnnounceDTO>> response = new HashMap<>();
-        List<AnnounceDTO> announceList = announceService.getByProduct(pid);
-
-        response.put("announce", announceList);
-        return ResponseEntity.ok(response);
+    public List<AnnounceDTO> getList(@PathVariable Long pid){
+        return announceService.getByProduct(pid);
     }
 
     @GetMapping("/product/announce/{aid}")
-    public Object getById(@PathVariable Long aid) {
+    public AnnounceDTO getById(@PathVariable Long aid) {
         AnnounceDTO announceDTO = announceService.getById(aid);
 
-        if (announceDTO.getId() == null) {
-            return ResponseEntity.noContent().build();
-        }
-
-        Map<String, AnnounceDTO> response = new HashMap<>();
-        response.put("announce", announceDTO);
-
-        return ResponseEntity.ok(response);
+        if (announceDTO.getId() != null) {
+            return announceDTO;
+        }else throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
 
 

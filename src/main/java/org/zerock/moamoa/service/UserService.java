@@ -42,7 +42,6 @@ public class UserService {
         user.setNick(nick);
         user.setProfImg(profImg);
         user.setEmail(email);
-        user.setPhone(phone);
         user.setDetailAddress(detailAddress);
 
         return saveUser(user);

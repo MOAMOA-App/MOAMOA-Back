@@ -31,9 +31,6 @@ public class File {
 
     @Column(name = "name")
     private String name;
-
-    @OneToOne(mappedBy = "file", fetch = FetchType.LAZY)
-    private ProductImage productImage;
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

@@ -82,10 +82,9 @@ public class ProductService {
         }
         PageRequest pageRequest = PageRequest.of(pageNo, pageSize, sort);
         Page<Product> resultPage = productRepository.findAll(spec, pageRequest);
-        List<ProductDTO> resultList = resultPage.getContent().stream()
-                .map(product -> new ProductDTO(product))
+        return resultPage.getContent().stream()
+                .map(this::convertToDTO)
             .collect(Collectors.toList());
-        return resultList;
     }
 
 
@@ -138,7 +137,7 @@ public class ProductService {
     }
 
     private ProductDTO convertToDTO(Product product) {
-        return new ProductDTO(product);
+        return new ProductDTO().fromEntity(product);
     }
 
     public List<ProductDTO> getProductsByUserId(Long userId) {

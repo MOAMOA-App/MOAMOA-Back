@@ -13,9 +13,6 @@ public class Party {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-
-
     @Column(name = "address", nullable = false, length = 254)
     private String address;
 
