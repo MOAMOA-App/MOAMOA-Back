@@ -13,8 +13,6 @@ public class UserDTO {
 
     private String password;
 
-    private String phone;
-
     private String nick;
 
     private String profImg;
@@ -29,7 +27,6 @@ public class UserDTO {
         id = user.getId();
         name = user.getName();
         password = user.getPassword();
-        phone = user.getPhone();
         nick = user.getNick();
         profImg = user.getProfImg();
         email = user.getEmail();

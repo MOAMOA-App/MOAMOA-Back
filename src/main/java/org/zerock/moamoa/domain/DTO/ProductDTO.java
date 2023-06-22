@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class ProductDTO {
     private Long id;
 
-    private User user;
+    private UserDTO user;
 
     private Long categoryId;
 
@@ -47,26 +47,29 @@ public class ProductDTO {
 
     private List<AnnounceDTO> announces;
 
-    public ProductDTO(Product p){
-        id = p.getId();
-        categoryId = p.getCategoryId();
-        sellingArea = p.getSellingArea();
-        detailArea = p.getDetailArea();
-        title = p.getTitle();
-        status = p.getStatus();
-        viewCount = p.getViewCount();
-        description = p.getDescription();
-        createdAt = p.getCreatedAt();
-        finishedAt = p.getFinishedAt();
-        updatedAt = p.getUpdatedAt();
-        sellCount = p.getSellCount();
-        maxCount = p.getMaxCount();
-        choiceSend = p.getChoiceSend();
+    public ProductDTO fromEntity(Product p){
+        ProductDTO dto = new ProductDTO();
+        dto.id = p.getId();
+        dto.categoryId = p.getCategoryId();
+        dto.sellingArea = p.getSellingArea();
+        dto.detailArea = p.getDetailArea();
+        dto.title = p.getTitle();
+        dto.status = p.getStatus();
+        dto.viewCount = p.getViewCount();
+        dto.description = p.getDescription();
+        dto.createdAt = p.getCreatedAt();
+        dto.finishedAt = p.getFinishedAt();
+        dto.updatedAt = p.getUpdatedAt();
+        dto.sellCount = p.getSellCount();
+        dto.maxCount = p.getMaxCount();
+        dto.choiceSend = p.getChoiceSend();
 
-        user = p.getUser();
+        dto.user = new UserDTO(p.getUser());
 
-        announces = p.getAnnounces().stream()
-                .map(announce -> new AnnounceDTO(announce))
+        dto.announces = p.getAnnounces().stream()
+                .map(AnnounceDTO::new)
                 .collect(Collectors.toList());
+
+        return dto;
     }
 }
