@@ -2,21 +2,22 @@ package org.zerock.moamoa.domain.entity;
 
 import lombok.*;
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name= "announces")
 @Data
-public class Announce {
+public class Announce extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-
 
     @Column(name = "is_lock", nullable = false)
     private Boolean lock;
@@ -25,15 +26,6 @@ public class Announce {
     @Column(name = "contents", nullable = false)
     private String contents;
 
-
-    @CreatedDate
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)

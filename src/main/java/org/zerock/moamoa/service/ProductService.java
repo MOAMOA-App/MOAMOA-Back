@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 
@@ -55,7 +56,7 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public List<ProductDTO> searchProducts(String title, String description, List<String> categories, List<String> statuses, String orderBy, String sortOrder, int pageNo, int pageSize) {
+    public Page<ProductDTO> searchProducts(String title, String description, List<String> categories, List<String> statuses, String orderBy, String sortOrder, int pageNo, int pageSize) {
         Specification<Product> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -71,6 +72,7 @@ public class ProductService {
             if (statuses != null && !statuses.isEmpty()) {
                 predicates.add(root.get("status").in(statuses));
             }
+            predicates.add(root.get("activate").in(true));
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
@@ -82,9 +84,7 @@ public class ProductService {
         }
         PageRequest pageRequest = PageRequest.of(pageNo, pageSize, sort);
         Page<Product> resultPage = productRepository.findAll(spec, pageRequest);
-        return resultPage.getContent().stream()
-                .map(this::convertToDTO)
-            .collect(Collectors.toList());
+        return resultPage.map(this::convertToDTO);
     }
 
 
@@ -105,9 +105,10 @@ public class ProductService {
         return false;
     }
 
-    public void updateContents(Product product){
-        productRepository.findById(product.getId()).ifPresent( temp -> {
-            temp.setUpdatedAt(LocalDateTime.now());
+    public boolean updateContents(Product product) {
+        AtomicBoolean isSaved = new AtomicBoolean(false);
+
+        productRepository.findById(product.getId()).ifPresent(temp -> {
             temp.setCategoryId(product.getCategoryId());
             temp.setSellingArea(product.getSellingArea());
             temp.setDetailArea(product.getDetailArea());
@@ -117,15 +118,29 @@ public class ProductService {
             temp.setFinishedAt(product.getFinishedAt());
             temp.setMaxCount(product.getMaxCount());
             temp.setChoiceSend(product.getChoiceSend());
-            productRepository.save(temp);
+            temp.setCountImage(product.getCountImage());
+
+            Product savedProduct = productRepository.save(temp);
+            if (savedProduct != null) {
+                isSaved.set(true);
+            }
         });
+
+        return isSaved.get();
     }
 
-    public void updateStatus(Long id, String status){
-        productRepository.findById(id).ifPresent(product -> {
-            product.setStatus(status);
-            productRepository.save(product);
+    public boolean updateStatus(Long id, String status){
+        AtomicBoolean isSaved = new AtomicBoolean(false);
+        productRepository.findById(id).ifPresent(temp -> {
+            temp.setStatus(status);
+
+            Product savedProduct = productRepository.save(temp);
+            if (savedProduct != null) {
+                isSaved.set(true);
+            }
         });
+
+        return isSaved.get();
     }
 
     private List<ProductDTO> productDTOS(List<Product> products){
@@ -139,6 +154,7 @@ public class ProductService {
     private ProductDTO convertToDTO(Product product) {
         return new ProductDTO().fromEntity(product);
     }
+
 
     public List<ProductDTO> getProductsByUserId(Long userId) {
         User user = userRepository.findById(userId)

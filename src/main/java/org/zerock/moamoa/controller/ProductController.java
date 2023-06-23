@@ -1,34 +1,40 @@
 package org.zerock.moamoa.controller;
 
+import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import org.zerock.moamoa.component.ImageService;
 import org.zerock.moamoa.domain.DTO.ProductDTO;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.service.ProductService;
 
-import java.io.File;
-import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 
 //RestController -> return 값을 자동으로 json 형식으로 변환해주는 기능 + Controller
 @RequiredArgsConstructor
 @RestController
-//@Controller
 public class ProductController {
     private final ProductService productService;
+    private final ImageService imageService;
 
     @GetMapping("/product")
-    public Object searchProducts(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String description,
+    public Page<ProductDTO> searchProducts(
+            @RequestParam(required = false) String       title,
+            @RequestParam(required = false) String       description,
             @RequestParam(required = false) List<String> categories,
             @RequestParam(required = false) List<String> statuses,
             @RequestParam(defaultValue = "createdAt") String orderBy,
-            @RequestParam(defaultValue = "DESC") String sortOrder,
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(defaultValue = "10") int pageSize
+            @RequestParam(defaultValue = "DESC")      String sortOrder,
+            @RequestParam(defaultValue = "0")         int    pageNo,
+            @RequestParam(defaultValue = "20")        int    pageSize
     ) {
         return productService.searchProducts(title, description, categories, statuses, orderBy, sortOrder, pageNo, pageSize);
     }
@@ -37,74 +43,55 @@ public class ProductController {
      * @param pid 게시글 id
      */
     @GetMapping("/product/{pid}")
-    public Object getById(@PathVariable Long pid) {
+    public ProductDTO getById(@PathVariable Long pid) {
         ProductDTO productDTO = productService.getById(pid);
 
-        if (productDTO.getId() == null) {
-            return ResponseEntity.noContent().build();
-        }else{
-            Map<String, ProductDTO> response = new HashMap<>();
-            response.put("product", productDTO);
-
-            return ResponseEntity.ok(response);
-        }
+        if (productDTO.getId() != null) {
+            return productDTO;
+        }else throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
 
     /**
      * 게시글 생성하기
      */
-    @GetMapping("/create")
-    public String getCreatePage(){
-        return "product";
-    }
+
     @PostMapping("/product")
-    public Object Save(
+    public Long Save(
             @RequestParam(defaultValue = "41") Long userId,
             @ModelAttribute("product") Product product,
             @RequestParam("images") MultipartFile[] images){
 
+        product.setCountImage(images.length);
+        //테스트용 코드
+        product.setFinishedAt(Instant.now());
+        //-----------
         Product productTemp = productService.saveProduct(product, userId);
-
-        if (images != null && images.length > 0) {
-            String directoryPath = String.format("D:/WorkSpace/%s", productTemp.getId());
-            File directory = new File(directoryPath);
-            if (!directory.exists()) {
-                directory.mkdirs(); // Create the directory if it doesn't exist
-            }
-
-            // Process each image
-            for (int i = 0; i < images.length; i++) {
-                MultipartFile image = images[i];
-                if (!image.isEmpty()) {
-                    try {
-                        // Save the image to the directory
-                        String savedImagePath = String.format("%s/image%d.jpg", directoryPath, i);
-                        image.transferTo(new File(savedImagePath));
-                        System.out.println("이미지가 저장되었습니다.");
-                        /*
-                            product Image DB 저장 미완성
-                         */
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    System.out.println("이미지가 전송되지 않았습니다.");
-                }
-            }
-        } else {
-            System.out.println("이미지가 전송되지 않았습니다.");
-        }
-        Map<String, Long> response = new HashMap<>();
-        response.put("id", productTemp.getId());
-
-        return ResponseEntity.ok(response);
+        if(imageService.saveProductImage(images, productTemp.getId()))
+            return productTemp.getId();
+        else
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT,"이미지 저장에 실패했습니다.");
     }
 
-    /**게시글 수정하기
+    /**
+     * 게시글 수정하기
+     * kse -> 수정 시 기존의 이미지 삭제 추가할 것
      */
     @PutMapping("/product/{pid}")
-    public Object UpdateContents(@ModelAttribute("product") Product product){
-        return "product";
+    public String UpdateContents(@PathVariable Long pid,
+                                 @ModelAttribute("product") Product product,
+                                 @RequestParam("images") MultipartFile[] images ){
+
+        product.setCountImage(images.length);
+        //테스트용 코드
+        product.setFinishedAt(Instant.now());
+        //----------
+        if(imageService.saveProductImage(images, pid)){
+            if(productService.updateContents(product))
+                return "게시글을 수정했습니다";
+        }
+        else
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"게시글 수정에 실패했습니다.");
+        return "";
     }
 
     /**게시글 상태 변경하기
@@ -112,13 +99,16 @@ public class ProductController {
      * @param pid 게시글 id
      */
     @PutMapping("/product/status/{pid}")
-    public Object UpdateStatus(@PathVariable Long pid, @RequestParam String Status){
-        return "product";
+    public Object UpdateStatus(@PathVariable Long pid, @RequestParam String status){
+        if(productService.updateStatus(pid, status))
+            return "게시글의 거래상태를 변경했습니다";
+        else throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"게시글의 거래상태를 변경하는데에 실패했습니다.");
     }
 
     /**게시글 삭제하기
      * @param pid 게시글 id
      * return 삭제 성공 여부 message 출력
+     * 게시글 진짜 삭제하는게 아니라 Product 활성화 비활성화 처리를 위해 속성 추가할 것
      */
     @DeleteMapping("/product/{pid}")
     public Object DeleteContents(@PathVariable Long pid){

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @Table(name = "parties")
-public class Party {
+public class Party extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,10 +17,7 @@ public class Party {
     private String address;
 
     @Column(name = "count", nullable = false)
-    private int count;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private Integer count;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id", nullable = false)
@@ -29,11 +26,6 @@ public class Party {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 
     public void setProduct(Product product) {
         this.product = product;

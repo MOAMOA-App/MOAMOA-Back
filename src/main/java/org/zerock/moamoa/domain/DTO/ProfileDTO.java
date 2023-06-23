@@ -17,6 +17,7 @@ public class ProfileDTO {
 
     private String detailAddress;
 
+
     public ProfileDTO(User user) {
         id = user.getId();
         nick = user.getNick();

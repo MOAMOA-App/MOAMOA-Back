@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Table(name= "wish_lists")
 @Entity
 @Data
-public class WishList {
+public class WishList extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,12 +21,4 @@ public class WishList {
     @OneToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
     private User userId;
-    
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 }
