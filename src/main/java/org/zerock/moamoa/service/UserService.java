@@ -34,7 +34,7 @@ public class UserService {
     }
 
     @Transactional
-    public User saveUser(String logintype, String token,String name, String nick, String profImg, String email, String phone, String detailAddress){
+    public User saveUser(String logintype, String token,String name, String nick, String profImg, String email, String detailAddress){
         User user = new User();
         user.setLoginType(logintype);
         user.setToken(token);

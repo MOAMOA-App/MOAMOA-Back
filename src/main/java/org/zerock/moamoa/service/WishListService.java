@@ -43,14 +43,24 @@ public class WishListService {
         Product product = productService.findById(product_id);
         if (product == null) {
             throw new IllegalArgumentException("해당 상품이 없습니다. id=" + product_id);
-        }        wishList.setUserId(user);
+        }
+        wishList.setUserId(user);
         wishList.setProductId(product);
+        user.addWishList(wishList); // user의 wishlists에 정보 추가
         return wishListRepository.save(wishList);
     }
 
     @Transactional
     public void removeWish(Long id){
         WishList wishList = wishListRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 위시리스트가 없습니다. id=" + id));
+
+        // User의 removeWishList를 호출해서 WishList 제거하는 코드 추가해봄
+        User user = wishList.getUserId();
+        if (user != null) {
+            user.removeWishList(wishList);
+            userService.saveUser(user);
+        }
+
         this.wishListRepository.delete(wishList);
     }
 

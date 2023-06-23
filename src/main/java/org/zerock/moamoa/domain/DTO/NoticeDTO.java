@@ -1,16 +1,18 @@
 package org.zerock.moamoa.domain.DTO;
 
+import lombok.Data;
 import org.zerock.moamoa.domain.entity.Notice;
 import org.zerock.moamoa.domain.entity.User;
 
 import java.time.LocalDateTime;
 
+@Data
 public class NoticeDTO {
     private Long id;    // 알람ID
 
     private User senderID;      // 회원ID(보내는)
 
-    private Long receiverID;    // 받는ID
+    private User receiverID;    // 받는ID
 
     private String message;
 

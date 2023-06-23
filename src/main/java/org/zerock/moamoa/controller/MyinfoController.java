@@ -1,16 +1,20 @@
 package org.zerock.moamoa.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.domain.DTO.ProductDTO;
+import org.zerock.moamoa.domain.DTO.WishListDTO;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.service.ProductService;
 import org.zerock.moamoa.service.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RestController
 public class MyinfoController {
     @Autowired
     private UserService userService;
@@ -42,6 +46,8 @@ public class MyinfoController {
      * @param id
      * @return
      */
+    // -> 참여했을 때 이 리스트에 추가되어야 함
+
     // 임시 주석처리
 //    @GetMapping("/myinfo/userparty/{id}")
 //    public ResponseEntity<List<UserDTO>> getMyUserParty(@PathVariable("id") Long id) {
@@ -59,17 +65,47 @@ public class MyinfoController {
      * @return
      */
     @GetMapping("/myinfo/userheart/{id}")
-    public List<Long> getUserHeartProducts(@PathVariable("id") Long userId) {
-        // 위시리스트에 있는 상품들 불러옴, 가져온 상품 목록을 ProductDTO 객체로 변환하여 products 리스트에 저장
-        List<ProductDTO> products = productService.getProductsByWishListUserId(userId);
+    public ResponseEntity<?>
+           // <List<WishListDTO>>   // 원래 이건데 메시지 반환하려니까 충돌나서 일단 이걸로 바꿔둠
+                                    // 추후 데이터 추가해서 테스트 예정
+        getUserWishLists(@PathVariable("id") Long userId) {
 
-        // products에서 상품id 추출-> map(ProductDTO::getId) 통해 ID 목록 생성
-        // 생성된 ID 목록을 Collectors.toList() 사용해 productIds 리스트에 저장
-        List<Long> productIds = products.stream()
-                .map(ProductDTO::getId)
-                .collect(Collectors.toList());
+        // User의 위시리스트 목록 불러옴
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 없습니다. id=" + userId));
+        List<WishList> wishLists = user.getWishLists();
 
-        // 사용자의 위시리스트에 있는 상품의 ID 목록을 클라이언트에게 보냄
-        return productIds;
+        // 위시리스트 목록을 WishListDTO로 변환
+        List<WishListDTO> wishListDTOs = wishLists.stream()
+                .map(WishListDTO::new)
+                .collect(Collectors.toList());  // 변환된 WishListDTO 요소들을 리스트로 수집
+
+        if (wishListDTOs.isEmpty()) {
+            String message = "위시리스트가 존재하지 않습니다.";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
+        }
+
+        // 변환된 위시리스트 DTO 목록을 ResponseEntity에 담아 응답, ok 상태코드(200)와 함께 DTO 목록 반환
+        return ResponseEntity.ok(wishListDTOs);
     }
+
+    @DeleteMapping("/myinfo/userheart/{id}")
+    public ResponseEntity<Void> removeUserWishList(@PathVariable("id") Long userId,
+                                                   @RequestParam("wishListId") Long wishListId) {
+        // User의 위시리스트 목록 불러옴
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 없습니다. id=" + userId));
+
+        WishList wishList = user.getWishLists().stream()
+                .filter(wl -> wl.getId().equals(wishListId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("해당 위시리스트가 없습니다. id=" + wishListId));
+
+        // User의 위시리스트 제거, 변경사항 저장
+        user.removeWishList(wishList);
+        userService.saveUser(user);
+
+        return ResponseEntity.noContent().build(); // 성공적으로 삭제되었을 때는 204 No Content 상태코드 반환
+    }
+
 }

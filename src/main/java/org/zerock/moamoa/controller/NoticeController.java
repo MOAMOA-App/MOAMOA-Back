@@ -7,6 +7,7 @@ import org.zerock.moamoa.domain.entity.Notice;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.service.NoticeService;
+import org.zerock.moamoa.service.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,10 +17,13 @@ import java.util.stream.Collectors;
 public class NoticeController {
     private final NoticeService noticeService;
 
+    private final UserService userService;
+
     private final UserRepository userRepository;
 
-    public NoticeController(NoticeService noticeService, UserRepository userRepository) {
+    public NoticeController(NoticeService noticeService, UserService userService, UserRepository userRepository) {
         this.noticeService = noticeService;
+        this.userService = userService;
         this.userRepository = userRepository;
     }
 
@@ -29,20 +33,15 @@ public class NoticeController {
      * @return
      */
     @GetMapping("/{id}")
-    public ResponseEntity<List<NoticeDTO>> getReminderNotices(@PathVariable("id") Long userId) {
-        // noticeService를 통해 getReminderNotices 메서드를 호출
-        // -> 해당 사용자의 알림 리스트를 받아옴
-        List<Notice> reminderNotices = noticeService.getReminderNotices(userId);
+    public List<NoticeDTO> getUserNotices(@PathVariable("id") Long userId) {
+        User user = userRepository.findById(userId) // 사용자 조회
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        // reminderNotices 리스트를 스트림으로 변환, map() 메서드를 사용해 Notice 객체를 NoticeDTO 객체로 변환
-        // collect() 메서드를 사용하여 변환된 NoticeDTO 객체들을 리스트로 수집
-        List<NoticeDTO> noticeDTOs = reminderNotices.stream()
+        List<Notice> notices = user.getNotices();   // notices 가져옴
+
+        return notices.stream()
                 .map(NoticeDTO::new)
-                .collect(Collectors.toList());
-
-        // 변환된 NoticeDTO 객체들을 ResponseEntity 객체에 담아 클라이언트에게 반환
-        // HTTP 상태 코드: 200 OK
-        return ResponseEntity.ok(noticeDTOs);
+                .collect(Collectors.toList());  // NoticeDTO 가져와 반환
     }
 
     /**
@@ -64,6 +63,7 @@ public class NoticeController {
         String type = "";
 
         Notice notice = noticeService.saveNotice(sender.getId(), receiverID, message, type, referenceID);
+        // NoticeService의 saveNotices에 리시버에 알림 추가되는 코드 추가햇음!!!
 
         return ResponseEntity.ok("알림이 성공적으로 발송되었습니다.");
     }

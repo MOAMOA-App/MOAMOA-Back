@@ -26,13 +26,19 @@ public class NoticeService {
         User sender = userRepository.findById(senderID)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid sender ID"));
 
+        User receiver = userRepository.findById(receiverID)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid sender ID"));
+
         Notice notice = new Notice();
         notice.setSenderID(sender);
-        notice.setReceiverID(receiverID);
+        notice.setReceiverID(receiver);
         notice.setMessage(message);
         notice.setType(type);
         notice.setReferenceID(referenceID);
         notice.setReadOrNot(false);
+
+        receiver.addNotice(notice); // receiver의 notices에 알림이 추가되도록 함
+
         return noticeRepository.save(notice);
     }
 
@@ -47,7 +53,19 @@ public class NoticeService {
     }
 
     public void removeNotice(Long id) {
-        noticeRepository.deleteById(id);
+//        noticeRepository.deleteById(id);  // 원래코드
+
+        Optional<Notice> noticeOptional = noticeRepository.findById(id);
+        if (noticeOptional.isPresent()) {
+            Notice notice = noticeOptional.get();
+            User receiver = notice.getReceiverID();
+            if (receiver != null) {
+                receiver.removeNotice(notice);  // user 엔티티의 notices에서 알림 제거
+                userRepository.save(receiver);
+            }
+            noticeRepository.delete(notice);
+        }
+
     }
 
     public Notice updateNotice(Long id, Long senderID, Long receiverID, String message,
@@ -58,8 +76,11 @@ public class NoticeService {
         User sender = userRepository.findById(senderID)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid sender ID"));
 
+        User receiver = userRepository.findById(receiverID)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid sender ID"));
+
         notice.setSenderID(sender);
-        notice.setReceiverID(receiverID);
+        notice.setReceiverID(receiver);
         notice.setMessage(message);
         notice.setType(type);
         notice.setReferenceID(referenceID);
@@ -91,6 +112,7 @@ public class NoticeService {
         List<Notice> reminderNotices = noticeRepository.findReminderNoticesByReceiverID(userId);
 
         // 조회된 알림들을 읽은 상태로 변경해줌
+        // --> 나중에 조회수 1 이상인 알림을 setReadOrNot(true) 해줘야됨!!!
         for (Notice notice : reminderNotices) {
             notice.setReadOrNot(true);
         }

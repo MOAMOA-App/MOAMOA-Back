@@ -1,10 +1,12 @@
 package org.zerock.moamoa.domain.DTO;
 
+import lombok.Data;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.UserBlocked;
 
 import java.time.LocalDateTime;
 
+@Data
 public class UserBlockedDTO {
     private Long id;
 

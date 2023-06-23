@@ -27,14 +27,14 @@ public class Notice {
     @JoinColumn(name="sender_id")
     private User senderID;    // 회원ID(보내는)
 
-    @Column(name = "receiver_id", nullable = false) // id가 아닌 다른 칼럼에는 @Column 붙여 표현할 수 있음
-    private Long receiverID;    // 근데얘도 User에서 받아와야되는거아니여 아닌가? 아니면 상품쪽 테이블이라던가
-                                // 아무튼 받는ID
+    @ManyToOne
+    @JoinColumn(name = "receiver_id", nullable = false)
+    private User receiverID;    // 받는 회원ID. 0622 Long->User로 타입 변경해줌
 
     @Column(name = "message", length = 255, nullable = false)
     private String message;
 
-    @Column(name = "read_or_not", nullable = false)
+    @Column(name = "read_or_not", nullable = false) // id가 아닌 다른 칼럼에는 @Column 붙여 표현할 수 있음
     private Boolean readOrNot;
 
     @Column(name = "type", length = 8, nullable = false)

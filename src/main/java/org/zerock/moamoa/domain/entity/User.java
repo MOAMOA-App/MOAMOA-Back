@@ -42,11 +42,24 @@ public class User {
     @Column(name = "detailed_address", length=254)
     private String detailAddress;
 
-    @Column(name = "updated_at")
+    @Column(name = "created_at")
     private LocalDateTime joinDate;
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
     private List<Party> parties;
+
+
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)z
+//    private List<Product> myPost;
+//
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+//    private List<Product> myParty;
+
+    @OneToMany(mappedBy = "receiverID", cascade = CascadeType.ALL)  // 받는 쪽에 알림을 추가하기 위해 만듦
+    private List<Notice> notices;   // Notice쪽도 receiverID 타입 User로 변경해줌!!!
+
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL)
+    private List<WishList> wishLists;
 
     @PrePersist
     protected void onCreate() {
@@ -61,6 +74,36 @@ public class User {
     public void removeParty(Party party) {
         parties.remove(party);
     }
+
+    // 위시리스트 추가/제거
+    public void addWishList(WishList wishList) {
+        if (wishList != null) {
+            wishLists.add(wishList);
+            wishList.setUserId(this);
+        }
+    }
+    public void removeWishList(WishList wishList) {
+        wishLists.remove(wishList);
+        if (wishList.getUserId() == this) {
+            wishList.setUserId(null);
+        }
+    }
+
+    // 알림 추가/제거
+    public void addNotice(Notice notice) {
+        if (notice != null) {
+            notices.add(notice);
+            notice.setReceiverID(this);
+        }
+    }
+
+    public void removeNotice(Notice notice) {
+        if (notice != null) {
+            notices.remove(notice);
+            notice.setReceiverID(null);
+        }
+    }
+
 //
 //    @Id // 기본키로 설정한다.
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
