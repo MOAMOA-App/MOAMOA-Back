@@ -8,13 +8,14 @@ import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class PartyDTO {
     private Long id;
     private String address;
-    private int count;
-    private LocalDateTime createdAt;
+    private Integer count;
+    private Instant createdAt;
     private User buyer;
 
     public PartyDTO(Party party){

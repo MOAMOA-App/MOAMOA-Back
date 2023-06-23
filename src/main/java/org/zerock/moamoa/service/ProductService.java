@@ -109,7 +109,6 @@ public class ProductService {
         AtomicBoolean isSaved = new AtomicBoolean(false);
 
         productRepository.findById(product.getId()).ifPresent(temp -> {
-            temp.setUpdatedAt(LocalDateTime.now());
             temp.setCategoryId(product.getCategoryId());
             temp.setSellingArea(product.getSellingArea());
             temp.setDetailArea(product.getDetailArea());

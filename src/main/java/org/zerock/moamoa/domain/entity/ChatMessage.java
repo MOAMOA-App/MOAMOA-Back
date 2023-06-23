@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Table(name= "chat_messages")
 @Entity
 @Data
-public class ChatMessage {
+public class ChatMessage extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,15 +31,6 @@ public class ChatMessage {
     private String message;
 
     @Column(name = "read_or_not", nullable = false)
-    private boolean readOrNot;
-
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    private Boolean readOrNot;
 
 }

@@ -7,6 +7,7 @@ import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.service.ProductService;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,25 +28,25 @@ public class ProductDTO {
 
     private String status;
 
-    private int sellPrice;
+    private Integer sellPrice;
 
-    private int viewCount;
+    private Integer viewCount;
 
     private String description;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
-    private LocalDateTime finishedAt;
+    private Instant finishedAt;
 
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
-    private int sellCount;
+    private Integer sellCount;
 
-    private int maxCount;
+    private Integer maxCount;
 
     private String choiceSend;
 
-    private int countImage;
+    private Integer countImage;
 
     private List<AnnounceDTO> announces;
 
@@ -59,9 +60,7 @@ public class ProductDTO {
         dto.status = p.getStatus();
         dto.viewCount = p.getViewCount();
         dto.description = p.getDescription();
-        dto.createdAt = p.getCreatedAt();
         dto.finishedAt = p.getFinishedAt();
-        dto.updatedAt = p.getUpdatedAt();
         dto.sellCount = p.getSellCount();
         dto.maxCount = p.getMaxCount();
         dto.choiceSend = p.getChoiceSend();

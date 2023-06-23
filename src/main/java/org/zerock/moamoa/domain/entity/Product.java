@@ -4,6 +4,8 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @Table(name = "products")
-public class Product {
+public class Product extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,25 +39,25 @@ public class Product {
     private String status;
 
     @Column(name = "sell_price", nullable = false)
-    private int sellPrice;
+    private Integer sellPrice;
 
-    @Column(name = "view_count", nullable = false)
-    private int viewCount;
+    @Column(name = "view_count")
+    private Integer viewCount = 0;
 
     @Column(name = "description", nullable = false, length = 254)
     private String description;
 
-    @Column(name = "sell_count", nullable = false)
-    private int sellCount;
+    @Column(name = "sell_count")
+    private Integer sellCount = 0;
 
     @Column(name = "max_count", nullable = false)
-    private int maxCount;
+    private Integer maxCount;
 
     @Column(name = "choice_send", nullable = false, length = 32)
     private String choiceSend;
 
     @Column(name = "count_image")
-    private int countImage;
+    private Integer countImage;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Announce> announces;
@@ -64,27 +66,14 @@ public class Product {
     private List<Party> parties;
 
     @Column(name = "activate")
-    private Boolean activate;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private Boolean activate = true;
 
     @Column(name = "finished_at", nullable = false)
-    private LocalDateTime finishedAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private Instant finishedAt;
 
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    private Instant deletedAt;
 
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.finishedAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
 
     public void addAnnounce(Announce announce) {
         announces.add(announce);

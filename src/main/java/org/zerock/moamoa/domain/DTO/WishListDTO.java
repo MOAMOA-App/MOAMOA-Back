@@ -5,6 +5,7 @@ import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.WishList;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Data
@@ -15,7 +16,7 @@ public class WishListDTO {
 
     private User userId;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public WishListDTO(WishList wishList) {
         id = wishList.getId();

@@ -4,6 +4,7 @@ import lombok.Data;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,7 +19,7 @@ public class MyinfoDTO {
 
     private String status;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     private int sellCount;
 

@@ -2,7 +2,6 @@ package org.zerock.moamoa.controller;
 
 import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,18 +13,14 @@ import org.zerock.moamoa.domain.DTO.ProductDTO;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.service.ProductService;
 
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
 //RestController -> return 값을 자동으로 json 형식으로 변환해주는 기능 + Controller
-@Slf4j
 @RequiredArgsConstructor
 @RestController
-//@Controller
 public class ProductController {
     private final ProductService productService;
     private final ImageService imageService;
@@ -67,6 +62,9 @@ public class ProductController {
             @RequestParam("images") MultipartFile[] images){
 
         product.setCountImage(images.length);
+        //테스트용 코드
+        product.setFinishedAt(Instant.now());
+        //-----------
         Product productTemp = productService.saveProduct(product, userId);
         if(imageService.saveProductImage(images, productTemp.getId()))
             return productTemp.getId();
@@ -85,7 +83,7 @@ public class ProductController {
 
         product.setCountImage(images.length);
         //테스트용 코드
-        product.setFinishedAt(LocalDateTime.now());
+        product.setFinishedAt(Instant.now());
         //----------
         if(imageService.saveProductImage(images, pid)){
             if(productService.updateContents(product))

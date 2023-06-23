@@ -1,26 +1,14 @@
 package org.zerock.moamoa.service;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.zerock.moamoa.domain.entity.Category;
 import org.zerock.moamoa.domain.entity.MyCategory;
 import org.zerock.moamoa.domain.entity.User;
-import org.zerock.moamoa.repository.CategoryRepository;
 import org.zerock.moamoa.repository.MyCategoryRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
-import java.time.Clock;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

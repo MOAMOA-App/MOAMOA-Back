@@ -16,8 +16,4 @@ public class MyCategory {
     @OneToOne
     @JoinColumn(name="user_id", nullable = false)
     private User users;
-
-    @ManyToOne
-    @JoinColumn(name="cate_id", nullable = true)
-    private Category categories;
 }

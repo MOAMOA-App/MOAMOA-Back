@@ -7,15 +7,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockMultipartFile;
-import org.zerock.moamoa.domain.entity.File;
-import org.zerock.moamoa.domain.entity.ProductImage;
-import org.zerock.moamoa.domain.entity.User;
-import org.zerock.moamoa.repository.FileRepository;
-import org.zerock.moamoa.repository.ProductImageRepository;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
