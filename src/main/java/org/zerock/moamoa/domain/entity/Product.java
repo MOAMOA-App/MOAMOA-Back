@@ -63,14 +63,15 @@ public class Product {
     @Column(name = "choice_send", nullable = false, length = 32)
     private String choiceSend;
 
+    @Column(name = "count_image")
+    private int countImage;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Announce> announces;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Party> parties;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<ProductImage> productImages;
 
     @PrePersist
     protected void onCreate() {
@@ -94,14 +95,5 @@ public class Product {
 
     public void removeParty(Party party) {
         parties.remove(party);
-    }
-
-    public void addProductImages(ProductImage productImage) {
-        productImages.add(productImage);
-        productImage.setProduct(this);
-    }
-
-    public void removeProductImages(ProductImage productImage) {
-        productImages.remove(productImage);
     }
 }

@@ -45,6 +45,8 @@ public class ProductDTO {
 
     private String choiceSend;
 
+    private int countImage;
+
     private List<AnnounceDTO> announces;
 
     public ProductDTO fromEntity(Product p){
@@ -63,6 +65,7 @@ public class ProductDTO {
         dto.sellCount = p.getSellCount();
         dto.maxCount = p.getMaxCount();
         dto.choiceSend = p.getChoiceSend();
+        dto.countImage = p.getCountImage();
 
         dto.user = new UserDTO(p.getUser());
 
