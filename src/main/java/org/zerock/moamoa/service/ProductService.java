@@ -72,6 +72,7 @@ public class ProductService {
             if (statuses != null && !statuses.isEmpty()) {
                 predicates.add(root.get("status").in(statuses));
             }
+            predicates.add(root.get("activate").in(true));
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
@@ -154,6 +155,7 @@ public class ProductService {
     private ProductDTO convertToDTO(Product product) {
         return new ProductDTO().fromEntity(product);
     }
+
 
     public List<ProductDTO> getProductsByUserId(Long userId) {
         User user = userRepository.findById(userId)

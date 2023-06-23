@@ -76,6 +76,7 @@ public class ProductController {
 
     /**
      * 게시글 수정하기
+     * kse -> 수정 시 기존의 이미지 삭제 추가할 것
      */
     @PutMapping("/product/{pid}")
     public String UpdateContents(@PathVariable Long pid,
@@ -109,6 +110,7 @@ public class ProductController {
     /**게시글 삭제하기
      * @param pid 게시글 id
      * return 삭제 성공 여부 message 출력
+     * 게시글 진짜 삭제하는게 아니라 Product 활성화 비활성화 처리를 위해 속성 추가할 것
      */
     @DeleteMapping("/product/{pid}")
     public Object DeleteContents(@PathVariable Long pid){

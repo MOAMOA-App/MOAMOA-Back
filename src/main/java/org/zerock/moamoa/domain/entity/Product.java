@@ -45,15 +45,6 @@ public class Product {
     @Column(name = "description", nullable = false, length = 254)
     private String description;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "finished_at", nullable = false)
-    private LocalDateTime finishedAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     @Column(name = "sell_count", nullable = false)
     private int sellCount;
 
@@ -71,6 +62,21 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Party> parties;
+
+    @Column(name = "activate")
+    private Boolean activate;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "finished_at", nullable = false)
+    private LocalDateTime finishedAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
 
     @PrePersist
