@@ -3,6 +3,7 @@ package org.zerock.moamoa.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceMapper;
@@ -12,7 +13,6 @@ import org.zerock.moamoa.domain.entity.Announce;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.repository.AnnounceRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service

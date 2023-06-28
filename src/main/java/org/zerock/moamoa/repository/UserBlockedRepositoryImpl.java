@@ -1,17 +1,19 @@
 package org.zerock.moamoa.repository;
 
-import org.zerock.moamoa.domain.entity.UserBlocked;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.List;
 
-public class UserBlockedRepositoryImpl implements UserBlockedInterface{
-    @PersistenceContext
-    private EntityManager em;
-    @Override
-    public List<UserBlocked> findByUserList(Long UserId) {
+import org.zerock.moamoa.domain.entity.UserBlocked;
 
-        return null;
-    }
+public class UserBlockedRepositoryImpl implements UserBlockedInterface {
+	@PersistenceContext
+	private EntityManager em;
+
+	@Override
+	public List<UserBlocked> findByUserList(Long UserId) {
+
+		return null;
+	}
 }
