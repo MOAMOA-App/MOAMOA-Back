@@ -1,90 +1,74 @@
 package org.zerock.moamoa.service;
 
+import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.zerock.moamoa.domain.DTO.AnnounceDTO;
+import org.zerock.moamoa.common.exception.EntityNotFoundException;
+import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.domain.DTO.announce.AnnounceMapper;
+import org.zerock.moamoa.domain.DTO.announce.AnnounceRequest;
+import org.zerock.moamoa.domain.DTO.announce.AnnounceResponse;
 import org.zerock.moamoa.domain.entity.Announce;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.repository.AnnounceRepository;
 
-import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class AnnounceService {
-    private final AnnounceRepository announceRepository;
-    private final ProductService productService;
+	private final AnnounceRepository announceRepository;
+	private final AnnounceMapper announceMapper;
+	private final ProductService productService;
 
-    @Autowired
-    public AnnounceService(AnnounceRepository announceRepository, ProductService productService) {
-        this.announceRepository = announceRepository;
-        this.productService = productService;
-    }
+	public AnnounceResponse findOne(Long id) {
+		return announceMapper.toDto(findById(id));
+	}
 
-    @Transactional
-    public AnnounceDTO getById(Long id) {
-        return convertToDTO(findById(id));
-    }
-    @Transactional
-    public Announce findById(Long id){
-        return announceRepository.findById(id).orElse(null);
-    }
+	public Announce findById(Long id) {
+		return announceRepository.findById(id)
+			.orElseThrow(() -> new EntityNotFoundException(ErrorCode.ANNOUNCE_NOT_FOUND));
+	}
 
-    @Transactional
-    public List<AnnounceDTO> getList() {
-        return announceDTOS(findAll());
-    }
-    @Transactional
-    public List<Announce> findAll(){
-        return announceRepository.findAll();
-    }
+	public List<Announce> findAll() {
+		return announceRepository.findAll();
+	}
 
-    public List<AnnounceDTO> getByProduct(Long pid){
-        List<Announce> announceList = productService.findById(pid).getAnnounces();
-        List<AnnounceDTO> announceDTOs = new ArrayList<>();
-        for (Announce announce : announceList) {
-            AnnounceDTO announceDTO = convertToDTO(announce);
-            announceDTOs.add(announceDTO);
-        }
-        return announceDTOs;
-    }
+	public void remove(Long id) {
+		if (announceRepository.findById(id).isEmpty())
+			throw new EntityNotFoundException(ErrorCode.ANNOUNCE_NOT_FOUND);
+		announceRepository.deleteById(id);
+	}
 
-    public Long saveAnnounce(Announce announce, Long pid){
-        Product product = productService.findById(pid);
-        announce.setProduct(product);
-        try {
-            return announceRepository.save(announce).getId();
-        }catch (Exception e) {
-            String errorMessage = e.getMessage();
-            // 에러 메시지를 사용하여 예외 처리 로직 수행
-            return -1L;
-        }
-    }
+	@Transactional
+	public AnnounceResponse updateInfo(AnnounceRequest announce) {
+		Announce temp = findById(announce.getId());
+		temp.updateInfo(announce);
+		return announceMapper.toDto(temp);
+	}
 
-    public boolean removeAnnounce(Long id){
-        Announce announce = findById(id);
-        if(announce.getId()!=null){
-            announce.getProduct().removeAnnounce(announce);
-            announceRepository.delete(announce);
-            return true;
-        }
-        return false;
-    }
+	public List<AnnounceResponse> getByProduct(Long pid) {
+		List<Announce> announceList = productService.findById(pid).getAnnounces();
+		return announceList.stream().map(announceMapper::toDto).toList();
+	}
 
-    private List<AnnounceDTO> announceDTOS(List<Announce> announces){
-        List<AnnounceDTO> announceDTOList = new ArrayList<>();
-        for (Announce announce: announces) {
-            announceDTOList.add(convertToDTO(announce));
-        }
-        return announceDTOList;
-    }
+	public AnnounceResponse saveAnnounce(AnnounceRequest request, Long pid) {
+		Announce announce = announceMapper.toEntity(request);
+		Product product = productService.findById(pid);
+		announce.setProduct(product);
+		product.addAnnounce(announce);
+		return announceMapper.toDto(announceRepository.save(announce));
+	}
 
-    private AnnounceDTO convertToDTO(Announce announce) {
-        return new AnnounceDTO(announce);
-    }
-
+	public boolean removeAnnounce(Long id) {
+		Announce announce = findById(id);
+		if (announce.getId() != null) {
+			announce.getProduct().removeAnnounce(announce);
+			announceRepository.delete(announce);
+			return true;
+		}
+		return false;
+	}
 
 }

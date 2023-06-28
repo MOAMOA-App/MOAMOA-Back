@@ -4,7 +4,7 @@ import lombok.Data;
 import org.zerock.moamoa.domain.entity.Notice;
 import org.zerock.moamoa.domain.entity.User;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 public class NoticeDTO {
@@ -22,7 +22,7 @@ public class NoticeDTO {
 
     private Long referenceID;   // 게시글ID
 
-    private LocalDateTime sendDate;
+    private Instant sendDate;
 
     public NoticeDTO(Notice notice) {
         id = notice.getId();

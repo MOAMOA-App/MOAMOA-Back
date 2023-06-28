@@ -1,30 +1,25 @@
 package org.zerock.moamoa.domain.entity;
 
 
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.Data;
 
-import lombok.ToString;
-
-import javax.persistence.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-//@AllArgsConstructor
-//@NoArgsConstructor
 
 @Entity
-@Table(name= "notice")
-@Data   // @Getter @Setter @ToString @EqualsAndHashCode @RequiredArgsConstructor @Value 합침
-        // @EqualsAndHashCode: equals()메소드와 hashCode()메소드를 생성해준다.
-        // @RequiredArgsConstructor: 초기화안된 final 필드나 @NonNull이 붙은 필드에 대해 생성자를 만들어 준다
+@Table(name = "notice")
+@Data
+// @Getter @Setter @ToString @EqualsAndHashCode @RequiredArgsConstructor @Value 합침
+// @EqualsAndHashCode: equals()메소드와 hashCode()메소드를 생성해준다.
+// @RequiredArgsConstructor: 초기화안된 final 필드나 @NonNull이 붙은 필드에 대해 생성자를 만들어 준다
 public class Notice {
     @Id // 기본키로 설정한다.
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 데이터를 저장할 때 값 1씩 자동으로 증가
     private Long id;
 
     @ManyToOne  // 외래키 어노테이션
-    @JoinColumn(name="sender_id")
+    @JoinColumn(name = "sender_id")
     private User senderID;    // 회원ID(보내는)
 
     @ManyToOne
@@ -44,10 +39,10 @@ public class Notice {
     private Long referenceID;   // 게시글ID
 
     @Column(name = "send_date", nullable = false)
-    private LocalDateTime sendDate;
+    private Instant sendDate;
 
     @PrePersist // DB에 해당 테이블의 insert 연산을 실행할 때 같이 실행하라는 의미.
     protected void onCreate() { // 현재 시간의 정보 주입해주는 함수 생성. insert할 때 현재시간정보 DB에 삽입 가능
-        this.sendDate = LocalDateTime.now();
+        this.sendDate = Instant.from(LocalDateTime.now());
     }
 }

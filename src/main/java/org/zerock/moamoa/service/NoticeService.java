@@ -48,7 +48,7 @@ public class NoticeService {
     }
 
     @Transactional
-    public Optional<Notice> findById(Long id){
+    public Optional<Notice> findById(Long id) {
         return this.noticeRepository.findById(id);
     }
 
@@ -88,35 +88,35 @@ public class NoticeService {
     }
 
     // 읽을 시 상태 변경
-    public void updateNoticeReadState(Long noticeId, Long receiverId) {
-        Notice notice = noticeRepository.findByIdAndReceiverID(noticeId, receiverId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid notice ID or receiver ID"));
-
-        notice.setReadOrNot(true);
-    }
+//    public void updateNoticeReadState(Long noticeId, Long receiverId) {
+//        Notice notice = noticeRepository.findByIdAndReceiverID(noticeId, receiverId)
+//                .orElseThrow(() -> new IllegalArgumentException("Invalid notice ID or receiver ID"));
+//
+//        notice.setReadOrNot(true);
+//    }
 
     // 알림 조회
-    public List<Notice> getReminderNotices(Long userId) {
-        // 알림 줘야하는 상황
-        /* 1. Product
-            : 게시글 변경/게시글 상태 변경/관심 게시글 변경/공지사항 추가 시 알림 전송
-            : 해당 상태 변동 이벤트가 발생하는 시점에서 알림을 생성하고 저장
-            : 알림 생성 시 알림의 수신자(receiverID)를 지정
-         */
-        /* 2. Chat
-            : 새로운 채팅 추가 시 알림 전송
-            : 해당 채팅 이벤트가 발생하는 시점에서 알림을 생성하고 저장
-         */
-
-        // 나와 관련된 알림을 조회(받는 ID가 userId인 알림)해서 reminderNotices 리스트에 저장
-        List<Notice> reminderNotices = noticeRepository.findReminderNoticesByReceiverID(userId);
-
-        // 조회된 알림들을 읽은 상태로 변경해줌
-        // --> 나중에 조회수 1 이상인 알림을 setReadOrNot(true) 해줘야됨!!!
-        for (Notice notice : reminderNotices) {
-            notice.setReadOrNot(true);
-        }
-
-        return reminderNotices;
-    }
+//    public List<Notice> getReminderNotices(Long userId) {
+//        // 알림 줘야하는 상황
+//        /* 1. Product
+//            : 게시글 변경/게시글 상태 변경/관심 게시글 변경/공지사항 추가 시 알림 전송
+//            : 해당 상태 변동 이벤트가 발생하는 시점에서 알림을 생성하고 저장
+//            : 알림 생성 시 알림의 수신자(receiverID)를 지정
+//         */
+//        /* 2. Chat
+//            : 새로운 채팅 추가 시 알림 전송
+//            : 해당 채팅 이벤트가 발생하는 시점에서 알림을 생성하고 저장
+//         */
+//
+//        // 나와 관련된 알림을 조회(받는 ID가 userId인 알림)해서 reminderNotices 리스트에 저장
+//        List<Notice> reminderNotices = noticeRepository.findReminderNoticesByReceiverID(userId);
+//
+//        // 조회된 알림들을 읽은 상태로 변경해줌
+//        // --> 나중에 조회수 1 이상인 알림을 setReadOrNot(true) 해줘야됨!!!
+//        for (Notice notice : reminderNotices) {
+//            notice.setReadOrNot(true);
+//        }
+//
+//        return reminderNotices;
+//    }
 }
