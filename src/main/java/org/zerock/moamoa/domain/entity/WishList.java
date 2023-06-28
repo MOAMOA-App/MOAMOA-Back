@@ -1,43 +1,41 @@
 package org.zerock.moamoa.domain.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
+import lombok.*;
+import javax.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 
-import lombok.Data;
+import java.time.Instant;
+import java.time.LocalDateTime;
 
-@Table(name = "wish_lists")
+@Table(name= "wish_lists")
 @Entity
 @Data
 public class WishList extends BaseEntity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@ManyToOne(targetEntity = Product.class)
-	@JoinColumn(name = "product_id", nullable = false)
-	private Product productId;
+    @ManyToOne(targetEntity = Product.class)
+    @JoinColumn(name = "product_id",nullable = false)
+    private Product productId;
 
-	@OneToOne(targetEntity = User.class)
-	@JoinColumn(name = "user_id", nullable = false)
-	private User userId;
+    @OneToOne(targetEntity = User.class)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User userId;
+    
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
-	public void setUserId(User user) {
-		this.userId = user;
-		user.getWishLists().add(this);
-	}
+    public void setUserId(User user) {
+        this.userId = user;
+        user.getWishLists().add(this);
+    }
 
-	public void removeUserId() {
-		if (userId != null) {
-			userId.getWishLists().remove(this);
-			userId = null;
-		}
-	}
+    public void removeUserId() {
+        if (userId != null) {
+            userId.getWishLists().remove(this);
+            userId = null;
+        }
+    }
 }

@@ -5,6 +5,7 @@ import org.zerock.moamoa.domain.entity.Notice;
 import org.zerock.moamoa.domain.entity.User;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 public class NoticeDTO {
@@ -22,7 +23,7 @@ public class NoticeDTO {
 
     private Long referenceID;   // 게시글ID
 
-    private Instant sendDate;
+    private Instant createdAt;
 
     public NoticeDTO(Notice notice) {
         id = notice.getId();
@@ -32,6 +33,6 @@ public class NoticeDTO {
         readOrNot = notice.getReadOrNot();
         type = notice.getType();
         referenceID = notice.getReferenceID();
-        sendDate = notice.getSendDate();
+        createdAt = notice.getCreatedAt();
     }
 }

@@ -4,6 +4,7 @@ import lombok.Data;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.UserBlocked;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Data
@@ -14,7 +15,7 @@ public class UserBlockedDTO {
 
     User target;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public UserBlockedDTO(UserBlocked userBlocked) {
         id = userBlocked.getId();

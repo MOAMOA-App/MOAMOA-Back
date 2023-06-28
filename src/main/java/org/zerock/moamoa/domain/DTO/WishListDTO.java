@@ -16,12 +16,9 @@ public class WishListDTO {
 
     private User userId;
 
-    private Instant createdAt;
-
     public WishListDTO(WishList wishList) {
         id = wishList.getId();
         productId = wishList.getProductId();
         userId = wishList.getUserId();
-        createdAt = wishList.getCreatedAt();
     }
 }
