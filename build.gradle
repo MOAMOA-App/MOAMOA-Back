@@ -40,8 +40,7 @@ dependencies {
     implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '3.1.2'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    // 임시 주석처리
-    // implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
