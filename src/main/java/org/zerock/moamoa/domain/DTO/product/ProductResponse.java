@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.zerock.moamoa.domain.DTO.UserDTO;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceResponse;
+import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 
 import lombok.Builder;
@@ -14,7 +15,7 @@ import lombok.Data;
 public class ProductResponse {
 	private Long id;
 	private UserDTO user;
-	private Long categoryId;
+	private Category categoryId;
 	private String sellingArea;
 	private String detailArea;
 	private String title;
@@ -32,7 +33,8 @@ public class ProductResponse {
 	private List<AnnounceResponse> announces;
 
 	@Builder
-	public ProductResponse(Long id, UserDTO user, Long categoryId, String sellingArea, String detailArea, String title,
+	public ProductResponse(Long id, UserDTO user, Category categoryId, String sellingArea, String detailArea,
+		String title,
 		ProductStatus status, Integer sellPrice, Integer viewCount, String description, Integer sellCount,
 		Integer maxCount,
 		String choiceSend, Integer countImage, Instant createdAt, Instant finishedAt, Instant updatedAt,

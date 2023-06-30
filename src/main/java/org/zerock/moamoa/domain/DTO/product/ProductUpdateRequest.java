@@ -2,6 +2,7 @@ package org.zerock.moamoa.domain.DTO.product;
 
 import java.time.Instant;
 
+import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 
 import lombok.Builder;
@@ -13,7 +14,7 @@ public class ProductUpdateRequest {
 	private Long id;
 	private String title;
 	private String description;
-	private Long categoryId;
+	private Category categoryId;
 	private String sellingArea;
 	private String detailArea;
 	private Integer sellPrice;
@@ -25,7 +26,7 @@ public class ProductUpdateRequest {
 	private ProductStatus status;
 
 	@Builder
-	public ProductUpdateRequest(Long id, String title, String description, Long categoryId, String sellingArea,
+	public ProductUpdateRequest(Long id, String title, String description, Category categoryId, String sellingArea,
 		String detailArea, Integer sellPrice, Integer viewCount, Integer maxCount, String choiceSend,
 		Integer countImage,
 		Instant finishedAt, ProductStatus status) {
