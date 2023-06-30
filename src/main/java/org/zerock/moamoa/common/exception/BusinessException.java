@@ -1,6 +1,9 @@
 package org.zerock.moamoa.common.exception;
 
+import lombok.Getter;
+
 /** 상위 상속 Exception class */
+@Getter
 public class BusinessException extends RuntimeException {
 
 	private final String detail;

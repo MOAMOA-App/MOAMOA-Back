@@ -3,8 +3,9 @@ package org.zerock.moamoa.controller;
 import java.time.Instant;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -15,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.zerock.moamoa.api.file.ImageService;
-import org.zerock.moamoa.common.exception.EntityNotFoundException;
-import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.common.message.OkResponse;
+import org.zerock.moamoa.common.message.SuccessMessage;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductSaveRequest;
 import org.zerock.moamoa.domain.DTO.product.ProductStatusUpdateRequest;
@@ -54,7 +55,7 @@ public class ProductController {
 	@PostMapping("/product")
 	public ProductResponse Save(
 		@RequestParam(defaultValue = "41") Long userId,
-		@ModelAttribute("product") ProductSaveRequest product,
+		@Valid @ModelAttribute("product") ProductSaveRequest product,
 		@RequestParam("images") MultipartFile[] images) {
 
 		product.setCountImage(images.length);
@@ -99,9 +100,7 @@ public class ProductController {
 	 */
 	@DeleteMapping("/product/{pid}")
 	public Object DeleteContents(@PathVariable Long pid) {
-		if (productService.remove(pid))
-			return ResponseEntity.ok();
-		else
-			throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
+		productService.remove(pid);
+		return new OkResponse(SuccessMessage.PRODUCT_DELETE).makeAnswer();
 	}
 }
