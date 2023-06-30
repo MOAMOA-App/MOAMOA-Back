@@ -113,7 +113,7 @@ public class Product extends BaseEntity {
 
 	@Builder
 	public Product(
-		Long id, User user, Long categoryId, String sellingArea, String detailArea, String title,
+		Long id, User user, Category categoryId, String sellingArea, String detailArea, String title,
 		ProductStatus status, Integer sellPrice, Integer viewCount, String description, Integer sellCount,
 		Integer maxCount,
 		String choiceSend, Integer countImage, List<Announce> announces, List<Party> parties, Boolean activate,
