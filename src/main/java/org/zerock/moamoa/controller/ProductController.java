@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.zerock.moamoa.api.file.ImageService;
+import org.zerock.moamoa.common.file.ImageService;
+import org.zerock.moamoa.common.file.dto.FileResponse;
 import org.zerock.moamoa.common.message.OkResponse;
 import org.zerock.moamoa.common.message.SuccessMessage;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
@@ -55,14 +56,11 @@ public class ProductController {
 	@PostMapping("/product")
 	public ProductResponse Save(
 		@RequestParam(defaultValue = "41") Long userId,
-		@Valid @ModelAttribute("product") ProductSaveRequest product,
+		//유효성검사
+		@Valid @ModelAttribute("product") ProductSaveRequest request,
 		@RequestParam("images") MultipartFile[] images) {
-
-		product.setCountImage(images.length);
-		product.setFinishedAt(Instant.now());
-		ProductResponse response = productService.saveProduct(product, userId);
-		imageService.saveImages(images, response.getId());
-
+		request.setFinishedAt(Instant.now());
+		ProductResponse response = productService.saveProduct(request, userId, images);
 		return response;
 	}
 
@@ -76,7 +74,7 @@ public class ProductController {
 		@RequestParam("images") MultipartFile[] images) {
 
 		product.setCountImage(images.length);
-		imageService.saveImages(images, pid);
+		List<FileResponse> fileResponses = imageService.saveFiles(images, pid);
 
 		return productService.updateInfo(product);
 	}
@@ -103,4 +101,5 @@ public class ProductController {
 		productService.remove(pid);
 		return new OkResponse(SuccessMessage.PRODUCT_DELETE).makeAnswer();
 	}
+
 }

@@ -98,6 +98,10 @@ public class Product extends BaseEntity {
 		this.status = status;
 	}
 
+	public void updateImage(int counts) {
+		this.countImage = counts;
+	}
+
 	public void updateInfo(ProductUpdateRequest product) {
 		this.categoryId = product.getCategoryId();
 		this.sellingArea = product.getSellingArea();

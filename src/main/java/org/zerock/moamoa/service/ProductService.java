@@ -11,8 +11,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.common.file.ImageService;
+import org.zerock.moamoa.common.file.dto.FileResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductSaveRequest;
@@ -45,6 +48,7 @@ public class ProductService {
 	private final ProductRepository productRepository;
 	private final ProductMapper productMapper;
 	private final UserService userService;
+	private final ImageService imageService;
 
 	public ProductResponse findOne(Long id) {
 		return productMapper.toDto(findById(id));
@@ -59,10 +63,14 @@ public class ProductService {
 		return productRepository.findAll();
 	}
 
-	public ProductResponse saveProduct(ProductSaveRequest request, Long sellerId) {
+	@Transactional
+	public ProductResponse saveProduct(ProductSaveRequest request, Long sellerId, MultipartFile[] images) {
 		Product product = productMapper.toEntity(request);
 		User user = userService.findById(sellerId);
 		product.addUser(user);
+		product = productRepository.save(product);
+		List<FileResponse> responses = imageService.saveFiles(images, product.getId());
+		product.updateImage(responses.size());
 		return productMapper.toDto(productRepository.save(product));
 	}
 
