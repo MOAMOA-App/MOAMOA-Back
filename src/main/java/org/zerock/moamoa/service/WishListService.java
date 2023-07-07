@@ -2,33 +2,46 @@ package org.zerock.moamoa.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.common.exception.EntityNotFoundException;
+import org.zerock.moamoa.domain.DTO.product.ProductResponse;
+import org.zerock.moamoa.domain.DTO.wishlist.WishListMapper;
+import org.zerock.moamoa.domain.DTO.wishlist.WishListRequest;
+import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.repository.WishListRepository;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 public class WishListService {
+    private final WishListMapper wishListMapper;
     private final WishListRepository wishListRepository;
     private final ProductService productService;
     private final UserService userService;
 
     @Autowired
-    public WishListService(WishListRepository wishListRepository, ProductService productService, UserService userService) {
+    public WishListService(WishListMapper wishListMapper, WishListRepository wishListRepository, ProductService productService, UserService userService) {
+        this.wishListMapper = wishListMapper;
         this.wishListRepository = wishListRepository;
         this.productService = productService;
         this.userService = userService;
     }
 
+    // ID에 해당하는 위시리스트 조회-> WishListMapper 사용해 WishListResponse 객체로 매핑 후 반환
+    public WishListResponse findOne(Long id){
+        return wishListMapper.toDto(findById(id));
+    }
 
     @Transactional
-    public Optional<WishList> findById(Long id){
-        return this.wishListRepository.findById(id);
+    public WishList findById(Long id){
+        return this.wishListRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
     @Transactional
@@ -36,34 +49,54 @@ public class WishListService {
         return this.wishListRepository.findAll();
     }
 
-    @Transactional
-    public WishList saveWish(Long user_id, Long product_id){
-        WishList wishList = new WishList();
-        User user = userService.findById(user_id);
-        Product product = productService.findById(product_id);
-        if (product == null) {
-            throw new IllegalArgumentException("해당 상품이 없습니다. id=" + product_id);
-        }
-        wishList.setUserId(user);
-        wishList.setProductId(product);
-
-        user.addWishList(wishList); // user의 wishlists에 정보 추가
-
-        return wishListRepository.save(wishList);
+    public WishListResponse saveWish(WishListRequest request, Long uid){
+        WishList wishList = wishListMapper.toEntity(request);
+        User user = userService.findById(uid);
+        wishList.addUserWish(user);
+        return wishListMapper.toDto(wishListRepository.save(wishList));
     }
 
-    @Transactional
-    public void removeWish(Long id){
-        WishList wishList = wishListRepository.findById(id).orElseThrow(()->new IllegalArgumentException("해당 위시리스트가 없습니다. id=" + id));
+    public void removeWish(Long id) {
+//        if (wishListRepository.findById(id).isEmpty())
+//            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
 
-        // User의 removeWishList를 호출해서 WishList 제거하는 코드 추가해봄
-        User user = wishList.getUserId();
+        Optional<WishList> optionalWishList = wishListRepository.findById(id);
+        if (optionalWishList.isEmpty()) {
+            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        // optionalWishList에서 실제 WishList 객체 가져옴
+        WishList wishList = optionalWishList.get();
+        // WishList 객체에 연결된 User 객체 가져옴
+        User user = wishList.getUser();
+
         if (user != null) {
-            user.removeWishList(wishList);
-            userService.saveUser(user);
+            wishList.removeUserWish();
         }
 
-        this.wishListRepository.delete(wishList);
+        wishListRepository.deleteById(id);
     }
 
+    public List<ProductResponse> WishToProduct(Long userId) {
+        // 유저에  저장된 위시리스트 가져옴
+        User user = userService.findById(userId);
+        List<WishList> wishLists = user.getWishLists();
+
+        // pid로 상품 가져옴-> ProductResponse 객체로 매핑-> 리스트 추가
+        List<ProductResponse> products = new ArrayList<>();
+        for (WishList wishList : wishLists) {
+            Product product = wishList.getProduct();
+
+//            ProductResponse productResponse = productService.findOne(product.getId());
+
+            // productservice의 search 임시 이용
+            ProductResponse productResponse = productService.search(
+                    product.getTitle(), null, null, null, "createdAt", "DESC", 0, 1
+            ).getContent().get(0);
+            products.add(productResponse);
+        }
+
+        // 조회된 상품 리스트 반환
+        return products;
+    }
 }

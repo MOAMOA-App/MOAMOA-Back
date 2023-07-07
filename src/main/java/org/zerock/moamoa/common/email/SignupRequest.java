@@ -1,4 +1,4 @@
-package org.zerock.moamoa.domain;
+package org.zerock.moamoa.common.email;
 
 import lombok.Data;
 

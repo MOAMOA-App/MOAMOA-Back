@@ -2,15 +2,15 @@ package org.zerock.moamoa.domain.entity;
 
 import lombok.*;
 import javax.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
+
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
-@Table(name= "wish_lists")
 @Entity
-@Data
+@Getter
+@NoArgsConstructor
+@Table(name= "wish_lists")
 public class WishList extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,24 +18,35 @@ public class WishList extends BaseEntity {
 
     @ManyToOne(targetEntity = Product.class)
     @JoinColumn(name = "product_id",nullable = false)
-    private Product productId;
+    private Product product;
 
     @OneToOne(targetEntity = User.class)
     @JoinColumn(name = "user_id", nullable = false)
-    private User userId;
+    private User user;
     
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    public void setUserId(User user) {
-        this.userId = user;
-        user.getWishLists().add(this);
+    @Builder
+    public WishList(Long id, Product product, User user, Instant createdAt) {
+        this.id = id;
+        this.product = product;
+        this.user = user;
+        this.createdAt = createdAt;
     }
 
-    public void removeUserId() {
-        if (userId != null) {
-            userId.getWishLists().remove(this);
-            userId = null;
+    public void addUserWish(User user){
+        this.user = user;
+        if (!user.getWishLists().contains(this)){
+            user.getWishLists().add(this);
+        }
+    }
+
+    public void removeUserWish() {
+        if (user != null) {
+            User user = this.user;
+            user.getWishLists().remove(this);
+            this.user = null;
         }
     }
 }

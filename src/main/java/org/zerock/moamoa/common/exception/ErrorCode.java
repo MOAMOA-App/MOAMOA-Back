@@ -14,6 +14,8 @@ public enum ErrorCode {
 
 	PARTY_NOT_FOUND(HttpStatus.NOT_FOUND, "PT_001", "파티을 찾을 수 없습니다."),
 
+	NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NO_001", "알림을 찾을 수 없습니다."),
+
 	FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FL_OO1", "파일 업로드 중 오류가 발생하였습니다."),
 	FILE_READING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FL_OO2", "파일 읽기 중 오류가 발생하였습니다."),
 	FILE_STORAGE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FL_OO3", "파일 저장 중 오류가 발생하였습니다."),
