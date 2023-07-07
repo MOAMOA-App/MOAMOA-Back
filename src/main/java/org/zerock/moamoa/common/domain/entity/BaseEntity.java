@@ -1,16 +1,14 @@
 package org.zerock.moamoa.common.domain.entity;
 
-import java.time.Instant;
-
-import javax.persistence.Column;
-import javax.persistence.EntityListeners;
-import javax.persistence.MappedSuperclass;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
+import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.Data;
+import java.time.Instant;
 
 @Data
 @MappedSuperclass
@@ -19,11 +17,11 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 //Entity의 변화를 지켜보는 클래스 정의
 public class BaseEntity {
-	@CreatedDate
-	@Column(updatable = false)
-	private Instant createdAt;
+    @CreatedDate
+    @Column(updatable = false)
+    private Instant createdAt;
 
-	@LastModifiedDate
-	@Column(updatable = true)
-	private Instant updatedAt;
+    @LastModifiedDate
+    @Column(updatable = true)
+    private Instant updatedAt;
 }

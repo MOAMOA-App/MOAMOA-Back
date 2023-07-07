@@ -1,7 +1,5 @@
 package org.zerock.moamoa.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.message.OkResponse;
@@ -13,37 +11,41 @@ import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.service.NoticeService;
 import org.zerock.moamoa.service.UserService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/reminder")
 public class NoticeController {
-	private final NoticeService noticeService;
-	private final NoticeMapper noticeMapper;
-	private final UserService userService;
+    private final NoticeService noticeService;
+    private final NoticeMapper noticeMapper;
+    private final UserService userService;
 
-	public NoticeController(NoticeService noticeService, NoticeMapper noticeMapper, UserService userService) {
-		this.noticeService = noticeService;
-		this.noticeMapper = noticeMapper;
-		this.userService = userService;
-	}
+    public NoticeController(NoticeService noticeService, NoticeMapper noticeMapper, UserService userService) {
+        this.noticeService = noticeService;
+        this.noticeMapper = noticeMapper;
+        this.userService = userService;
+    }
 
-	/**
-	 * 알림 조회
-	 * @param uid
-	 * @return
-	 */
-	// 추후 알림 클릭 시 관련된 product나 chatroom으로 가는 코드도 필요할듯
-	@GetMapping("/{uid}")
-	public List<NoticeResponse> getNoticesByUserId(@PathVariable("id") Long uid) {
 
-		List<NoticeResponse> noticeResponses = noticeService.getReminderNotices(uid);
+    /**
+     * 알림 조회
+     *
+     * @param uid
+     * @return
+     */
+    // 추후 알림 클릭 시 관련된 product나 chatroom으로 가는 코드도 필요할듯
+    @GetMapping("/{uid}")
+    public List<NoticeResponse> getNoticesByUserId(@PathVariable("id") Long uid) {
 
-		for (NoticeResponse noticeResponse : noticeResponses) {
-			String senderNickname = noticeResponse.getSenderNickname();	// 보내는 사람 닉네임 불러옴
-			String referenceTitle = noticeResponse.getReferenceTitle();	// 관련 공동구매의 제목 불러옴
-		}
+        List<NoticeResponse> noticeResponses = noticeService.getReminderNotices(uid);
 
-		return noticeResponses;
-	}
+        for (NoticeResponse noticeResponse : noticeResponses) {
+            String senderNickname = noticeResponse.getSenderNickname();    // 보내는 사람 닉네임 불러옴
+            String referenceTitle = noticeResponse.getReferenceTitle();    // 관련 공동구매의 제목 불러옴
+        }
+
+        return noticeResponses;
+    }
 
 
 	/*	알림 줘야하는 상황
@@ -59,53 +61,57 @@ public class NoticeController {
 	  	근데 생각해보니까 이거는 noticeService에서 만들고 해당 사건이 발생하는 데다 끼워넣어야 하는 거 아님...?
 	 	함 조사해보기로.
 	 */
-	/**
-	 * 알림 발신
-	 * @param referenceID
-	 * @param receiverID
-	 * @param senderID
-	 * @return
-	 */
-	//
-	@PostMapping("/{referenceID}/{receiverID}")
-	public ResponseEntity<String> sendReminderNotice(@PathVariable("referenceID") Long referenceID,
-		@PathVariable("receiverID") Long receiverID,
-		@RequestParam("senderID") Long senderID) {
 
-		User sender = userService.findById(senderID);
+    /**
+     * 알림 발신
+     *
+     * @param referenceID
+     * @param receiverID
+     * @param senderID
+     * @return
+     */
+    //
+    @PostMapping("/{referenceID}/{receiverID}")
+    public ResponseEntity<String> sendReminderNotice(@PathVariable("referenceID") Long referenceID,
+                                                     @PathVariable("receiverID") Long receiverID,
+                                                     @RequestParam("senderID") Long senderID) {
 
-		String message = "";
-		String type = "";
+        User sender = userService.findById(senderID);
+
+        String message = "";
+        String type = "";
 
 //		Notice notice = noticeService.saveNotice(sender.getId(), receiverID, message, type, referenceID);
-		// NoticeService의 saveNotices에 리시버에 알림 추가되는 코드 추가햇음!!!
+        // NoticeService의 saveNotices에 리시버에 알림 추가되는 코드 추가햇음!!!
 
-		return ResponseEntity.ok("알림이 성공적으로 발송되었습니다.");
-	}
+        return ResponseEntity.ok("알림이 성공적으로 발송되었습니다.");
+    }
 
-	/**
-	 * 알림 읽음 상태 변경
-	 * @param receiverId
-	 * @param noticeId
-	 * @param NR
-	 * @return
-	 */
-	@PutMapping("/{uid}/{noticeId}")
-	public NoticeResponse updateRead(@PathVariable Long receiverId,
-									 @PathVariable Long noticeId,
-									 @ModelAttribute("profile")NoticeReadUpdateRequest NR){
-		return noticeService.updateRead(NR);
-	}
+    /**
+     * 알림 읽음 상태 변경
+     *
+     * @param receiverId
+     * @param noticeId
+     * @param NR
+     * @return
+     */
+    @PutMapping("/{uid}/{noticeId}")
+    public NoticeResponse updateRead(@PathVariable Long receiverId,
+                                     @PathVariable Long noticeId,
+                                     @ModelAttribute("profile") NoticeReadUpdateRequest NR) {
+        return noticeService.updateRead(NR);
+    }
 
-	/**
-	 * 알림 삭제
-	 * @param uid
-	 * @param noticeId
-	 * @return
-	 */
-	@DeleteMapping("/{uid}/{noticeId}")
-	public Object DeleteNotice(@PathVariable Long uid, @PathVariable Long noticeId){
-		noticeService.removeNotice(noticeId);
-		return new OkResponse(SuccessMessage.NOTICE_DELETE).makeAnswer();
-	}
+    /**
+     * 알림 삭제
+     *
+     * @param uid
+     * @param noticeId
+     * @return
+     */
+    @DeleteMapping("/{uid}/{noticeId}")
+    public Object DeleteNotice(@PathVariable Long uid, @PathVariable Long noticeId) {
+        noticeService.removeNotice(noticeId);
+        return new OkResponse(SuccessMessage.NOTICE_DELETE).makeAnswer();
+    }
 }

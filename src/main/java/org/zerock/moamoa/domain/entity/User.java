@@ -1,12 +1,13 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
 import org.zerock.moamoa.domain.DTO.user.UserPwUpdateRequest;
-
-import javax.persistence.*;
 
 import java.time.Instant;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name= "users")
+@Table(name = "users")
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,10 +42,10 @@ public class User extends BaseEntity {
     @Column(name = "prof_img", length = 32)
     private String profImg;
 
-    @Column(name = "address", length=254)
+    @Column(name = "address", length = 254)
     private String address;
 
-    @Column(name = "detailed_address", length=254)
+    @Column(name = "detailed_address", length = 254)
     private String detailAddress;
 
     @Column(name = "activate")
@@ -97,7 +98,7 @@ public class User extends BaseEntity {
         this.deletedAt = Instant.now();
     }
 
-    public void updateProfile(UserProfileUpdateRequest UP){
+    public void updateProfile(UserProfileUpdateRequest UP) {
         this.nick = UP.getNick();
         this.profImg = UP.getProfImg();
         this.email = UP.getEmail();
@@ -105,7 +106,7 @@ public class User extends BaseEntity {
         this.detailAddress = UP.getDetailAddress();
     }
 
-    public void updatePw(UserPwUpdateRequest UPw){
+    public void updatePw(UserPwUpdateRequest UPw) {
         this.password = UPw.getNewPw();
     }
 
@@ -120,6 +121,7 @@ public class User extends BaseEntity {
 
     /**
      * 비밀번호 암호화
+     *
      * @param passwordEncoder 암호화 할 인코더 클래스
      * @return 변경된 유저 Entity
      */
@@ -130,7 +132,8 @@ public class User extends BaseEntity {
 
     /**
      * 비밀번호 확인
-     * @param plainPassword 암호화 이전의 비밀번호
+     *
+     * @param plainPassword   암호화 이전의 비밀번호
      * @param passwordEncoder 암호화에 사용된 클래스
      * @return true | false
      */

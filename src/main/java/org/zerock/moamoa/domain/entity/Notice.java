@@ -1,24 +1,26 @@
 package org.zerock.moamoa.domain.entity;
 
 
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 
-import javax.persistence.*;
 import java.time.Instant;
 
 
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name= "notice")
+@Table(name = "notice")
 public class Notice extends BaseEntity {
     @Id // 기본키로 설정한다.
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 데이터를 저장할 때 값 1씩 자동으로 증가
     private Long id;
 
     @ManyToOne  // 외래키 어노테이션
-    @JoinColumn(name="sender_id", nullable = false)
+    @JoinColumn(name = "sender_id", nullable = false)
     private User senderID;    // 보내는 회원
 
     @ManyToOne
@@ -54,14 +56,14 @@ public class Notice extends BaseEntity {
         this.createdAt = createdAt;
     }
 
-    public void setUserNotice(User user){
+    public void setUserNotice(User user) {
         this.receiverID = user;
-        if (!user.getNotices().contains(this)){
+        if (!user.getNotices().contains(this)) {
             user.getNotices().add(this);
         }
     }
 
-    public void removeUserNotice(){
+    public void removeUserNotice() {
         if (receiverID != null) {
             User user = this.receiverID;
             user.getWishLists().remove(this);

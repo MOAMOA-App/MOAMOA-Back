@@ -2,8 +2,9 @@ package org.zerock.moamoa.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.zerock.moamoa.common.exception.ErrorCode;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
+import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListRequest;
@@ -13,7 +14,6 @@ import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.repository.WishListRepository;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,22 +34,22 @@ public class WishListService {
     }
 
     // ID에 해당하는 위시리스트 조회-> WishListMapper 사용해 WishListResponse 객체로 매핑 후 반환
-    public WishListResponse findOne(Long id){
+    public WishListResponse findOne(Long id) {
         return wishListMapper.toDto(findById(id));
     }
 
     @Transactional
-    public WishList findById(Long id){
+    public WishList findById(Long id) {
         return this.wishListRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
     @Transactional
-    public List<WishList> findAll(){
+    public List<WishList> findAll() {
         return this.wishListRepository.findAll();
     }
 
-    public WishListResponse saveWish(WishListRequest request, Long uid){
+    public WishListResponse saveWish(WishListRequest request, Long uid) {
         WishList wishList = wishListMapper.toEntity(request);
         User user = userService.findById(uid);
         wishList.addUserWish(user);

@@ -1,12 +1,9 @@
 package org.zerock.moamoa.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
-import org.zerock.moamoa.domain.DTO.party.PartyResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.service.PartyService;
 import org.zerock.moamoa.service.ProductService;
@@ -33,16 +30,16 @@ public class MyinfoController { // 맨 긑에 붙은 id를 /profile
      * @param pageSize
      * @return
      */
-    @GetMapping("/{userid}/userpost")
-    public Page<ProductResponse> getMyPosts(
-            @PathVariable Long userid,
-            @RequestParam(defaultValue = "createdAt") String orderBy,   // 정렬 기준: 생성일
-            @RequestParam(defaultValue = "DESC") String sortOrder,      // 기본적으로 내림차순 정렬
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(defaultValue = "8") int pageSize
-            ){
-        return productService.toResPost(userid, orderBy, sortOrder, pageNo, pageSize);
-    }
+//    @GetMapping("/{userid}/userpost")
+//    public Page<ProductResponse> getMyPosts(
+//            @PathVariable Long userid,
+//            @RequestParam(defaultValue = "createdAt") String orderBy,   // 정렬 기준: 생성일
+//            @RequestParam(defaultValue = "DESC") String sortOrder,      // 기본적으로 내림차순 정렬
+//            @RequestParam(defaultValue = "0") int pageNo,
+//            @RequestParam(defaultValue = "8") int pageSize
+//    ){
+//        return productService.toResPost(userid, orderBy, sortOrder, pageNo, pageSize);
+//    }
 
     // 참여자 목록 확인-> 냅다 만들엇는데 생각해보니까 그냥 PartyController 쪽에서 만든거 쓰면 되는거아닌지...
 //    @GetMapping("/{userid}/userpost/{pid}/joinlist")
@@ -81,6 +78,7 @@ public class MyinfoController { // 맨 긑에 붙은 id를 /profile
 
     /**
      * 내가 찜한 게시글 불러옴
+     *
      * @param userId
      * @return
      */
@@ -93,6 +91,7 @@ public class MyinfoController { // 맨 긑에 붙은 id를 /profile
 
     /**
      * 내가 찜한 게시글 삭제
+     *
      * @param uid
      * @param wishListId
      * @return

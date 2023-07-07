@@ -3,17 +3,13 @@ package org.zerock.moamoa.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.DTO.user.*;
-import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.UserRepository;
 
-
-import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,23 +28,24 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserResponse findOne(Long id){
+    public UserResponse findOne(Long id) {
         return userMapper.toDto(findById(id));
     }
 
     @Transactional
-    public User findById(Long id){
+    public User findById(Long id) {
         return this.userRepository.findById(id)
-                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Transactional
-    public List<User> findAll(){
+    public List<User> findAll() {
         return this.userRepository.findAll();
     }
 
     /**
      * 회원가입
+     *
      * @param userSignupRequest
      * @return
      * @throws Exception
@@ -64,21 +61,21 @@ public class UserService {
         }
     }
 
-    public boolean removeUser(Long id){
+    public boolean removeUser(Long id) {
         User user = findById(id);
         user.delete();
         return !user.getActivate();
     }
 
     @Transactional
-    public User updateUser(Long id, String name){
+    public User updateUser(Long id, String name) {
         User user = findById(id);
 
         return this.userRepository.save(user);
     }
 
     @Transactional
-    public UserResponse updateProfile(UserProfileUpdateRequest UP){
+    public UserResponse updateProfile(UserProfileUpdateRequest UP) {
         User temp = findById(UP.getId());
         temp.updateProfile(UP);
         return userMapper.toDto(temp);
@@ -91,7 +88,7 @@ public class UserService {
         String encodePw = userMapper.toDto(temp).getPassword();
 
         // 원래 비밀번호 뭐였는지 확인
-        if (passwordEncoder.matches(UPw.getOldPw(), encodePw)){
+        if (passwordEncoder.matches(UPw.getOldPw(), encodePw)) {
             // 맞을 시 새 비밀번호 해싱해서 저장
             UPw.setNewPw(passwordEncoder.encode(UPw.getOldPw())); // 비밀번호 암호화
             temp.updatePw(UPw);
@@ -104,6 +101,7 @@ public class UserService {
 
     /**
      * 로그인
+     *
      * @param userLoginRequest
      * @return
      * @throws Exception
@@ -111,13 +109,13 @@ public class UserService {
     public UserResponse login(UserLoginRequest userLoginRequest) throws Exception {
 
         // 이메일/비밀번호 모두 null-> 이메일을 입력해주세요.
-        if(userLoginRequest.getEmail() == null || userLoginRequest.getPassword() == null)
+        if (userLoginRequest.getEmail() == null || userLoginRequest.getPassword() == null)
             throw new Exception("이메일을 입력해주세요.");
 
         Optional<User> userOptional = userRepository.findByEmail(userLoginRequest.getEmail());
         // 이메일 확인
         // 이메일이 db에 존재-> 비밀번호 확인으로
-        if (userOptional.isPresent()){
+        if (userOptional.isPresent()) {
             User user = userOptional.get();
             String encodePw = userMapper.toDto(user).getPassword();
 
@@ -135,6 +133,7 @@ public class UserService {
 
     /**
      * 이메일 중복 확인
+     *
      * @param email
      * @return
      */

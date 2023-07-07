@@ -28,8 +28,7 @@ public class ProductUpdateRequest {
 	@Builder
 	public ProductUpdateRequest(Long id, String title, String description, Category categoryId, String sellingArea,
 		String detailArea, Integer sellPrice, Integer viewCount, Integer maxCount, String choiceSend,
-		Integer countImage,
-		Instant finishedAt, ProductStatus status) {
+		Integer countImage, Instant finishedAt, ProductStatus status) {
 		this.id = id;
 		this.title = title;
 		this.description = description;

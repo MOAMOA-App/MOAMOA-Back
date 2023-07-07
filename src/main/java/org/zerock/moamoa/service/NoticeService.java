@@ -6,10 +6,9 @@ import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.notice.NoticeMapper;
 import org.zerock.moamoa.domain.DTO.notice.NoticeReadUpdateRequest;
-import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.DTO.notice.NoticeResponse;
+import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.entity.Notice;
-import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.NoticeRepository;
 
@@ -29,7 +28,7 @@ public class NoticeService {
         this.userService = userService;
     }
 
-    public NoticeResponse findOne(Long id){
+    public NoticeResponse findOne(Long id) {
         return noticeMapper.toDto(findById(id));
     }
 
@@ -57,7 +56,7 @@ public class NoticeService {
 
     // 읽을 시 상태 변경
     @Transactional
-    public NoticeResponse updateRead(NoticeReadUpdateRequest NR){
+    public NoticeResponse updateRead(NoticeReadUpdateRequest NR) {
         Notice temp = findById(NR.getId());
         temp.updateRead(true);
         return noticeMapper.toDto(temp);
