@@ -17,7 +17,6 @@ import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.common.file.ImageService;
 import org.zerock.moamoa.common.file.dto.FileResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductMapper;
-import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductSaveRequest;
 import org.zerock.moamoa.domain.DTO.product.ProductStatusUpdateRequest;
 import org.zerock.moamoa.domain.DTO.product.ProductUpdateRequest;
@@ -71,12 +70,29 @@ public class ProductService {
 		product = productRepository.save(product);
 		List<FileResponse> responses = imageService.saveFiles(images, product.getId());
 		product.updateImage(responses.size());
+		product.addUser(user);	// YJ: 만약 이거랑 sellerid 받은것도 내꺼면 그냥 지워도 될듯 product.getUser() 쓰기!!!
+		// request.getUser를 써야 하나...
+		product.addUserPosts(user);
+		return productMapper.toDto(productRepository.save(product));
+	}
+
+	public ProductResponse saveProduct(ProductSaveRequest request, Long sellerId) {
+		Product product = productMapper.toEntity(request);
+		User user = userService.findById(sellerId);
+		product.addUser(user);	// YJ: 만약 이거랑 sellerid 받은것도 내꺼면 그냥 지워도 될듯 product.getUser() 쓰기!!!
+								// request.getUser를 써야 하나...
+		product.addUserPosts(user);
 		return productMapper.toDto(productRepository.save(product));
 	}
 
 	@Transactional
 	public boolean remove(Long id) {
 		Product product = findById(id);
+
+		// 유저의 만든공구 리스트에서 공구 제거
+		User user = product.getUser();
+		product.removeUserPosts(user);
+
 		product.delete();
 		return !product.getActivate();
 	}
@@ -135,8 +151,70 @@ public class ProductService {
 		return resultPage.map(product -> findOne(product.getId()));
 	}
 
-	public List<ProductResponse> getProductsByUserId(Long userId) {
-		User user = userService.findById(userId);
-		return productRepository.findByUser(user).stream().map(productMapper::toDto).toList();
+	// 만든공구 리스트
+	public Page<ProductResponse> toResPost(Long uid,
+										   String orderBy, String sortOrder, int pageNo, int pageSize){
+		User user = userService.findById(uid);
+		List<ProductResponse> list = user.getMyPosts()
+										.stream().map(productMapper::toDto)
+										.toList();
+
+		Sort sort;
+		if (sortOrder.equalsIgnoreCase("desc")) {
+			sort = Sort.by(Sort.Direction.DESC, orderBy);	// 내림차순 받았을 시 내림차순 정렬
+		} else {
+			sort = Sort.by(Sort.Direction.ASC, orderBy);
+		}
+
+		Page<ProductResponse> productPage = listtoPage(list, sort, pageNo, pageSize);
+		return productPage.map(product -> findOne(product.getId()));
 	}
+
+	// 참여공구 리스트
+	// 아니근데일케하면 party 생성일 씹히는거아닌가 일단 테스트좀해봐야됨
+	// 순환경고떠서 일단 킵
+//	public Page<ProductResponse> toResParty(Long uid,
+//											String orderBy, String sortOrder, int pageNo, int pageSize) {
+//		List<PartyResponse> partyRes = partyService.getByBuyer(uid);
+//		List<Product> products = new ArrayList<>();
+//		for (PartyResponse partyResponse : partyRes){
+//			Product product = partyResponse.getProduct();
+//			products.add(product);
+//		}
+//
+//		Sort sort;
+//		if (sortOrder.equalsIgnoreCase("desc")) {
+//			sort = Sort.by(Sort.Direction.DESC, "party.createdAt");
+//		} else {
+//			sort = Sort.by(Sort.Direction.ASC, "party.createdAt");
+//		}
+//
+//		List<ProductResponse> list = products.stream()
+//										.map(productMapper::toDto)
+//										.toList();
+//
+//		Page<ProductResponse> productPage = listtoPage(list, sort, pageNo, pageSize);
+//		return productPage.map(product -> findOne(product.getId()));
+//	}
+
+	// 리스트 -> 페이지 변환
+	public Page<ProductResponse> listtoPage(List<ProductResponse> list, Sort sort,
+											int pageNo, int pageSize){
+
+		PageRequest pageRequest = PageRequest.of(pageNo, pageSize, sort);
+		int start = (int) pageRequest.getOffset();	// 페이지의 시작 인덱스. Offset: 페이지 시작 위치
+		int end = Math.min((start + pageRequest.getPageSize()), list.size());	// 페이지의 끝 인덱스
+		// end값 list 크기랑 비교, 만약 end>list -> end 값을 list의 크기로 대체 -> 리스트의 범위 초과하는 페이지 요청 방지
+
+		return new PageImpl<>(list.subList(start, end), pageRequest, list.size());
+	}
+
+
+//	public List<ProductResponse> toResPostList(Long uid) {
+//		User user = userService.findById(uid);
+//		return user.getMyPosts()
+//				.stream()
+//				.map(productMapper::toDto)
+//				.toList();
+//	}
 }

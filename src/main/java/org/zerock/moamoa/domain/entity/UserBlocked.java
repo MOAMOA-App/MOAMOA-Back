@@ -1,20 +1,15 @@
 package org.zerock.moamoa.domain.entity;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import org.springframework.data.annotation.CreatedDate;
+import lombok.*;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
-
-@Table(name= "block_users")
 @Entity
-@Data
+@Getter
+@NoArgsConstructor
+@Table(name= "block_users")
 public class UserBlocked extends BaseEntity {
     //DB상에서의 id명이 user_id로 되어 있어서 맞출 필요가 있음
     //id에 user_id를 그대로 넣는 경우
@@ -32,4 +27,12 @@ public class UserBlocked extends BaseEntity {
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+
+    @Builder
+    public UserBlocked(Long id, User user, User target, Instant createdAt) {
+        this.id = id;
+        this.user = user;
+        this.target = target;
+        this.createdAt = createdAt;
+    }
 }

@@ -3,14 +3,8 @@ package org.zerock.moamoa.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.criteria.Predicate;
-
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.party.PartyMapper;
@@ -18,17 +12,12 @@ import org.zerock.moamoa.domain.DTO.party.PartyRequest;
 import org.zerock.moamoa.domain.DTO.party.PartyResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
-import org.zerock.moamoa.domain.DTO.product.ProductSaveRequest;
-import org.zerock.moamoa.domain.DTO.product.ProductStatusUpdateRequest;
-import org.zerock.moamoa.domain.DTO.product.ProductUpdateRequest;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.PartyRepository;
-import org.zerock.moamoa.repository.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -59,7 +48,8 @@ public class PartyService {
 
 	public List<PartyResponse> getByBuyer(Long uid) {
 		User user = userService.findById(uid);
-		List<Party> parties = partyRepository.findByBuyer(user);
+		List<Party> parties = user.getParties();
+								// partyRepository.findByBuyer(user)
 
 		return parties.stream().map(partyMapper::toDto).toList();
 	}
@@ -69,6 +59,11 @@ public class PartyService {
 		Product product = productService.findById(pid);
 		party.setProduct(product);
 		product.addParty(party);
+
+		// request의 구매자 정보를 불러와서 user의 parties에 저장
+		User buyer = request.getBuyer();
+		party.setUser(buyer);
+
 		return partyMapper.toDto(partyRepository.save(party));
 	}
 

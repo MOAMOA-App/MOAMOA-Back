@@ -164,4 +164,18 @@ public class Product extends BaseEntity {
 	public void removeParty(Party party) {
 		parties.remove(party);
 	}
+
+	public void  addUserPosts(User user){
+		this.user = user;
+		if (!user.getMyPosts().contains(this)){
+			user.getMyPosts().add(this);
+		}
+	}
+
+	public void removeUserPosts(User user){
+		if (user != null){
+			user.getMyPosts().remove(this);
+			this.user = null;
+		}
+	}
 }

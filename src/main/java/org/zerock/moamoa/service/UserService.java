@@ -3,13 +3,15 @@ package org.zerock.moamoa.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.domain.DTO.UserDTO;
+import org.zerock.moamoa.domain.DTO.product.ProductResponse;
+import org.zerock.moamoa.domain.DTO.user.*;
+import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.UserRepository;
 
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,22 +21,25 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
 
-    private PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
-//    @Transactional
-//    public UserDTO getById(Long id) {
-//        return convertToDTO(findById(id));
-//    }
+    public UserResponse findOne(Long id){
+        return userMapper.toDto(findById(id));
+    }
 
     @Transactional
     public User findById(Long id){
-        return this.userRepository.findById(id).orElse(new User());
+        return this.userRepository.findById(id)
+                .orElseThrow(()-> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Transactional
@@ -42,88 +47,119 @@ public class UserService {
         return this.userRepository.findAll();
     }
 
-    @Transactional
-    public User saveUser(String logintype, String token,String name, String nick, String profImg, String email, String detailAddress){
-        User user = new User();
-        user.setLoginType(logintype);
-        user.setToken(token);
-        user.setName(name);
-        user.setNick(nick);
-        user.setProfImg(profImg);
-        user.setEmail(email);
-        user.setDetailAddress(detailAddress);
-
-        return saveUser(user);
+    /**
+     * 회원가입
+     * @param userSignupRequest
+     * @return
+     * @throws Exception
+     */
+    public UserResponse saveUser(UserSignupRequest userSignupRequest) throws Exception {
+        if (this.isEmailExist(userSignupRequest.getEmail())) {
+            throw new Exception("이미 존재하는 이메일입니다.");    // 이메일 중복 확인
+        } else {
+            // YJ: 이메일 인증 코드 보내는 코드 작성? (Controller에 있긴함 분리하는게 나을듯
+            User user = userMapper.toEntity(userSignupRequest);
+            user.hashPassword(passwordEncoder); // 비밀번호 암호화
+            return userMapper.toDto(userRepository.save(user));
+        }
     }
-    @Transactional
-    public User saveUser(User user){
-        return this.userRepository.save(user);
-    }
 
-    @Transactional
-    public void removeUser(Long id){
+    public boolean removeUser(Long id){
         User user = findById(id);
-
-        this.userRepository.delete(user);
+        user.delete();
+        return !user.getActivate();
     }
 
     @Transactional
     public User updateUser(Long id, String name){
-        User user = this.userRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("해당 아이템이 없습니다. id=" + id));
+        User user = findById(id);
 
-        user.setName(name);
         return this.userRepository.save(user);
     }
 
-    /**
-     * 회원가입할때 사용
-     * @param email 입력받은 이메일
-     * @param name 입력받은 이름
-     * @param password 입력받은 Pw
-     * @return 정보 db에 저장
-     */
-    // TODO(YJ): 비밀번호 해싱하는 코드 따로 빼기 (회원가입뿐만 아니라 정보수정할 때도 필요)
     @Transactional
-    public User registerUser(String email, String name, String password){   // 계정 최초등록
-        String encodePassword = passwordEncoder.encode(password);   // 비밀번호 해싱
-        User user = new User();
-        user.setEmail(email);
-        user.setName(name);
-        user.setPassword(encodePassword);
-        return this.userRepository.save(user);
+    public UserResponse updateProfile(UserProfileUpdateRequest UP){
+        User temp = findById(UP.getId());
+        temp.updateProfile(UP);
+        return userMapper.toDto(temp);
+    }
+
+    @Transactional
+    public UserResponse updatePw(UserPwUpdateRequest UPw) throws Exception {
+        // 일단 유저 비밀번호 받아서 입력된 비밀번호와 맞는지 확인
+        User temp = findById(UPw.getId());
+        String encodePw = userMapper.toDto(temp).getPassword();
+
+        // 원래 비밀번호 뭐였는지 확인
+        if (passwordEncoder.matches(UPw.getOldPw(), encodePw)){
+            // 맞을 시 새 비밀번호 해싱해서 저장
+            UPw.setNewPw(passwordEncoder.encode(UPw.getOldPw())); // 비밀번호 암호화
+            temp.updatePw(UPw);
+            return userMapper.toDto(temp);
+        } else {
+            // 비밀번호 틀릴 시
+            throw new Exception("비밀번호가 맞지 않습니다.");
+        }
     }
 
     /**
-     * 비밀번호 확인
-     * @param inputPassword 입력한 비밀번호
-     * @param storedPassword 저장된 비밀번호
-     * @return 같은 값이면 true 반환
+     * 로그인
+     * @param userLoginRequest
+     * @return
+     * @throws Exception
      */
-    public boolean checkPassword(String inputPassword, String storedPassword) {
-        if(!passwordEncoder.matches(inputPassword, storedPassword)){
-            throw new PasswordWrongException();
+    public UserResponse login(UserLoginRequest userLoginRequest) throws Exception {
+
+        // 이메일/비밀번호 모두 null-> 이메일을 입력해주세요.
+        if(userLoginRequest.getEmail() == null || userLoginRequest.getPassword() == null)
+            throw new Exception("이메일을 입력해주세요.");
+
+        Optional<User> userOptional = userRepository.findByEmail(userLoginRequest.getEmail());
+        // 이메일 확인
+        // 이메일이 db에 존재-> 비밀번호 확인으로
+        if (userOptional.isPresent()){
+            User user = userOptional.get();
+            String encodePw = userMapper.toDto(user).getPassword();
+
+            // 비밀번호 확인
+            if (passwordEncoder.matches(userLoginRequest.getPassword(), encodePw))  // 비밀번호 맞음
+                return userMapper.login(userLoginRequest);
+            else    // 비밀번호 틀림
+                throw new Exception("비밀번호가 맞지 않습니다.");
         }
-        return true;
-//        // 입력된 비밀번호와 저장된 비밀번호를 BCrypt 알고리즘을 사용하여 비교
-//        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-//        return passwordEncoder.matches(inputPassword, storedPassword);
-    }
-    public class PasswordWrongException extends RuntimeException {
-        PasswordWrongException(){
-            super("비밀번호가 틀렸습니다.");
+        // 이메일이 db에 존재하지 않음-> 존재하지 않는 이메일입니다.
+        else {
+            throw new Exception("존재하지 않는 이메일입니다.");
         }
     }
 
-    private List<UserDTO> userDTOS(List<User> users){
-        List<UserDTO> UserDTOList = new ArrayList<>();
-        for (User user: users) {
-            UserDTOList.add(convertToDTO(user));
-        }
-        return UserDTOList;
+    /**
+     * 이메일 중복 확인
+     * @param email
+     * @return
+     */
+    private boolean isEmailExist(String email) {
+        Optional<User> byEmail = userRepository.findByEmail(email);
+        return byEmail.isPresent();
     }
-
-    private UserDTO convertToDTO(User user) {
-        return new UserDTO(user);
-    }
+//
+//    // myposts 확인
+//    public List<ProductResponse> getMyposts(Long uid){
+//        User user = findById(uid);
+//        List<Product> userposts = user.getMyPosts();
+//
+//
+//        List<ProductResponse> products = new ArrayList<>();
+//        for (Product product : userposts) {
+//            ProductResponse productResponse = productService.search(
+//                    product.getTitle(), null, null, null, "createdAt", "DESC", 0, 1
+//            ).getContent().get(0);
+//            products.add(productResponse);
+//        }
+//
+//        // 조회된 상품 리스트 반환
+//        return products;
+//    }
+//
+//    // myparties 확인
 }
