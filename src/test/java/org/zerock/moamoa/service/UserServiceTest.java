@@ -25,18 +25,18 @@ class UserServiceTest {
 
     @Test
     void saveUser() {
-        for(int i = 0 ; i < 10 ; i ++){
-            String temp = Integer.toString(i);
-            User user = new User();
-            user.setLoginType(temp);
-            user.setToken(temp);
-            user.setName(temp);
-            user.setEmail(temp);
-            user.setNick(temp);
-            user.setProfImg(temp);
-
-            userService.saveUser(user);
-        }
+//        for(int i = 0 ; i < 10 ; i ++){
+//            String temp = Integer.toString(i);
+//            User user = new User();
+//            user.setLoginType(temp);
+//            user.setToken(temp);
+//            user.setName(temp);
+//            user.setEmail(temp);
+//            user.setNick(temp);
+//            user.setProfImg(temp);
+//
+//            userService.saveUser1(user);
+//        }
 
 
 

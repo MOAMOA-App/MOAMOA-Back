@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.zerock.moamoa.domain.DTO.UserDTO;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceResponse;
+import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 
@@ -31,6 +32,7 @@ public class ProductResponse {
 	private Instant finishedAt;
 	private Instant updatedAt;
 	private List<AnnounceResponse> announces;
+	private List<Party> parties;
 
 	@Builder
 	public ProductResponse(Long id, UserDTO user, Category categoryId, String sellingArea, String detailArea,
@@ -38,7 +40,7 @@ public class ProductResponse {
 		ProductStatus status, Integer sellPrice, Integer viewCount, String description, Integer sellCount,
 		Integer maxCount,
 		String choiceSend, Integer countImage, Instant createdAt, Instant finishedAt, Instant updatedAt,
-		List<AnnounceResponse> announces) {
+		List<AnnounceResponse> announces, List<Party> parties) {
 		this.id = id;
 		this.user = user;
 		this.categoryId = categoryId;
@@ -57,6 +59,7 @@ public class ProductResponse {
 		this.finishedAt = finishedAt;
 		this.updatedAt = updatedAt;
 		this.announces = announces;
+		this.parties = parties;
 	}
 
 }

@@ -3,6 +3,7 @@ package org.zerock.moamoa.domain.DTO.party;
 import java.time.Instant;
 
 import org.zerock.moamoa.domain.entity.Party;
+import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 
 import lombok.Data;
@@ -14,6 +15,7 @@ public class PartyResponse {
 	private Integer count;
 	private Instant createdAt;
 	private User buyer;
+	private Product product;
 
 	public PartyResponse(Party party) {
 		id = party.getId();
@@ -21,5 +23,6 @@ public class PartyResponse {
 		count = party.getCount();
 		createdAt = party.getCreatedAt();
 		buyer = party.getBuyer();
+		product = party.getProduct();
 	}
 }

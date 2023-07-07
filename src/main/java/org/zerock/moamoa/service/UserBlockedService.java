@@ -36,8 +36,8 @@ public class UserBlockedService {
 		User user = userService.findById(user_id);
 		User target = userService.findById(target_id);
 		UserBlocked userBlocked = new UserBlocked();
-		userBlocked.setUser(user);
-		userBlocked.setTarget(target);
+//		userBlocked.setUser(user);
+//		userBlocked.setTarget(target);
 		return this.userBlockedRepository.save(userBlocked);
 	}
 
