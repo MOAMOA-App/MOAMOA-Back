@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -151,25 +152,12 @@ public class ProductService {
     }
 
     // 만든공구 리스트
-//    public Page<ProductResponse> toResPost(Long uid,
-//                                           String orderBy, String sortOrder, int pageNo, int pageSize) {
-//        Pageable itemPage =  PageRequest.of(pageNo, pageSize);
-//
-//        User user = userService.findById(uid);
-//        List<ProductResponse> list = user.getMyPosts()
-//                .stream().map(productMapper::toDto)
-//                .toList();
-//
-//        Sort sort;
-//        if (sortOrder.equalsIgnoreCase("desc")) {
-//            sort = Sort.by(Sort.Direction.DESC, orderBy);    // 내림차순 받았을 시 내림차순 정렬
-//        } else {
-//            sort = Sort.by(Sort.Direction.ASC, orderBy);
-//        }
-//
-//        Page<ProductResponse> productPage = listtoPage(list, sort, pageNo, pageSize);
-//        return productPage.map(product -> findOne(product.getId()));
-//    }
+    public Page<ProductResponse> toResPost(Long uid, int pageNo, int pageSize) {
+        Pageable itemPage =  PageRequest.of(pageNo, pageSize);
+        User user = userService.findById(uid);
+        Page<Product> productPage = productRepository.findByUser(user, itemPage);
+        return productPage.map(product -> findOne(product.getId()));
+    }
 
     // 참여공구 리스트
     // 아니근데일케하면 party 생성일 씹히는거아닌가 일단 테스트좀해봐야됨
