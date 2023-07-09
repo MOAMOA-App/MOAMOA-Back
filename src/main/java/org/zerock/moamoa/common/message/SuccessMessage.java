@@ -11,6 +11,8 @@ public enum SuccessMessage {
 	USER_DELETE(HttpStatus.OK, "회원 탈퇴가 완료되었습니다."),
 
 	NOTICE_DELETE(HttpStatus.OK, "알림을 삭제했습니다."),
+
+	WISH_DELETE(HttpStatus.OK, "찜하기 취소")
 	;
 
 	SuccessMessage(HttpStatus httpStatus, String message) {

@@ -13,9 +13,9 @@ public class EmailConfig {  // 이메일 발송을 위한 JavaMailSender 설정�
     // JavaMailSender 인터페이스를 구현한 JavaMailSenderImpl 객체를 생성하고 필요한 속성들을 설정하여 반환
 
     @Value("${mail.smtp.port}") // @Value 어노테이션: properties 값 읽어옴
-    private int port;
+    private Integer port;
     @Value("${mail.smtp.socketFactory.port}")
-    private int socketPort;
+    private Integer socketPort;
     @Value("${mail.smtp.auth}")
     private boolean auth;
     @Value("${mail.smtp.starttls.enable}")

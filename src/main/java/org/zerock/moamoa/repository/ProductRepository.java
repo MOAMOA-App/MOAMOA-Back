@@ -13,5 +13,4 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<Product> findByUser(User user);
 
     Page<Product> findByUser(User user, Pageable pageable);
-    // List<Product> findBy
 }
