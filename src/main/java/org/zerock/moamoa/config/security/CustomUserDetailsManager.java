@@ -21,7 +21,7 @@ public class CustomUserDetailsManager implements UserDetailsManager {
 	//username = email
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		User user = userService.getByEmail(username);
+		User user = userService.findByEmail(username);
 		return CustomUserDetails.fromEntity(user);
 	}
 

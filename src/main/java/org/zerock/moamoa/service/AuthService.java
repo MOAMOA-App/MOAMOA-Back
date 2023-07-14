@@ -42,7 +42,7 @@ public class AuthService {
 	@Transactional
 	public UserLoginResponse login(UserLoginRequest request) {
 		// CHECK USERNAME AND PASSWORD
-		User user = userService.getByEmail(request.getEmail());
+		User user = userService.findByEmail(request.getEmail());
 		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
 			throw new AuthException(ErrorCode.AUTH_PASSWORD_UNEQUAL);
 		}
