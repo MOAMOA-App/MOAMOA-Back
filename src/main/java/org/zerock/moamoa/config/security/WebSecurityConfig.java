@@ -18,11 +18,16 @@ public class WebSecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(
 				authHttp -> authHttp
-					.requestMatchers("/product/**").permitAll()        //누구든 허용
-					.requestMatchers("/myinfo/**").authenticated()    //인증된 사용자만 허용
-					// .requestMatchers(
-					//
-					// ).anonymous()	//인증되지 않은 사용자만 허용
+					.requestMatchers(
+						"/product/**",
+						"/announce/**"
+					).permitAll()        //누구든 허용
+					.requestMatchers(
+						"/myinfo/**"
+					).authenticated()    //인증된 사용자만 허용
+					.requestMatchers(
+						"/user/**"
+					).anonymous()    //인증되지 않은 사용자만 허용
 					.anyRequest().permitAll()
 			)
 			.sessionManagement(

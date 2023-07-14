@@ -1,53 +1,46 @@
 package org.zerock.moamoa.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.zerock.moamoa.common.message.SuccessMessage;
+import org.zerock.moamoa.domain.DTO.user.UserLoginRequest;
+import org.zerock.moamoa.domain.DTO.user.UserLoginResponse;
 import org.zerock.moamoa.domain.DTO.user.UserResponse;
 import org.zerock.moamoa.domain.DTO.user.UserSignupRequest;
-import org.zerock.moamoa.repository.UserRepository;
+import org.zerock.moamoa.service.AuthService;
 import org.zerock.moamoa.service.EmailService;
 import org.zerock.moamoa.service.EmailServiceImpl;
-import org.zerock.moamoa.service.ProductService;
 import org.zerock.moamoa.service.UserService;
-import org.zerock.moamoa.service.WishListService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
-	private UserService userService;
-	private EmailService emailService;
-	private final UserRepository userRepository;
+	private final UserService userService;
+	private final EmailService emailService;
+	private final AuthService authService;
 
-	@Autowired
-	public UserController(UserService userService, EmailService emailService, ProductService productService,
-		WishListService wishListService, UserRepository userRepository) {
-		this.userService = userService;
-		this.emailService = emailService;
-		this.userRepository = userRepository;
+	/** 로그인 API */
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestBody UserLoginRequest request) {
+		UserLoginResponse response = authService.login(request);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
-	// /** 로그인 페이지 */
-	// @GetMapping("/login")
-	// public ResponseEntity<String> getLoginPage() {
-	//     return ResponseEntity.ok("로그인 페이지");
-	// }
-	//
-	// /**
-	//  * 회원가입 페이지
-	//  * @return
-	//  */
-	// @GetMapping("/signup")
-	// public ResponseEntity<String> getSignUpPage() {
-	//     return ResponseEntity.ok("회원가입 페이지");
-	// }
+	/** 토큰갱신 API */
+	@GetMapping("/refresh")
+	public ResponseEntity<?> refreshToken(@RequestHeader("refresh_token") String refreshToken) {
+		String newAccessToken = authService.refreshToken(refreshToken);
+		return ResponseEntity.status(HttpStatus.OK).body(newAccessToken);
+	}
 
 	/** 회원가입 */
 	@PostMapping("/signup")
@@ -84,17 +77,6 @@ public class UserController {
 	private boolean isValidCode(String code) {
 		// 입력한 code가 EmailAuthCode와 같은지 확인
 		return EmailServiceImpl.EmailAuthCode.equals(code);
-	}
-
-	/**
-	 * 회원탈퇴
-	 * @param id
-	 * @return
-	 */
-	@DeleteMapping("/{id}")
-	public Object deleteUser(@PathVariable Long id) {
-		userService.removeUser(id);
-		return ResponseEntity.ok(SuccessMessage.USER_DELETE);
 	}
 
 }
