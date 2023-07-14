@@ -1,5 +1,6 @@
 package org.zerock.moamoa.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
@@ -16,17 +17,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final NoticeMapper noticeMapper;
     private final UserService userService;
 
-
-    public NoticeService(NoticeRepository noticeRepository, NoticeMapper noticeMapper, UserService userService) {
-        this.noticeRepository = noticeRepository;
-        this.noticeMapper = noticeMapper;
-        this.userService = userService;
-    }
 
     public NoticeResponse findOne(Long id) {
         return noticeMapper.toDto(findById(id));

@@ -1,5 +1,6 @@
 package org.zerock.moamoa.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,19 +20,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class WishListService {
     private final WishListMapper wishListMapper;
     private final WishListRepository wishListRepository;
     private final ProductService productService;
     private final UserService userService;
-
-    @Autowired
-    public WishListService(WishListMapper wishListMapper, WishListRepository wishListRepository, ProductService productService, UserService userService) {
-        this.wishListMapper = wishListMapper;
-        this.wishListRepository = wishListRepository;
-        this.productService = productService;
-        this.userService = userService;
-    }
 
     // ID에 해당하는 위시리스트 조회-> WishListMapper 사용해 WishListResponse 객체로 매핑 후 반환
     public WishListResponse findOne(Long id) {
@@ -49,9 +43,9 @@ public class WishListService {
         return this.wishListRepository.findAll();
     }
 
-    public WishListResponse saveWish(WishListRequest request, Long uid) {
+    public WishListResponse saveWish(WishListRequest request) {
         WishList wishList = wishListMapper.toEntity(request);
-        User user = userService.findById(uid);
+        User user = wishList.getUser();
         wishList.addUserWish(user);
         return wishListMapper.toDto(wishListRepository.save(wishList));
     }

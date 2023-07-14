@@ -1,10 +1,10 @@
 package org.zerock.moamoa.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.message.OkResponse;
 import org.zerock.moamoa.common.message.SuccessMessage;
-import org.zerock.moamoa.domain.DTO.notice.NoticeMapper;
 import org.zerock.moamoa.domain.DTO.notice.NoticeReadUpdateRequest;
 import org.zerock.moamoa.domain.DTO.notice.NoticeResponse;
 import org.zerock.moamoa.domain.entity.User;
@@ -15,17 +15,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/reminder")
+@RequiredArgsConstructor
 public class NoticeController {
     private final NoticeService noticeService;
-    private final NoticeMapper noticeMapper;
     private final UserService userService;
-
-    public NoticeController(NoticeService noticeService, NoticeMapper noticeMapper, UserService userService) {
-        this.noticeService = noticeService;
-        this.noticeMapper = noticeMapper;
-        this.userService = userService;
-    }
-
 
     /**
      * 알림 조회
@@ -64,7 +57,7 @@ public class NoticeController {
 
     /**
      * 알림 발신
-     *
+     * YJ: 이거 다시 해야됨
      * @param referenceID
      * @param receiverID
      * @param senderID
@@ -89,7 +82,6 @@ public class NoticeController {
 
     /**
      * 알림 읽음 상태 변경
-     *
      * @param receiverId
      * @param noticeId
      * @param NR
@@ -104,7 +96,6 @@ public class NoticeController {
 
     /**
      * 알림 삭제
-     *
      * @param uid
      * @param noticeId
      * @return

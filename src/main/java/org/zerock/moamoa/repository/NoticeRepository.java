@@ -9,7 +9,5 @@ import org.zerock.moamoa.domain.entity.Notice;
 
 @Repository
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
-	List<Notice> findReminderNoticesByReceiverID(@Param("receiverId") Long receiverId);
 
-	Notice findByIdAndReceiverID(Long noticeId, Long receiverId);
 }
