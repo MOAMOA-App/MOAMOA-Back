@@ -1,24 +1,18 @@
-package org.zerock.moamoa.domain.DTO.auth;
+package org.zerock.moamoa.domain.DTO.user;
 
 import org.zerock.moamoa.domain.entity.Auth;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class AuthResponseDto {
+@Data
+public class UserLoginResponse {
 	private String tokenType;
 	private String accessToken;
 	private String refreshToken;
 
 	@Builder
-	public AuthResponseDto(Auth entity) {
+	public UserLoginResponse(Auth entity) {
 		this.tokenType = entity.getTokenType();
 		this.accessToken = entity.getAccessToken();
 		this.refreshToken = entity.getRefreshToken();

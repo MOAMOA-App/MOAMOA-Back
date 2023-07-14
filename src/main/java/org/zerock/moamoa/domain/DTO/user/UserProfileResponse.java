@@ -1,4 +1,4 @@
-package org.zerock.moamoa.domain.DTO;
+package org.zerock.moamoa.domain.DTO.user;
 
 import org.zerock.moamoa.domain.entity.User;
 
@@ -6,13 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class UserDTO {
+public class UserProfileResponse {
 	private Long id;
-
-	private String name;
-
-	private String password;
-
 	private String nick;
 
 	private String profImg;
@@ -24,11 +19,9 @@ public class UserDTO {
 	private String detailAddress;
 
 	@Builder
-	public UserDTO(Long id, String name, String password, String nick, String profImg, String email, String address,
+	public UserProfileResponse(Long id, String nick, String profImg, String email, String address,
 		String detailAddress) {
 		this.id = id;
-		this.name = name;
-		this.password = password;
 		this.nick = nick;
 		this.profImg = profImg;
 		this.email = email;
@@ -36,10 +29,8 @@ public class UserDTO {
 		this.detailAddress = detailAddress;
 	}
 
-	public UserDTO(User user) {
+	public UserProfileResponse(User user) {
 		id = user.getId();
-		name = user.getName();
-		password = user.getPassword();
 		nick = user.getNick();
 		profImg = user.getProfImg();
 		email = user.getEmail();
