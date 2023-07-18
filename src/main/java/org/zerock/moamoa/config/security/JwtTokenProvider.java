@@ -5,11 +5,16 @@ import java.time.Instant;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,10 +34,8 @@ public class JwtTokenProvider {
 		this.jwtParser = Jwts.parserBuilder().setSigningKey(this.jwtSecretKey).build();
 	}
 
-	public String generateAccessToken(CustomUserDetails userDetails) {
-		Date expiryDate = new Date(new Date().getTime() + jwtAccessTokenExpirationTime);
-		//Claim : JWT 에 담길 데이터의 키 (맵의 키와 비슷한 용도)
-		//이 부분은 JWT 에 담고싶은 사용자 정보를 담는다.
+	public String generateToken(UserDetails userDetails, Date expiryDate) {
+		//Claims : JWT 에 담기는 정보의 단위를 Claim 이라고 부른다. JWT 에 담고싶은 사용자 정보를 담는다.
 		Claims jwtClaims = Jwts.claims()
 			.setSubject(userDetails.getUsername())
 			.setIssuedAt(Date.from(Instant.now()))
@@ -44,19 +47,14 @@ public class JwtTokenProvider {
 			.compact();
 	}
 
+	public String generateAccessToken(CustomUserDetails userDetails) {
+		Date expiryDate = new Date(new Date().getTime() + jwtAccessTokenExpirationTime);
+		return generateToken(userDetails, expiryDate);
+	}
+
 	public String generateRefreshToken(CustomUserDetails userDetails) {
 		Date expiryDate = new Date(new Date().getTime() + jwtRefreshTokenExpirationTime);
-		//Claim : JWT 에 담길 데이터의 키 (맵의 키와 비슷한 용도)
-		//이 부분은 JWT 에 담고싶은 사용자 정보를 담는다.
-		Claims jwtClaims = Jwts.claims()
-			.setSubject(userDetails.getUsername())
-			.setIssuedAt(Date.from(Instant.now()))
-			.setExpiration(expiryDate);
-
-		return Jwts.builder()
-			.setClaims(jwtClaims)
-			.signWith(jwtSecretKey)
-			.compact();
+		return generateToken(userDetails, expiryDate);
 	}
 
 	// 1. JWT가 유효한지 판단하는 메소드 jjwt 라이브러리에서는 JWT를 해석하는 과정에서 유효하지 않으면 예외가 발생
@@ -67,10 +65,18 @@ public class JwtTokenProvider {
 			jwtParser.parseClaimsJws(token);
 			// 정당하지 않은 JWT면 false
 			return true;
-		} catch (Exception e) {
-			log.warn("invalid jwt : {}", e.getClass());
-			return false;
+		} catch (SignatureException ex) {
+			System.out.println("Invalid JWT signature");
+		} catch (MalformedJwtException ex) {
+			System.out.println("Invalid JWT token");
+		} catch (ExpiredJwtException ex) {
+			System.out.println("Expired JWT token");
+		} catch (UnsupportedJwtException ex) {
+			System.out.println("Unsupported JWT token");
+		} catch (IllegalArgumentException ex) {
+			System.out.println("JWT claims string is empty.");
 		}
+		return false;
 	}
 
 	// JWT를 인자로 받고, 그 JWT를 해석해서 사용자 정보를 회수하는 메소드

@@ -21,4 +21,6 @@ public interface UserMapper {
 	UserResponse toDto(User user);  // User 엔티티 객체를 UserResponse DTO로 변환
 
 	CustomUserDetails toDetailsDto(User user);
+
+	UserProfileResponse toProfileDto(User user);
 }

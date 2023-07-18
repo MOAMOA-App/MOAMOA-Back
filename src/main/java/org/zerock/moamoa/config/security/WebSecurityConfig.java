@@ -8,9 +8,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 @Configuration
 public class WebSecurityConfig {
+	private final JwtTokenFilter jwtTokenFilter;
+
+	public WebSecurityConfig(JwtTokenFilter jwtTokenFilter) {
+		this.jwtTokenFilter = jwtTokenFilter;
+	}
+
 	@Bean //메소드의 결과를 @Bean 객체로 등록해주는 어노테이션
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
@@ -27,12 +34,15 @@ public class WebSecurityConfig {
 					).authenticated()    //인증된 사용자만 허용
 					.requestMatchers(
 						"/user/**"
-					).anonymous()    //인증되지 않은 사용자만 허용
+					).anonymous()        //인증되지 않은 사용자만 허용
 					.anyRequest().permitAll()
 			)
 			.sessionManagement(
 				sessionManagement -> sessionManagement
 					.sessionCreationPolicy((SessionCreationPolicy.STATELESS))
+			).addFilterBefore(
+				jwtTokenFilter,
+				AuthorizationFilter.class
 			);
 
 		return http.build();

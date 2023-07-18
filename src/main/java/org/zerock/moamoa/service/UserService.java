@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.user.UserMapper;
+import org.zerock.moamoa.domain.DTO.user.UserProfileResponse;
 import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
 import org.zerock.moamoa.domain.DTO.user.UserPwUpdateRequest;
 import org.zerock.moamoa.domain.DTO.user.UserResponse;
@@ -29,6 +30,11 @@ public class UserService {
 
 	public UserResponse findOne(Long id) {
 		return userMapper.toDto(findById(id));
+	}
+
+	public UserProfileResponse getMyProfile(String email) {
+		User user = findByEmail(email);
+		return userMapper.toProfileDto(user);
 	}
 
 	public User findByEmail(String email) {
