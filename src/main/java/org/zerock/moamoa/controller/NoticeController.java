@@ -1,24 +1,31 @@
 package org.zerock.moamoa.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.message.OkResponse;
 import org.zerock.moamoa.common.message.SuccessMessage;
 import org.zerock.moamoa.domain.DTO.notice.NoticeReadUpdateRequest;
 import org.zerock.moamoa.domain.DTO.notice.NoticeResponse;
+import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
+import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.service.NoticeService;
+import org.zerock.moamoa.service.ProductService;
 import org.zerock.moamoa.service.UserService;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/reminder")
 @RequiredArgsConstructor
 public class NoticeController {
     private final NoticeService noticeService;
     private final UserService userService;
+    private final ProductService productService;
+    private final SimpMessageSendingOperations messagingTemplate;
 
     /**
      * 알림 조회
@@ -28,13 +35,15 @@ public class NoticeController {
      */
     // 추후 알림 클릭 시 관련된 product나 chatroom으로 가는 코드도 필요할듯
     @GetMapping("/{uid}")
-    public List<NoticeResponse> getNoticesByUserId(@PathVariable("id") Long uid) {
+    public List<NoticeResponse> getNoticesByUserId(@PathVariable("uid") Long uid) {
 
         List<NoticeResponse> noticeResponses = noticeService.getReminderNotices(uid);
 
         for (NoticeResponse noticeResponse : noticeResponses) {
-            String senderNickname = noticeResponse.getSenderNickname();    // 보내는 사람 닉네임 불러옴
-            String referenceTitle = noticeResponse.getReferenceTitle();    // 관련 공동구매의 제목 불러옴
+            User user = noticeResponse.getSenderID();
+            String senderNickname = user.getNick();    // 보내는 사람 닉네임 불러옴
+            Product product = noticeResponse.getReferenceID();
+            String referenceTitle = product.getTitle();    // 관련 공동구매의 제목 불러옴
         }
 
         return noticeResponses;
@@ -58,27 +67,34 @@ public class NoticeController {
     /**
      * 알림 발신
      * YJ: 이거 다시 해야됨
-     * @param referenceID
-     * @param receiverID
-     * @param senderID
-     * @return
      */
     //
-    @PostMapping("/{referenceID}/{receiverID}")
-    public ResponseEntity<String> sendReminderNotice(@PathVariable("referenceID") Long referenceID,
-                                                     @PathVariable("receiverID") Long receiverID,
-                                                     @RequestParam("senderID") Long senderID) {
-
-        User sender = userService.findById(senderID);
-
-        String message = "";
-        String type = "";
-
-//		Notice notice = noticeService.saveNotice(sender.getId(), receiverID, message, type, referenceID);
-        // NoticeService의 saveNotices에 리시버에 알림 추가되는 코드 추가햇음!!!
-
-        return ResponseEntity.ok("알림이 성공적으로 발송되었습니다.");
+//    @PostMapping("/{referenceID}/{receiverID}")
+//    public ResponseEntity<String> sendReminderNotice(@PathVariable("referenceID") Long referenceID,
+//                                                     @PathVariable("receiverID") Long receiverID,
+//                                                     @RequestParam("senderID") Long senderID) {
+//
+//        User sender = userService.findById(senderID);
+//
+//        String message = "";
+//        String type = "";
+//
+////		Notice notice = noticeService.saveNotice(sender.getId(), receiverID, message, type, referenceID);
+//        // NoticeService의 saveNotices에 리시버에 알림 추가되는 코드 추가햇음!!! <<언제......
+//
+//        return ResponseEntity.ok("알림이 성공적으로 발송되었습니다.");
+//    }
+    // stomp 테스트 화면
+    @GetMapping("/alarm/stomp")
+    public String stompAlarm() {
+        return "/stomp";
     }
+
+    @PostMapping("/messagetest")
+    public void sendReminderNotice(@RequestBody NoticeSaveRequest noticeSaveReq) {
+        noticeService.sendNotice(noticeSaveReq);
+    }
+
 
     /**
      * 알림 읽음 상태 변경
@@ -91,7 +107,13 @@ public class NoticeController {
     public NoticeResponse updateRead(@PathVariable Long receiverId,
                                      @PathVariable Long noticeId,
                                      @ModelAttribute("profile") NoticeReadUpdateRequest NR) {
-        return noticeService.updateRead(NR);
+        // 알림 처리 로직 호출
+        NoticeResponse response = noticeService.updateRead(NR);
+
+        log.info("알림을 처리했습니다. Receiver ID: " + receiverId + ", Notice ID: " + noticeId);
+
+        return response;
+
     }
 
     /**

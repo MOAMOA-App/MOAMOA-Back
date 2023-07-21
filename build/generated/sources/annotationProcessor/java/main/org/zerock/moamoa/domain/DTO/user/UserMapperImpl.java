@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
+import org.zerock.moamoa.config.security.CustomUserDetails;
+import org.zerock.moamoa.domain.entity.Auth;
 import org.zerock.moamoa.domain.entity.Notice;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
@@ -12,8 +14,8 @@ import org.zerock.moamoa.domain.entity.WishList;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-07-07T19:42:00+0900",
-    comments = "version: 1.5.5.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-7.6.1.jar, environment: Java 17.0.2 (Oracle Corporation)"
+    date = "2023-07-21T17:48:27+0900",
+    comments = "version: 1.5.5.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-7.6.1.jar, environment: Java 17.0.7 (Amazon.com Inc.)"
 )
 @Component
 public class UserMapperImpl implements UserMapper {
@@ -34,17 +36,25 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public UserResponse login(UserLoginRequest userLoginRequest) {
+    public UserLoginResponse login(UserLoginRequest userLoginRequest) {
         if ( userLoginRequest == null ) {
             return null;
         }
 
-        UserResponse.UserResponseBuilder userResponse = UserResponse.builder();
+        UserLoginResponse.UserLoginResponseBuilder userLoginResponse = UserLoginResponse.builder();
 
-        userResponse.email( userLoginRequest.getEmail() );
-        userResponse.password( userLoginRequest.getPassword() );
+        return userLoginResponse.build();
+    }
 
-        return userResponse.build();
+    @Override
+    public UserLoginResponse toLoginResponse(Auth auth) {
+        if ( auth == null ) {
+            return null;
+        }
+
+        UserLoginResponse.UserLoginResponseBuilder userLoginResponse = UserLoginResponse.builder();
+
+        return userLoginResponse.build();
     }
 
     @Override
@@ -57,10 +67,8 @@ public class UserMapperImpl implements UserMapper {
 
         userResponse.id( user.getId() );
         userResponse.loginType( user.getLoginType() );
-        userResponse.token( user.getToken() );
         userResponse.name( user.getName() );
         userResponse.email( user.getEmail() );
-        userResponse.password( user.getPassword() );
         userResponse.nick( user.getNick() );
         userResponse.profImg( user.getProfImg() );
         userResponse.address( user.getAddress() );
@@ -84,5 +92,19 @@ public class UserMapperImpl implements UserMapper {
         }
 
         return userResponse.build();
+    }
+
+    @Override
+    public CustomUserDetails toDetailsDto(User user) {
+        if ( user == null ) {
+            return null;
+        }
+
+        CustomUserDetails.CustomUserDetailsBuilder customUserDetails = CustomUserDetails.builder();
+
+        customUserDetails.id( user.getId() );
+        customUserDetails.password( user.getPassword() );
+
+        return customUserDetails.build();
     }
 }

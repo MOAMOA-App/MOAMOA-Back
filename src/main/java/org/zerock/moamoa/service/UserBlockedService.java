@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zerock.moamoa.common.exception.EntityNotFoundException;
+import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.UserBlocked;
 import org.zerock.moamoa.repository.UserBlockedRepository;
@@ -40,7 +42,7 @@ public class UserBlockedService {
     @Transactional
     public void removeUserBlocked(Long id) {
         UserBlocked user = userBlockedRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이템이 없습니다. id=" + id));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
         this.userBlockedRepository.delete(user);
     }
 

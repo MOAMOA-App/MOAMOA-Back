@@ -1,6 +1,5 @@
 package org.zerock.moamoa.domain.entity;
 
-
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 
 import java.time.Instant;
-
 
 @Entity
 @Getter
@@ -74,4 +72,6 @@ public class Notice extends BaseEntity {
     public void updateRead(Boolean readOrNot) {
         this.readOrNot = readOrNot;
     }
+
+
 }

@@ -1,18 +1,9 @@
 package org.zerock.moamoa.controller;
 
-import java.time.Instant;
-import java.util.List;
-
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.zerock.moamoa.common.file.ImageService;
 import org.zerock.moamoa.common.message.OkResponse;
@@ -26,6 +17,9 @@ import org.zerock.moamoa.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.Instant;
+import java.util.List;
 
 //RestController -> return 값을 자동으로 json 형식으로 변환해주는 기능 + Controller
 @RequiredArgsConstructor
@@ -61,7 +55,7 @@ public class ProductController {
 		@RequestParam("images") MultipartFile[] images) {
 		request.setFinishedAt(Instant.now());
 		log.info(request.toString());
-		ProductResponse response = productService.saveProduct(request, request.getUserId(), images);
+		ProductResponse response = productService.saveProduct(request, images);
 		return response;
 	}
 

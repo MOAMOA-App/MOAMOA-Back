@@ -10,8 +10,10 @@ import org.zerock.moamoa.domain.DTO.party.PartyResponse;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.repository.PartyRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -61,6 +63,20 @@ public class PartyService {
 
         return partyMapper.toDto(partyRepository.save(party));
 
+    }
+
+    public List<Product> partyToProduct(Long userId) {
+        User buyer = userService.findById(userId);
+        List<Party> parties = partyRepository.findByBuyer(buyer);
+
+        // YJ: 파티 존재하지 않을 시의 경우도 고려해야 함
+        // 상품 가져와서 리스트 추가
+        List<Product> products = new ArrayList<>();
+        for (Party party : parties) {
+            Product product = party.getProduct();
+            products.add(product);
+        }
+        return products;
     }
 }
 

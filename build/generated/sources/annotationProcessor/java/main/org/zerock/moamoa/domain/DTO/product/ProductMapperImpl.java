@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
-import org.zerock.moamoa.domain.DTO.UserDTO;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceResponse;
+import org.zerock.moamoa.domain.DTO.user.UserProfileResponse;
 import org.zerock.moamoa.domain.entity.Announce;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
@@ -13,8 +13,8 @@ import org.zerock.moamoa.domain.entity.User;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-07-07T19:42:00+0900",
-    comments = "version: 1.5.5.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-7.6.1.jar, environment: Java 17.0.2 (Oracle Corporation)"
+    date = "2023-07-21T17:48:27+0900",
+    comments = "version: 1.5.5.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-7.6.1.jar, environment: Java 17.0.7 (Amazon.com Inc.)"
 )
 @Component
 public class ProductMapperImpl implements ProductMapper {
@@ -27,7 +27,6 @@ public class ProductMapperImpl implements ProductMapper {
 
         Product.ProductBuilder product = Product.builder();
 
-        product.user( userSaveRequest.getUser() );
         product.categoryId( userSaveRequest.getCategoryId() );
         product.sellingArea( userSaveRequest.getSellingArea() );
         product.detailArea( userSaveRequest.getDetailArea() );
@@ -55,7 +54,7 @@ public class ProductMapperImpl implements ProductMapper {
         ProductResponse.ProductResponseBuilder productResponse = ProductResponse.builder();
 
         productResponse.id( product.getId() );
-        productResponse.user( userToUserDTO( product.getUser() ) );
+        productResponse.user( userToUserProfileResponse( product.getUser() ) );
         productResponse.categoryId( product.getCategoryId() );
         productResponse.sellingArea( product.getSellingArea() );
         productResponse.detailArea( product.getDetailArea() );
@@ -80,23 +79,21 @@ public class ProductMapperImpl implements ProductMapper {
         return productResponse.build();
     }
 
-    protected UserDTO userToUserDTO(User user) {
+    protected UserProfileResponse userToUserProfileResponse(User user) {
         if ( user == null ) {
             return null;
         }
 
-        UserDTO.UserDTOBuilder userDTO = UserDTO.builder();
+        UserProfileResponse.UserProfileResponseBuilder userProfileResponse = UserProfileResponse.builder();
 
-        userDTO.id( user.getId() );
-        userDTO.name( user.getName() );
-        userDTO.password( user.getPassword() );
-        userDTO.nick( user.getNick() );
-        userDTO.profImg( user.getProfImg() );
-        userDTO.email( user.getEmail() );
-        userDTO.address( user.getAddress() );
-        userDTO.detailAddress( user.getDetailAddress() );
+        userProfileResponse.id( user.getId() );
+        userProfileResponse.nick( user.getNick() );
+        userProfileResponse.profImg( user.getProfImg() );
+        userProfileResponse.email( user.getEmail() );
+        userProfileResponse.address( user.getAddress() );
+        userProfileResponse.detailAddress( user.getDetailAddress() );
 
-        return userDTO.build();
+        return userProfileResponse.build();
     }
 
     protected AnnounceResponse announceToAnnounceResponse(Announce announce) {

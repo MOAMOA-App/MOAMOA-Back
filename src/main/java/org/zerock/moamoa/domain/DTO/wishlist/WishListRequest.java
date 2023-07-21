@@ -8,7 +8,6 @@ import org.zerock.moamoa.domain.entity.User;
 @Data
 public class WishListRequest {
     private Product product;
-
     private User user;
 
     @Builder
