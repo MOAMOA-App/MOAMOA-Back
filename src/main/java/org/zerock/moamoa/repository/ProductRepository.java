@@ -10,7 +10,5 @@ import org.zerock.moamoa.domain.entity.User;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
-    List<Product> findByUser(User user);
-
     Page<Product> findByUser(User user, Pageable pageable);
 }

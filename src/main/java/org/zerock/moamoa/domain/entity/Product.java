@@ -165,4 +165,8 @@ public class Product extends BaseEntity {
             this.user = null;
         }
     }
+
+    public Product(Long id) {
+        this.id = id;
+    }
 }

@@ -8,8 +8,8 @@ import org.zerock.moamoa.domain.entity.Notice;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2023-07-07T19:42:00+0900",
-    comments = "version: 1.5.5.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-7.6.1.jar, environment: Java 17.0.2 (Oracle Corporation)"
+    date = "2023-07-21T17:53:33+0900",
+    comments = "version: 1.5.5.Final, compiler: IncrementalProcessingEnvironment from gradle-language-java-7.6.1.jar, environment: Java 17.0.7 (Amazon.com Inc.)"
 )
 @Component
 public class NoticeMapperImpl implements NoticeMapper {
@@ -22,14 +22,12 @@ public class NoticeMapperImpl implements NoticeMapper {
 
         Notice.NoticeBuilder notice = Notice.builder();
 
-        notice.id( noticeSaveRequest.getId() );
-        notice.senderID( noticeSaveRequest.getSenderID() );
-        notice.receiverID( noticeSaveRequest.getReceiverID() );
+        notice.senderID( mapToUser( noticeSaveRequest.getSenderID() ) );
+        notice.receiverID( mapToUser( noticeSaveRequest.getReceiverID() ) );
+        notice.referenceID( mapToProduct( noticeSaveRequest.getReferenceID() ) );
         notice.message( noticeSaveRequest.getMessage() );
         notice.readOrNot( noticeSaveRequest.getReadOrNot() );
         notice.type( noticeSaveRequest.getType() );
-        notice.referenceID( noticeSaveRequest.getReferenceID() );
-        notice.createdAt( noticeSaveRequest.getCreatedAt() );
 
         return notice.build();
     }

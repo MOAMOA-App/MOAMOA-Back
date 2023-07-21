@@ -3,21 +3,21 @@ package org.zerock.moamoa.service;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.common.exception.InvalidValueException;
 import org.zerock.moamoa.common.file.ImageService;
 import org.zerock.moamoa.common.file.dto.FileResponse;
 import org.zerock.moamoa.domain.DTO.product.*;
+import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.repository.ProductRepository;
 
 import java.util.ArrayList;
@@ -44,6 +44,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final UserService userService;
+    private final WishListService wishListService;
     private final ImageService imageService;
 
     public ProductResponse findOne(Long id) {
@@ -60,15 +61,13 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse saveProduct(ProductSaveRequest request, Long sellerId, MultipartFile[] images) {
+    public ProductResponse saveProduct(ProductSaveRequest request, MultipartFile[] images) {
         Product product = productMapper.toEntity(request);
-        User user = userService.findById(sellerId);
-        product.addUser(user);
         product = productRepository.save(product);
         List<FileResponse> responses = imageService.saveFiles(images, product.getId());
         product.updateImage(responses.size());
-        product.addUser(user);    // YJ: 만약 이거랑 sellerid 받은것도 내꺼면 그냥 지워도 될듯 product.getUser() 쓰기!!!
-        // request.getUser를 써야 하나...
+
+        User user = product.getUser();
         product.addUserPosts(user);
         return productMapper.toDto(productRepository.save(product));
     }
@@ -78,9 +77,9 @@ public class ProductService {
     public boolean remove(Long id) {
         Product product = findById(id);
 
-        // 유저의 만든공구 리스트에서 공구 제거
-        User user = product.getUser();
-        product.removeUserPosts(user);
+//        // 유저의 만든공구 리스트에서 공구 제거 -> 좀 애매...
+//        User user = product.getUser();
+//        product.removeUserPosts(user);
         product.delete();
         return !product.getActivate();
     }
@@ -153,57 +152,67 @@ public class ProductService {
 
     // 만든공구 리스트
     public Page<ProductResponse> toResPost(Long uid, int pageNo, int pageSize) {
-        Pageable itemPage =  PageRequest.of(pageNo, pageSize);
         User user = userService.findById(uid);
+//        if (user == null) {
+//            throw new EntityNotFoundException(ErrorCode.USER_NOT_FOUND);
+//        }
+
+        Pageable itemPage =  PageRequest.of(pageNo, pageSize);
         Page<Product> productPage = productRepository.findByUser(user, itemPage);
+        if (productPage.isEmpty()){
+            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
         return productPage.map(product -> findOne(product.getId()));
     }
 
     // 참여공구 리스트
-    // 아니근데일케하면 party 생성일 씹히는거아닌가 일단 테스트좀해봐야됨
-    // 순환경고떠서 일단 킵
-//	public Page<ProductResponse> toResParty(Long uid,
-//											String orderBy, String sortOrder, int pageNo, int pageSize) {
-//		List<PartyResponse> partyRes = partyService.getByBuyer(uid);
-//		List<Product> products = new ArrayList<>();
-//		for (PartyResponse partyResponse : partyRes){
-//			Product product = partyResponse.getProduct();
-//			products.add(product);
-//		}
-//
-//		Sort sort;
-//		if (sortOrder.equalsIgnoreCase("desc")) {
-//			sort = Sort.by(Sort.Direction.DESC, "party.createdAt");
-//		} else {
-//			sort = Sort.by(Sort.Direction.ASC, "party.createdAt");
-//		}
-//
-//		List<ProductResponse> list = products.stream()
-//										.map(productMapper::toDto)
-//										.toList();
-//
-//		Page<ProductResponse> productPage = listtoPage(list, sort, pageNo, pageSize);
-//		return productPage.map(product -> findOne(product.getId()));
-//	}
+    // partyService 불러서 깔끔하게 만들고싶은데 자꾸 순환오류남...
+	public Page<ProductResponse> toResParty(Long uid, int pageNo, int pageSize) {
+        User buyer = userService.findById(uid);
+//        if (userService.isUserExits(buyer)) {
+//            throw new EntityNotFoundException(ErrorCode.USER_NOT_FOUND);
+//        }
+
+        List<Party> parties = buyer.getParties();
+        if (parties.isEmpty()){
+            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        // 상품 가져와서 리스트 추가
+        List<Product> products = new ArrayList<>();
+
+        for (Party party : parties) {
+            Product product = party.getProduct();
+            products.add(product);
+        }
+
+        List<ProductResponse> list = products.stream()
+                .map(productMapper::toDto)
+                .toList();
+
+        Sort sort = Sort.by(Sort.Direction.DESC, "party.createdAt");
+        Page<ProductResponse> productPage = listtoPage(list, sort, pageNo, pageSize);
+        return productPage.map(product -> findOne(product.getId()));
+	}
+
+    // 찜한공구 리스트
+    public Page<ProductResponse> toResWish(Long uid, int pageNo, int pageSize) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "wishlist.createdAt");
+        List<ProductResponse> list = wishListService.wishToProduct(uid).stream()
+										.map(productMapper::toDto)
+										.toList();
+        Page<ProductResponse> productPage = listtoPage(list, sort, pageNo, pageSize);
+        return productPage.map(product -> findOne(product.getId()));
+    }
 
     // 리스트 -> 페이지 변환
-//    public Page<ProductResponse> listtoPage(List<ProductResponse> list, Sort sort,
-//                                            int pageNo, int pageSize) {
-//
-//        PageRequest pageRequest = PageRequest.of(pageNo, pageSize, sort);
-//        int start = (int) pageRequest.getOffset();    // 페이지의 시작 인덱스. Offset: 페이지 시작 위치
-//        int end = Math.min((start + pageRequest.getPageSize()), list.size());    // 페이지의 끝 인덱스
-//        // end값 list 크기랑 비교, 만약 end>list -> end 값을 list의 크기로 대체 -> 리스트의 범위 초과하는 페이지 요청 방지
-//
-//        return new PageImpl<>(list.subList(start, end), pageRequest, list.size());
-//    }
+    public Page<ProductResponse> listtoPage(List<ProductResponse> list, Sort sort, int pageNo, int pageSize) {
 
+        PageRequest pageRequest = PageRequest.of(pageNo, pageSize, sort);
+        int start = (int) pageRequest.getOffset();    // 페이지의 시작 인덱스. Offset: 페이지 시작 위치
+        int end = Math.min((start + pageRequest.getPageSize()), list.size());    // 페이지의 끝 인덱스
+        // end값 list 크기랑 비교, 만약 end>list -> end 값을 list의 크기로 대체 -> 리스트의 범위 초과하는 페이지 요청 방지
 
-//	public List<ProductResponse> toResPostList(Long uid) {
-//		User user = userService.findById(uid);
-//		return user.getMyPosts()
-//				.stream()
-//				.map(productMapper::toDto)
-//				.toList();
-//	}
+        return new PageImpl<>(list.subList(start, end), pageRequest, list.size());
+    }
 }

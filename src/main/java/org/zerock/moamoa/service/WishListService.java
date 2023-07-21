@@ -1,12 +1,10 @@
 package org.zerock.moamoa.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListRequest;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
@@ -24,7 +22,6 @@ import java.util.Optional;
 public class WishListService {
     private final WishListMapper wishListMapper;
     private final WishListRepository wishListRepository;
-    private final ProductService productService;
     private final UserService userService;
 
     // ID에 해당하는 위시리스트 조회-> WishListMapper 사용해 WishListResponse 객체로 매핑 후 반환
@@ -38,7 +35,6 @@ public class WishListService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    @Transactional
     public List<WishList> findAll() {
         return this.wishListRepository.findAll();
     }
@@ -71,26 +67,22 @@ public class WishListService {
         wishListRepository.deleteById(id);
     }
 
-    public List<ProductResponse> WishToProduct(Long userId) {
+    public List<Product> wishToProduct(Long userId) {
         // 유저에  저장된 위시리스트 가져옴
         User user = userService.findById(userId);
-        List<WishList> wishLists = user.getWishLists();
+        List<WishList> wishLists = wishListRepository.findByUser(user);
 
-        // pid로 상품 가져옴-> ProductResponse 객체로 매핑-> 리스트 추가
-        List<ProductResponse> products = new ArrayList<>();
+        // 상품 가져와서 리스트 추가
+        List<Product> products = new ArrayList<>();
         for (WishList wishList : wishLists) {
             Product product = wishList.getProduct();
-
-//            ProductResponse productResponse = productService.findOne(product.getId());
-
-            // productservice의 search 임시 이용
-            ProductResponse productResponse = productService.search(
-                    product.getTitle(), null, null, null, "createdAt", "DESC", 0, 1
-            ).getContent().get(0);
-            products.add(productResponse);
+            products.add(product);
         }
 
-        // 조회된 상품 리스트 반환
-        return products;
+        if (products.isEmpty()){
+            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
+        } else {
+            return products;
+        }
     }
 }

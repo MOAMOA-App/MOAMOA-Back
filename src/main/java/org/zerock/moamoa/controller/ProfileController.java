@@ -1,5 +1,6 @@
 package org.zerock.moamoa.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,14 +13,9 @@ import org.zerock.moamoa.service.UserService;
 
 @RestController
 @RequestMapping("/profile")
+@RequiredArgsConstructor
 public class ProfileController {
-    private UserService userService;
-    private final ProductService productService;
-
-    public ProfileController(UserService userService, ProductService productService) {
-        this.userService = userService;
-        this.productService = productService;
-    }
+    private final UserService userService;
 
     /**
      * 본인 프로필로 리다이렉트
@@ -38,14 +34,7 @@ public class ProfileController {
      * @return
      */
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getProfile(
-            @PathVariable Long id
-//            @RequestParam(required = false) String nick,
-//            @RequestParam(required = false) String profImg,
-//            @RequestParam(required = false) String email,
-//            @RequestParam(required = false) String address,
-//            @RequestParam(required = false) String detailAddress
-    ) {
+    public ResponseEntity<UserResponse> getProfile(@PathVariable Long id) {
         UserResponse userResponse = userService.findOne(id);
         return ResponseEntity.ok(userResponse);
     }

@@ -12,7 +12,9 @@ public enum SuccessMessage {
 
 	NOTICE_DELETE(HttpStatus.OK, "알림을 삭제했습니다."),
 
-	WISH_DELETE(HttpStatus.OK, "찜하기 취소")
+	WISH_DELETE(HttpStatus.OK, "찜하기 취소"),
+
+	AUTH_SUCCESS(HttpStatus.OK, "인증이 완료되었습니다.")
 	;
 
 	SuccessMessage(HttpStatus httpStatus, String message) {

@@ -10,7 +10,10 @@ import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
 import org.zerock.moamoa.domain.DTO.user.UserPwUpdateRequest;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 @Entity
 @Getter
@@ -89,6 +92,10 @@ public class User extends BaseEntity {
         this.wishLists = wishLists;
     }
 
+    public User(Long id) {
+        this.id = id;
+    }
+
     public void delete() {
         this.activate = false;
         this.deletedAt = Instant.now();
@@ -119,11 +126,9 @@ public class User extends BaseEntity {
      * 비밀번호 암호화
      *
      * @param passwordEncoder 암호화 할 인코더 클래스
-     * @return 변경된 유저 Entity
      */
-    public User hashPassword(PasswordEncoder passwordEncoder) {
+    public void hashPassword(PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(this.password);
-        return this;
     }
 
     /**
@@ -135,5 +140,26 @@ public class User extends BaseEntity {
      */
     public boolean checkPassword(String plainPassword, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(plainPassword, this.password);
+    }
+
+
+    /**
+     * 닉네임 설정
+     */
+    // 가입할때 함 설정해주면 될거같은데 나머지는 프로필에서 뭐 알아서 랜덤으로 하든 설정을 하든 하겠지...
+    // 일케 해놓고보니 닉네임 랜덤설정도 따로빼야되나싶기도함
+    // 아니 생각해보니 프사설정 생각도못햇음 이런젠장멍충이;
+    // YJ: 프사설정!!!!
+    public void randomNick(){
+        ArrayList<String> nickarr1 = new ArrayList<>(
+                Arrays.asList("무지개", "분홍", "오렌지", "개나리", "연두", "해변의", "퍼렁", "보라", "갈색", "하얀"));
+        ArrayList<String> nickarr2 = new ArrayList<>(
+                Arrays.asList("웨옹", "곰돌이", "귀긴곰", "꽥", "고양이", "냥이", "곰", "토끼", "오리"));
+
+        Random rnd = new Random();
+        int rnum1 = rnd.nextInt(nickarr1.size());
+        int rnum2 = rnd.nextInt(nickarr2.size());
+
+        this.nick = nickarr1.get(rnum1) + nickarr2.get(rnum2);
     }
 }
