@@ -31,5 +31,5 @@ public class ChatMessage extends BaseEntity {
 
     @Column(name = "read_or_not", nullable = false)
     private Boolean readOrNot;
-
+    
 }

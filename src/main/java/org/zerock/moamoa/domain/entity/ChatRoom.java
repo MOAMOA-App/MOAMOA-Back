@@ -31,4 +31,9 @@ public class ChatRoom extends BaseEntity {
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY)
     private List<ChatMessage> messages;
 
+    public void build(Product product, User seller, User user) {
+        this.productId = product;
+        this.sellerId = seller;
+        this.userId = user;
+    }
 }

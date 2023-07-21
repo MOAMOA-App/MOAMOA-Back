@@ -26,12 +26,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.projectlombok:lombok:1.18.26'
+    compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
-
-    // Lombok 롬북
-    compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
 
     //	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -61,6 +61,14 @@ dependencies {
     //oAuth
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
+    // gson
+    implementation 'com.google.code.gson:gson:2.9.0'
+
+    //websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    //testpage
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.assertj:assertj-core:3.21.0'

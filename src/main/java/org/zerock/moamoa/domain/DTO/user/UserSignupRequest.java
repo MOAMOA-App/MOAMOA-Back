@@ -8,11 +8,15 @@ public class UserSignupRequest {
     private String name;
     private String email;
     private String password;
+    private String loginType;
+    private boolean activate;
 
     @Builder
     public UserSignupRequest(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.loginType = "email";
+        this.activate = true;
     }
 }

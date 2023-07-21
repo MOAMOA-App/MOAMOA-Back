@@ -54,9 +54,6 @@ public class User extends BaseEntity {
     @Column(name = "deleted_at", nullable = false)
     private Instant deletedAt;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
-
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
     private List<Party> parties;    // 내가 참여한 공동구매?
 
@@ -72,7 +69,7 @@ public class User extends BaseEntity {
     @Builder
     public User(Long id, String loginType, String token, String name, String email, String password,
                 String nick, String profImg, String address, String detailAddress, Boolean activate,
-                Instant deletedAt, Instant createdAt, List<Party> parties, List<Product> myPosts,
+                Instant deletedAt, List<Party> parties, List<Product> myPosts,
                 List<Notice> notices, List<WishList> wishLists) {
         this.id = id;
         this.loginType = loginType;
@@ -86,7 +83,6 @@ public class User extends BaseEntity {
         this.detailAddress = detailAddress;
         this.activate = activate;
         this.deletedAt = deletedAt;
-        this.createdAt = createdAt;
         this.parties = parties;
         this.myPosts = myPosts;
         this.notices = notices;

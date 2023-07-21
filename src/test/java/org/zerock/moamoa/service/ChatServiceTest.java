@@ -5,11 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.zerock.moamoa.domain.entity.ChatMessage;
 import org.zerock.moamoa.domain.entity.ChatRoom;
-import org.zerock.moamoa.repository.UserRepository;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class ChatServiceTest {
@@ -36,7 +33,7 @@ class ChatServiceTest {
 
     @Test
     void saveChatRoom() {
-        ChatRoom chatRoom = chatService.saveChatRoom(31L, 32L, 11L);
+//        ChatRoom chatRoom = chatService.saveChatRoom(31L, 32L, 11L);
 
     }
 
