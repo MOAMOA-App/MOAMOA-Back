@@ -1,18 +1,15 @@
 package org.zerock.moamoa.domain.DTO.product;
 
-import org.zerock.moamoa.domain.enums.ProductStatus;
-
 import lombok.Builder;
 import lombok.Data;
+import org.zerock.moamoa.domain.enums.ProductStatus;
 
 @Data
 public class ProductStatusUpdateRequest {
-	private Long id;
-	private ProductStatus status;
+    private ProductStatus status;
 
-	@Builder
-	public ProductStatusUpdateRequest(Long id, ProductStatus status) {
-		this.id = id;
-		this.status = status;
-	}
+    @Builder
+    public ProductStatusUpdateRequest(ProductStatus status) {
+        this.status = status;
+    }
 }

@@ -19,11 +19,11 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
-	private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-	private final UserMapper userMapper;
+    private final UserMapper userMapper;
 
-	private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponse findOne(Long id) {
         return userMapper.toDto(findById(id));
@@ -34,43 +34,50 @@ public class UserService {
         return UserProfileResponse.builder(user);
     }
 
-	public User findByEmail(String email) {
-		return this.userRepository.findByEmail(email)
-			.orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
-	}
+    public User findByEmail(String email) {
+        return this.userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+    }
 
-	@Transactional
-	public User findById(Long id) {
-		return this.userRepository.findById(id)
-			.orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
-	}
+    @Transactional
+    public User findById(Long id) {
+        return this.userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.USER_NOT_FOUND));
+    }
 
-	@Transactional
-	public List<User> findAll() {
-		return this.userRepository.findAll();
-	}
+    @Transactional
+    public List<User> findAll() {
+        return this.userRepository.findAll();
+    }
 
     /**
      * 회원가입
      */
-    public UserResponse saveUser(UserSignupRequest userSignupRequest) throws Exception {
-        if (this.isEmailExist(userSignupRequest.getEmail())) {
-            throw new Exception("이미 존재하는 이메일입니다.");    // 이메일 중복 확인
+    @Transactional
+    public UserResponse saveUser(UserSignupRequest request) throws Exception {
+        if (isEmailExist(request.getEmail())) {
+            User user = userRepository.findByEmailOrThrow(request.getEmail());
+            if (user.getPassword() == null) {
+                user.updatePw(request.getPassword());
+                user.hashPassword(passwordEncoder); // 비밀번호 암호화
+                return userMapper.toDto(user);
+            } else throw new Exception("이미 존재하는 이메일입니다.");    // 이메일 중복 확인
         } else {
             // YJ: 이메일 인증 코드 보내는 코드 작성? (Controller에 있긴함 분리하는게 나을듯
-            User user = userMapper.toEntity(userSignupRequest);
-            log.info(user.getLoginType());
-            user.hashPassword(passwordEncoder); // 비밀번호 암호화
-			user.randomNick();  // 닉네임 랜덤설정
-			return userMapper.toDto(userRepository.save(user));
+            User user = userMapper.toEntity(request);
+            if (request.getNaver() != null && request.getKakao() != null) {
+                user.hashPassword(passwordEncoder); // 비밀번호 암호화
+            }
+            user.randomNick();  // 닉네임 랜덤설정
+            return userMapper.toDto(userRepository.save(user));
         }
     }
 
-	public boolean removeUser(Long id) {
-		User user = findById(id);
-		user.delete();
-		return !user.getActivate();
-	}
+    public boolean removeUser(Long id) {
+        User user = findById(id);
+        user.delete();
+        return !user.getActivate();
+    }
 
     @Transactional
     public UserResponse updateProfile(UserProfileUpdateRequest UP) {
@@ -79,17 +86,17 @@ public class UserService {
         return userMapper.toDto(temp);
     }
 
-	@Transactional
-	public UserResponse updatePw(UserPwUpdateRequest UPw) throws Exception {
-		// 일단 유저 비밀번호 받아서 입력된 비밀번호와 맞는지 확인
-		User temp = findById(UPw.getId());
-		String encodePw = temp.getPassword();
+    @Transactional
+    public UserResponse updatePw(UserPwUpdateRequest request) throws Exception {
+        // 일단 유저 비밀번호 받아서 입력된 비밀번호와 맞는지 확인
+        User temp = findById(request.getId());
+        String encodePw = temp.getPassword();
 
         // 원래 비밀번호 뭐였는지 확인
-        if (passwordEncoder.matches(UPw.getOldPw(), encodePw)) {
+        if (passwordEncoder.matches(request.getOldPw(), encodePw)) {
             // 맞을 시 새 비밀번호 해싱해서 저장
-            UPw.setNewPw(passwordEncoder.encode(UPw.getOldPw())); // 비밀번호 암호화
-            temp.updatePw(UPw);
+            request.setNewPw(passwordEncoder.encode(request.getOldPw())); // 비밀번호 암호화
+            temp.updatePw(request.getNewPw());
             return userMapper.toDto(temp);
         } else {
             // 비밀번호 틀릴 시
@@ -128,14 +135,10 @@ public class UserService {
         }
     }
 
-    /** 이메일 중복 확인 */
+    /**
+     * 이메일 중복 확인
+     */
     public boolean isEmailExist(String email) {
-        Optional<User> byEmail = userRepository.findByEmail(email);
-        return byEmail.isPresent();
+        return userRepository.existsByEmail(email);
     }
-
-//    public boolean isUserExits(Long uid) {
-//        Optional<User> byId = userRepository.findByUID(uid);
-//        return byId.isPresent();
-//    }
 }

@@ -8,7 +8,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
-import org.zerock.moamoa.config.security.JwtTokenProvider;
+import org.zerock.moamoa.common.auth.JwtTokenProvider;
 
 @RequiredArgsConstructor
 @Component
@@ -25,8 +25,8 @@ public class StompHandler implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         // 클라이언트가 WebSocket에 연결할 때 호출되는 CONNECT 메시지를 가로채고 토큰의 유효성 검증
-        if(accessor.getCommand() == StompCommand.CONNECT) { // CONNECT 메시지인지 확인
-            if(!jwtTokenProvider.validate(accessor.getFirstNativeHeader("token")))
+        if (accessor.getCommand() == StompCommand.CONNECT) { // CONNECT 메시지인지 확인
+            if (!jwtTokenProvider.validate(accessor.getFirstNativeHeader("token")))
                 // 메시지에서 "token" 헤더 값을 가져와서 토큰의 유효성을 검증, 유효하지 않으면 클라이언트의 연결 거부
                 throw new AccessDeniedException("");
         }

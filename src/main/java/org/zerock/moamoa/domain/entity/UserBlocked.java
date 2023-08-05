@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 
-import java.time.Instant;
-
 @Entity
 @Getter
 @NoArgsConstructor
@@ -27,14 +25,10 @@ public class UserBlocked extends BaseEntity {
     @JoinColumn(name = "target_id")
     private User target;
 
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
-
     @Builder
-    public UserBlocked(Long id, User user, User target, Instant createdAt) {
+    public UserBlocked(Long id, User user, User target) {
         this.id = id;
         this.user = user;
         this.target = target;
-        this.createdAt = createdAt;
     }
 }

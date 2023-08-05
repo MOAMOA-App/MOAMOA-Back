@@ -1,7 +1,6 @@
 package org.zerock.moamoa.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
@@ -11,7 +10,6 @@ import org.zerock.moamoa.domain.entity.UserBlocked;
 import org.zerock.moamoa.repository.UserBlockedRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,10 +17,6 @@ public class UserBlockedService {
     private final UserBlockedRepository userBlockedRepository;
     private final UserService userService;
 
-    @Transactional
-    public Optional<UserBlocked> findById(Long id) {
-        return this.userBlockedRepository.findById(id);
-    }
 
     @Transactional
     public List<UserBlocked> findAll() {

@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 import org.zerock.moamoa.domain.DTO.product.ProductUpdateRequest;
 import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
+import org.zerock.moamoa.utils.TimeUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -58,12 +60,10 @@ public class Product extends BaseEntity {
     @Column(name = "choice_send", nullable = false, length = 32)
     private String choiceSend;
 
-    @Column(name = "count_image")
-    private Integer countImage;
-
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Announce> announces;
 
+    @Setter
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Party> parties;
 
@@ -76,6 +76,10 @@ public class Product extends BaseEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    @Setter
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductImages> productImages;
+
     public void delete() {
         this.activate = false;
         this.deletedAt = Instant.now();
@@ -85,9 +89,6 @@ public class Product extends BaseEntity {
         this.status = status;
     }
 
-    public void updateImage(int counts) {
-        this.countImage = counts;
-    }
 
     public void updateInfo(ProductUpdateRequest product) {
         this.categoryId = product.getCategoryId();
@@ -99,17 +100,12 @@ public class Product extends BaseEntity {
         this.finishedAt = product.getFinishedAt();
         this.maxCount = product.getMaxCount();
         this.choiceSend = product.getChoiceSend();
-        this.countImage = product.getCountImage();
     }
 
     @Builder
-    public Product(
-            Long id, User user, Category categoryId, String sellingArea, String detailArea, String title,
-            ProductStatus status, Integer sellPrice, Integer viewCount, String description, Integer sellCount,
-            Integer maxCount,
-            String choiceSend, Integer countImage, List<Announce> announces, List<Party> parties, Boolean activate,
-            Instant finishedAt, Instant deletedAt) {
-        this.id = id;
+    public Product(User user, Category categoryId, String sellingArea, String detailArea, String title,
+                   ProductStatus status, Integer sellPrice, Integer viewCount, String description, Integer sellCount,
+                   Integer maxCount, String choiceSend, Boolean activate, String finishedAt) {
         this.user = user;
         this.categoryId = categoryId;
         this.sellingArea = sellingArea;
@@ -122,17 +118,10 @@ public class Product extends BaseEntity {
         this.sellCount = sellCount;
         this.maxCount = maxCount;
         this.choiceSend = choiceSend;
-        this.countImage = countImage;
-        this.announces = announces;
-        this.parties = parties;
         this.activate = activate;
-        this.finishedAt = finishedAt;
-        this.deletedAt = deletedAt;
+        this.finishedAt = TimeUtils.toInstant(finishedAt);
     }
 
-    public void addUser(User user) {
-        this.user = user;
-    }
 
     public void addAnnounce(Announce announce) {
         announces.add(announce);
@@ -143,28 +132,6 @@ public class Product extends BaseEntity {
         announces.remove(announce);
     }
 
-    public void addParty(Party party) {
-        parties.add(party);
-        party.setProduct(this);
-    }
-
-    public void removeParty(Party party) {
-        parties.remove(party);
-    }
-
-    public void addUserPosts(User user) {
-        this.user = user;
-        if (!user.getMyPosts().contains(this)) {
-            user.getMyPosts().add(this);
-        }
-    }
-
-    public void removeUserPosts(User user) {
-        if (user != null) {
-            user.getMyPosts().remove(this);
-            this.user = null;
-        }
-    }
 
     public Product(Long id) {
         this.id = id;

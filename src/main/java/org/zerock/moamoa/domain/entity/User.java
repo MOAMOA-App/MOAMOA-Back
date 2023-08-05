@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
-import org.zerock.moamoa.domain.DTO.user.UserPwUpdateRequest;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -24,19 +23,19 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "login_type", length = 11, nullable = false)
-    private String loginType;
-
-    @Column(name = "token", length = 254)
-    private String token;
-
     @Column(name = "name", length = 32, nullable = false)
     private String name;
+
+    @Column(name = "naver", length = 254)
+    private String naver;
+
+    @Column(name = "kakao", length = 254)
+    private String kakao;
 
     @Column(name = "email", length = 50, nullable = false)
     private String email;
 
-    @Column(name = "password", length = 128, nullable = false)
+    @Column(name = "password", length = 128)
     private String password;
 
     @Column(name = "nick", length = 32, nullable = false)
@@ -54,8 +53,9 @@ public class User extends BaseEntity {
     @Column(name = "activate")
     private Boolean activate = true;
 
-    @Column(name = "deleted_at", nullable = false)
+    @Column(name = "deleted_at")
     private Instant deletedAt;
+
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
     private List<Party> parties;    // 내가 참여한 공동구매?
@@ -70,13 +70,11 @@ public class User extends BaseEntity {
     private List<WishList> wishLists;
 
     @Builder
-    public User(Long id, String loginType, String token, String name, String email, String password,
-                String nick, String profImg, String address, String detailAddress, Boolean activate,
-                Instant deletedAt, List<Party> parties, List<Product> myPosts,
-                List<Notice> notices, List<WishList> wishLists) {
+    public User(Long id, String naver, String kakao, String name, String email,
+                String password, String nick, String profImg, String address, String detailAddress, Boolean activate, Instant deletedAt) {
         this.id = id;
-        this.loginType = loginType;
-        this.token = token;
+        this.naver = naver;
+        this.kakao = kakao;
         this.name = name;
         this.email = email;
         this.password = password;
@@ -86,11 +84,8 @@ public class User extends BaseEntity {
         this.detailAddress = detailAddress;
         this.activate = activate;
         this.deletedAt = deletedAt;
-        this.parties = parties;
-        this.myPosts = myPosts;
-        this.notices = notices;
-        this.wishLists = wishLists;
     }
+
 
     public User(Long id) {
         this.id = id;
@@ -109,18 +104,10 @@ public class User extends BaseEntity {
         this.detailAddress = UP.getDetailAddress();
     }
 
-    public void updatePw(UserPwUpdateRequest UPw) {
-        this.password = UPw.getNewPw();
+    public void updatePw(String password) {
+        this.password = password;
     }
 
-    public void addParty(Party party) {
-        parties.add(party);
-        party.setUser(this);
-    }
-
-    public void removeParty(Party party) {
-        parties.remove(party);
-    }
 
     /**
      * 비밀번호 암호화
@@ -150,7 +137,7 @@ public class User extends BaseEntity {
     // 일케 해놓고보니 닉네임 랜덤설정도 따로빼야되나싶기도함
     // 아니 생각해보니 프사설정 생각도못햇음 이런젠장멍충이;
     // YJ: 프사설정!!!!
-    public void randomNick(){
+    public void randomNick() {
         ArrayList<String> nickarr1 = new ArrayList<>(
                 Arrays.asList("무지개", "분홍", "오렌지", "개나리", "연두", "해변의", "퍼렁", "보라", "갈색", "하얀"));
         ArrayList<String> nickarr2 = new ArrayList<>(

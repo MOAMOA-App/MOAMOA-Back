@@ -10,7 +10,6 @@ import org.zerock.moamoa.domain.DTO.party.PartyResponse;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
-import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.repository.PartyRepository;
 
 import java.util.ArrayList;
@@ -55,7 +54,6 @@ public class PartyService {
         Party party = partyMapper.toEntity(request);
         Product product = productService.findById(pid);
         party.setProduct(product);
-        product.addParty(party);
 
         // request의 구매자 정보를 불러와서 user의 parties에 저장
         User buyer = request.getBuyer();
