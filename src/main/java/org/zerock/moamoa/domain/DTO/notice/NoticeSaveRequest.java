@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.enums.NoticeType;
 
 import java.time.Instant;
 
@@ -11,14 +12,12 @@ import java.time.Instant;
 public class NoticeSaveRequest {
     private Long senderID;
     private Long receiverID;
-    private String message;
     private Boolean readOrNot = false;
-    private String type;
+    private NoticeType type;
     private Long referenceID;
 
     @Builder
-    public NoticeSaveRequest(String message, String type) {
-        this.message = message;
+    public NoticeSaveRequest(NoticeType type) {
         this.type = type;
     }
 }

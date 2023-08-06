@@ -56,15 +56,11 @@ public class User extends BaseEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
     private List<Party> parties;    // 내가 참여한 공동구매?
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Product> myPosts;   // 내가 생성한 공동구매
-
-    @OneToMany(mappedBy = "receiverID", cascade = CascadeType.ALL)  // 받는 쪽에 알림을 추가하기 위해 만듦
-    private List<Notice> notices;   // Notice쪽도 receiverID 타입 User로 변경해줌!!!
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<WishList> wishLists;
@@ -85,7 +81,6 @@ public class User extends BaseEntity {
         this.activate = activate;
         this.deletedAt = deletedAt;
     }
-
 
     public User(Long id) {
         this.id = id;
@@ -135,7 +130,6 @@ public class User extends BaseEntity {
      */
     // 가입할때 함 설정해주면 될거같은데 나머지는 프로필에서 뭐 알아서 랜덤으로 하든 설정을 하든 하겠지...
     // 일케 해놓고보니 닉네임 랜덤설정도 따로빼야되나싶기도함
-    // 아니 생각해보니 프사설정 생각도못햇음 이런젠장멍충이;
     // YJ: 프사설정!!!!
     public void randomNick() {
         ArrayList<String> nickarr1 = new ArrayList<>(
