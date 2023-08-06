@@ -149,9 +149,6 @@ public class ProductService {
     // 만든공구 리스트
     public Page<ProductResponse> toResPost(Long uid, int pageNo, int pageSize) {
         User user = userService.findById(uid);
-//        if (user == null) {
-//            throw new EntityNotFoundException(ErrorCode.USER_NOT_FOUND);
-//        }
 
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Product> productPage = productRepository.findByUser(user, itemPage);

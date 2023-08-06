@@ -2,6 +2,9 @@ package org.zerock.moamoa.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.message.OkResponse;
@@ -19,34 +22,35 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/reminder")
 @RequiredArgsConstructor
 public class NoticeController {
     private final NoticeService noticeService;
-    private final UserService userService;
-    private final ProductService productService;
     private final SimpMessageSendingOperations messagingTemplate;
 
-    /**
-     * 알림 조회
-     *
-     * @param uid
-     * @return
-     */
-    // 추후 알림 클릭 시 관련된 product나 chatroom으로 가는 코드도 필요할듯
-    @GetMapping("/{uid}")
-    public List<NoticeResponse> getNoticesByUserId(@PathVariable("uid") Long uid) {
+    /** 알림 조회 */
+    // YJ: 알림 조회할 때 목록이 프론트에 전달할 리스트에 추가되어야 함
+    // 필요한게 참여한 사람 리스트에 추가 -> 아니근데이거 서비스쪽에서해야될거같은데 어쨌든 DB에 save하면 리스트랑 알림보내기 할거니까
+    // 그럼 양식을 어떻게 하지? 일단 제목 필요하고 type에 따른 메시지 필요하고 pid 필요하고 그냥 response로 불러와서 거기다가
+    // 제목이랑 불러오기 같이하면될듯??
+    // 그럼 User에 notices 리스트 만든거 지우고 service 차원에서 list 만들어서 거따 추가하면 되려나
+    // 아닌가 로그인~로그아웃까지만 유지하고 싶은데 일단 이거 어케하는지 알아보기
+    // 변경: 알림 조회할 때 페이지 형식으로 그냥 다 가져옴
+    // 알림은 그냥 어케... 보낼수만있게하면될듯
+    // 아마 알림 보내면 백엔드에서 pub으로 보내고 프론트에서 받아서 sub 구독한 놈들한테 보내서 처리하는 형식인가본데... 몰겟어요걍...
+    @GetMapping("/{receiverid}")
+    public Page<NoticeResponse> getNotices(@PathVariable Long receiverid,
+                                           @RequestParam(defaultValue = "0") int pageNo,
+                                           @RequestParam(defaultValue = "5") int pageSize) {
 
-        List<NoticeResponse> noticeResponses = noticeService.getReminderNotices(uid);
+//        List<NoticeResponse> noticeResponses = noticeService.getReminderNotices(uid);
+//        for (NoticeResponse noticeResponse : noticeResponses) {
+//            User user = noticeResponse.getSenderID();
+//            String senderNickname = user.getNick();    // 보내는 사람 닉네임 불러옴
+//            Product product = noticeResponse.getReferenceID();
+//            String referenceTitle = product.getTitle();    // 관련 공동구매의 제목 불러옴
+//        }
 
-        for (NoticeResponse noticeResponse : noticeResponses) {
-            User user = noticeResponse.getSenderID();
-            String senderNickname = user.getNick();    // 보내는 사람 닉네임 불러옴
-            Product product = noticeResponse.getReferenceID();
-            String referenceTitle = product.getTitle();    // 관련 공동구매의 제목 불러옴
-        }
-
-        return noticeResponses;
+        return noticeService.getNotices(receiverid, pageNo, pageSize);
     }
 
 
@@ -64,45 +68,22 @@ public class NoticeController {
 	 	함 조사해보기로.
 	 */
 
-    /**
-     * 알림 발신
-     * YJ: 이거 다시 해야됨
-     */
-    //
-//    @PostMapping("/{referenceID}/{receiverID}")
-//    public ResponseEntity<String> sendReminderNotice(@PathVariable("referenceID") Long referenceID,
-//                                                     @PathVariable("receiverID") Long receiverID,
-//                                                     @RequestParam("senderID") Long senderID) {
-//
-//        User sender = userService.findById(senderID);
-//
-//        String message = "";
-//        String type = "";
-//
-////		Notice notice = noticeService.saveNotice(sender.getId(), receiverID, message, type, referenceID);
-//        // NoticeService의 saveNotices에 리시버에 알림 추가되는 코드 추가햇음!!! <<언제......
-//
-//        return ResponseEntity.ok("알림이 성공적으로 발송되었습니다.");
-//    }
+    /** 알림 발신 */
+    // @PostMapping("/{referenceID}/{receiverID}")
     // stomp 테스트 화면
     @GetMapping("/alarm/stomp")
     public String stompAlarm() {
-        return "/stomp";
+        return "noticefront";
     }
 
-    @PostMapping("/messagetest")
-    public void sendReminderNotice(@RequestBody NoticeSaveRequest noticeSaveReq) {
+    @MessageMapping("/{referenceID}/{receiverID}")
+    public void sendReminderNotice(@DestinationVariable("receiverID") Long receiverID,
+                                   @RequestBody NoticeSaveRequest noticeSaveReq) {
         noticeService.sendNotice(noticeSaveReq);
     }
 
 
-    /**
-     * 알림 읽음 상태 변경
-     * @param receiverId
-     * @param noticeId
-     * @param NR
-     * @return
-     */
+    /** 알림 읽음 상태 변경 */
     @PutMapping("/{uid}/{noticeId}")
     public NoticeResponse updateRead(@PathVariable Long receiverId,
                                      @PathVariable Long noticeId,
@@ -116,12 +97,7 @@ public class NoticeController {
 
     }
 
-    /**
-     * 알림 삭제
-     * @param uid
-     * @param noticeId
-     * @return
-     */
+    /** 알림 삭제 */
     @DeleteMapping("/{uid}/{noticeId}")
     public Object DeleteNotice(@PathVariable Long uid, @PathVariable Long noticeId) {
         noticeService.removeNotice(noticeId);

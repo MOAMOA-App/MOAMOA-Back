@@ -19,6 +19,7 @@ import org.zerock.moamoa.domain.DTO.user.UserLoginRequest;
 import org.zerock.moamoa.domain.DTO.user.UserLoginResponse;
 import org.zerock.moamoa.domain.DTO.user.UserResponse;
 import org.zerock.moamoa.domain.DTO.user.UserSignupRequest;
+import org.zerock.moamoa.domain.entity.Auth;
 import org.zerock.moamoa.service.AuthService;
 import org.zerock.moamoa.service.UserService;
 

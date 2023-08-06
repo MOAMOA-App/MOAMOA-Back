@@ -146,3 +146,4 @@ application.yml
 ### VS Code ###
 .vscode/
 /build/
+/build/generated/sources

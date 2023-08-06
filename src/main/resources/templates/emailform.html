@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이메일 인증</title>
+</head>
+<body>
+<div style="margin:100px;">
+    <h1> 이메일 인증 코드입니다. </h1>
+    <br>
+    <p> 안녕하세요, 모아모아 계정의 이메일 확인을 위한 인증 절차입니다. </p>
+    <p> 회원가입 창으로 돌아가 아래의 인증 코드를 입력해주세요.</p>
+    <p> 인증시간이 만료되었을 경우, 인증번호 재발송을 통해 새 인증번호를 발급해 주세요.</p>
+    </p>
+    <br>
+
+    <div align="center" style="font-family:verdana;">
+        <h3> 인증 코드: </h3>
+        <div style="font-size:130%" th:text="${code}"> </div>
+    </div>
+    <br/>
+</div>
+
+
+</body>
+</html>
