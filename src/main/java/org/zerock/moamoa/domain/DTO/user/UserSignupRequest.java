@@ -24,8 +24,7 @@ public class UserSignupRequest {
     public UserSignupRequest(String name, String email, String password) {
         this.name = name;
         this.email = email;
-        if (password != null)
-            this.password = password;
+        if (password != null) this.password = password;
         this.activate = true;
 
     }

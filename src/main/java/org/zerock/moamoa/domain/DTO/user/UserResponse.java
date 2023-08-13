@@ -12,8 +12,7 @@ public class UserResponse {
     private String profImg;
     private String address;
     private String detailAddress;
-//	private List<Party> parties;
-//	private List<Product> myPosts;
+    //	private List<Party> parties;
 //	private List<Party> myParties;
 //	private List<Notice> notices;
 //	private List<WishList> wishLists;

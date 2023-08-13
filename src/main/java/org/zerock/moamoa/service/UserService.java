@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.common.exception.InvalidValueException;
@@ -54,21 +55,44 @@ public class UserService {
      * 회원가입
      */
     @Transactional
-    public UserResponse saveUser(UserSignupRequest request) throws Exception {
+    public UserResponse saveUser(UserSignupRequest request) {
+        User user;
+        //이미 계정이 있는 경우
         if (isEmailExist(request.getEmail())) {
-            User user = userRepository.findByEmailOrThrow(request.getEmail());
+            user = userRepository.findByEmailOrThrow(request.getEmail());
+            //일반 회원가입이 아닌 경우
             if (user.getPassword() == null) {
                 user.updatePw(request.getPassword());
-                user.hashPassword(passwordEncoder); // 비밀번호 암호화
+                user.hashPassword(passwordEncoder);     // 비밀번호 암호화
                 return userMapper.toDto(user);
-            } else throw new Exception("이미 존재하는 이메일입니다.");    // 이메일 중복 확인
+            } else throw new AuthException(ErrorCode.USER_EMAIL_USED);
         } else {
-            // YJ: 이메일 인증 코드 보내는 코드 작성? (Controller에 있긴함 분리하는게 나을듯
-            User user = userMapper.toEntity(request);
-            if (request.getNaver() != null && request.getKakao() != null) {
-                user.hashPassword(passwordEncoder); // 비밀번호 암호화
-            }
+            user = userMapper.toEntity(request);
+            user.updatePw(request.getPassword());
+            user.hashPassword(passwordEncoder);     // 비밀번호 암호화\
             user.randomNick();  // 닉네임 랜덤설정
+            return userMapper.toDto(userRepository.save(user));
+        }
+    }
+
+
+    @Transactional
+    public UserResponse oAuthSaveUser(UserSignupRequest request) {
+        User user;
+        log.info("oAuth 회원가입");
+        //이미 계정이 있는 경우
+        if (isEmailExist(request.getEmail())) {
+            user = userRepository.findByEmailOrThrow(request.getEmail());
+
+            if (request.getKakao() != null) user.setKakao(request.getKakao());
+            else if (request.getNaver() != null) user.setNaver(request.getNaver());
+
+            return userMapper.toDto(user);
+        } else {
+
+            user = userMapper.toEntity(request);
+            user.randomNick();  // 닉네임 랜덤설정
+            userRepository.save(user);
             return userMapper.toDto(userRepository.save(user));
         }
     }

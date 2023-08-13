@@ -7,6 +7,7 @@ import org.zerock.moamoa.common.domain.entity.BaseEntity;
 
 import java.util.List;
 
+//-> "/file/product/20230806_200920_동동주 (2).JPG",
 @Entity
 @Getter
 @NoArgsConstructor

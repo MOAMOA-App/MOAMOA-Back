@@ -51,8 +51,6 @@ public class UserController {
     @GetMapping("/oauth")
     public Claims val(@RequestParam("accessToken") String accessToken,
                       @RequestParam("refreshToken") String refreshToken) {
-        log.info("accessToken : " + accessToken);
-        log.info("refreshToken : " + refreshToken);
         return jwtTokenProvider.parseClaims(accessToken);
     }
 
