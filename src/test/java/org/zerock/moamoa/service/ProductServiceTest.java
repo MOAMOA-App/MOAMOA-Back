@@ -33,7 +33,7 @@ class ProductServiceTest {
 
         // Mocked User
         User user = new User();
-        user.setId(41L);
+//        user.setId(41L);
         //
         // product.setUser(user);
         // product.setCategoryId(Long.valueOf(i));

@@ -26,8 +26,7 @@ public class UserBlocked extends BaseEntity {
     private User target;
 
     @Builder
-    public UserBlocked(Long id, User user, User target) {
-        this.id = id;
+    public UserBlocked(User user, User target) {
         this.user = user;
         this.target = target;
     }

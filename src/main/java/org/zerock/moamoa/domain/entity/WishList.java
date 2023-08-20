@@ -29,8 +29,7 @@ public class WishList extends BaseEntity {
     private Instant createdAt;
 
     @Builder
-    public WishList(Long id, Product product, User user, Instant createdAt) {
-        this.id = id;
+    public WishList(Product product, User user, Instant createdAt) {
         this.product = product;
         this.user = user;
         this.createdAt = createdAt;

@@ -88,6 +88,14 @@ public class User extends BaseEntity {
         this.id = id;
     }
 
+    public User(Long id, String name, String email, String password, String nick) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.nick = nick;
+    }
+
     public void delete() {
         this.activate = false;
         this.deletedAt = Instant.now();

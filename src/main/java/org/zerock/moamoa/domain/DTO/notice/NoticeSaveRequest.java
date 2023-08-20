@@ -17,7 +17,10 @@ public class NoticeSaveRequest {
     private Long referenceID;
 
     @Builder
-    public NoticeSaveRequest(NoticeType type) {
+    public NoticeSaveRequest(Long senderID, Long receiverID, NoticeType type, Long referenceID) {
+        this.senderID = senderID;
+        this.receiverID = receiverID;
         this.type = type;
+        this.referenceID = referenceID;
     }
 }
