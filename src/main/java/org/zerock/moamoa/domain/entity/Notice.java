@@ -39,20 +39,14 @@ public class Notice extends BaseEntity {
     private Instant createdAt;
 
     @Builder
-    public Notice(Long id, User senderID, User receiverID, Boolean readOrNot, NoticeType type,
-                  Product referenceID, Instant createdAt) {
-        this.id = id;
+    public Notice(User senderID, User receiverID, NoticeType type, Product referenceID) {
         this.senderID = senderID;
         this.receiverID = receiverID;
-        this.readOrNot = readOrNot;
         this.type = type;
         this.referenceID = referenceID;
-        this.createdAt = createdAt;
     }
 
     public void updateRead(Boolean readOrNot) {
         this.readOrNot = readOrNot;
     }
-
-
 }

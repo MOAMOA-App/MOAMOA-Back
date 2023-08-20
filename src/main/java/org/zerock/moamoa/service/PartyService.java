@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.domain.DTO.notice.NoticeResponse;
 import org.zerock.moamoa.domain.DTO.party.PartyMapper;
 import org.zerock.moamoa.domain.DTO.party.PartyRequest;
 import org.zerock.moamoa.domain.DTO.party.PartyResponse;
@@ -63,19 +64,19 @@ public class PartyService {
 
     }
 
-    public List<Product> partyToProduct(Long userId) {
-        User buyer = userService.findById(userId);
-        List<Party> parties = partyRepository.findByBuyer(buyer);
-
-        // YJ: 파티 존재하지 않을 시의 경우도 고려해야 함
-        // 상품 가져와서 리스트 추가
-        List<Product> products = new ArrayList<>();
-        for (Party party : parties) {
-            Product product = party.getProduct();
-            products.add(product);
-        }
-        return products;
-    }
+//    public List<Product> partyToProduct(Long userId) {
+//        User buyer = userService.findById(userId);
+//        List<Party> parties = partyRepository.findByBuyer(buyer);
+//
+//        // YJ: 파티 존재하지 않을 시의 경우도 고려해야 함
+//        // 상품 가져와서 리스트 추가
+//        List<Product> products = new ArrayList<>();
+//        for (Party party : parties) {
+//            Product product = party.getProduct();
+//            products.add(product);
+//        }
+//        return products;
+//    }
 }
 
 // public boolean removeParty(Long id) {

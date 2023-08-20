@@ -3,10 +3,15 @@ package org.zerock.moamoa.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.zerock.moamoa.common.auth.CustomUserDetails;
 import org.zerock.moamoa.common.message.OkResponse;
 import org.zerock.moamoa.common.message.SuccessMessage;
 import org.zerock.moamoa.domain.DTO.notice.NoticeReadUpdateRequest;
@@ -28,15 +33,7 @@ public class NoticeController {
     private final SimpMessageSendingOperations messagingTemplate;
 
     /** 알림 조회 */
-    // YJ: 알림 조회할 때 목록이 프론트에 전달할 리스트에 추가되어야 함
-    // 필요한게 참여한 사람 리스트에 추가 -> 아니근데이거 서비스쪽에서해야될거같은데 어쨌든 DB에 save하면 리스트랑 알림보내기 할거니까
-    // 그럼 양식을 어떻게 하지? 일단 제목 필요하고 type에 따른 메시지 필요하고 pid 필요하고 그냥 response로 불러와서 거기다가
-    // 제목이랑 불러오기 같이하면될듯??
-    // 그럼 User에 notices 리스트 만든거 지우고 service 차원에서 list 만들어서 거따 추가하면 되려나
-    // 아닌가 로그인~로그아웃까지만 유지하고 싶은데 일단 이거 어케하는지 알아보기
-    // 변경: 알림 조회할 때 페이지 형식으로 그냥 다 가져옴
-    // 알림은 그냥 어케... 보낼수만있게하면될듯
-    // 아마 알림 보내면 백엔드에서 pub으로 보내고 프론트에서 받아서 sub 구독한 놈들한테 보내서 처리하는 형식인가본데... 몰겟어요걍...
+    // 페이지 형식으로 다 불러오게끔 함 나중에 무한스크롤하든 어쩌든 하면될듯
     @GetMapping("/{receiverid}")
     public Page<NoticeResponse> getNotices(@PathVariable Long receiverid,
                                            @RequestParam(defaultValue = "0") int pageNo,
@@ -69,17 +66,15 @@ public class NoticeController {
 	 */
 
     /** 알림 발신 */
-    // @PostMapping("/{referenceID}/{receiverID}")
-    // stomp 테스트 화면
-    @GetMapping("/alarm/stomp")
-    public String stompAlarm() {
-        return "noticefront";
-    }
-
-    @MessageMapping("/{referenceID}/{receiverID}")
-    public void sendReminderNotice(@DestinationVariable("receiverID") Long receiverID,
-                                   @RequestBody NoticeSaveRequest noticeSaveReq) {
-        noticeService.sendNotice(noticeSaveReq);
+    // @ApiOperation(value = "알림 구독", notes = "알림을 구독한다.")
+    // text/event-stream이 SSE통신 위한 표준 MediaType
+    // @AuthenticationPrincipal: 로그인 세션 정보 UserDetails에 접근할 수 있는 어노테이션
+    @GetMapping(value = "/subscribe", produces = "text/event-stream")
+    @ResponseStatus(HttpStatus.OK)
+    public SseEmitter subscribe(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "")
+                                    String lastEventId) {
+        return noticeService.subscribe(customUserDetails.getId(), lastEventId);
     }
 
 

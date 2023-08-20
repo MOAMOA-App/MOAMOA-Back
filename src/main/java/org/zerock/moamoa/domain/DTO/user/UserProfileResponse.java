@@ -10,13 +10,9 @@ import org.zerock.moamoa.domain.entity.User;
 public class UserProfileResponse {
     private Long id;
     private String nick;
-
     private String profImg;
-
     private String email;
-
     private String address;
-
     private String detailAddress;
 
     @Builder

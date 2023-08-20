@@ -11,6 +11,7 @@ import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.WishList;
+import org.zerock.moamoa.domain.enums.NoticeType;
 import org.zerock.moamoa.repository.WishListRepository;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class WishListService {
     private final WishListMapper wishListMapper;
     private final WishListRepository wishListRepository;
     private final UserService userService;
+
 
     // ID에 해당하는 위시리스트 조회-> WishListMapper 사용해 WishListResponse 객체로 매핑 후 반환
     public WishListResponse findOne(Long id) {

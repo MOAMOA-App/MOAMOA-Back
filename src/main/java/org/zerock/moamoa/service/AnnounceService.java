@@ -2,6 +2,7 @@ package org.zerock.moamoa.service;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
@@ -9,8 +10,10 @@ import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceMapper;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceRequest;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceResponse;
+import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.entity.Announce;
 import org.zerock.moamoa.domain.entity.Product;
+import org.zerock.moamoa.domain.enums.NoticeType;
 import org.zerock.moamoa.repository.AnnounceRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ public class AnnounceService {
 	private final AnnounceRepository announceRepository;
 	private final AnnounceMapper announceMapper;
 	private final ProductService productService;
+	private final ApplicationEventPublisher eventPublisher;
 
 	public AnnounceResponse findOne(Long id) {
 		return announceMapper.toDto(findById(id));
@@ -58,6 +62,11 @@ public class AnnounceService {
 		Product product = productService.findById(pid);
 		announce.setProduct(product);
 		product.addAnnounce(announce);
+
+		// 알림 발송
+		eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
+									NoticeType.NEW_ANNOUNCE, product.getId()));
+
 		return announceMapper.toDto(announceRepository.save(announce));
 	}
 
@@ -70,5 +79,4 @@ public class AnnounceService {
 		}
 		return false;
 	}
-
 }

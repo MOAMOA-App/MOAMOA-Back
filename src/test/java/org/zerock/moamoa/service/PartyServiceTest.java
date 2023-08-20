@@ -1,6 +1,5 @@
 package org.zerock.moamoa.service;
 
-import javax.persistence.*;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +44,7 @@ class PartyServiceTest {
 
 	@Test
 	void removeParty() {
-		partyService.removeParty(Long.valueOf(2));
+//		partyService.removeParty(Long.valueOf(2));
 	}
 
 	@Test
