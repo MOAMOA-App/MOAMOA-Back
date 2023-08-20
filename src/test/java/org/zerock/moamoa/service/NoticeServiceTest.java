@@ -1,31 +1,27 @@
 package org.zerock.moamoa.service;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.zerock.moamoa.domain.entity.Notice;
+import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.enums.NoticeType;
 import org.zerock.moamoa.repository.NoticeRepository;
 import org.zerock.moamoa.repository.UserRepository;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class NoticeServiceTest {
 
     @Autowired
     private NoticeService noticeService;
-
+    @MockBean
+    private UserService userService;
     @MockBean
     private NoticeRepository noticeRepository;
-
     @MockBean
     private UserRepository userRepository;
 
@@ -33,6 +29,34 @@ class NoticeServiceTest {
     void tearDown() {
         noticeRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    @DisplayName("알림 구독")
+    public void subscribe() throws Exception {
+        //given
+        User user = new User();
+        String lastEventId = "";
+
+        //when, then
+        Assertions.assertDoesNotThrow(() -> noticeService.subscribe(user.getId(), lastEventId));
+    }
+
+    @Test
+    @DisplayName("알림 메세지 전송")
+    public void saveAndSend() throws Exception {
+        //given
+        User user1 = new User(1L, "name", "email@email.com", "password", "nick");
+        User user2 = new User(2L, "name", "email@email.com", "password", "nick");
+
+        String lastEventId = "";
+        noticeService.subscribe(user1.getId(), lastEventId);
+
+        NoticeSaveRequest noticeSaveRequest = new NoticeSaveRequest(user2.getId(), user1.getId(),
+                NoticeType.NEW_ANNOUNCE, 33L);
+
+        //when, then
+        Assertions.assertDoesNotThrow(() -> noticeService.saveAndSend(noticeSaveRequest));
     }
 
     @Test

@@ -42,6 +42,13 @@ public class MyinfoController { // 맨 긑에 붙은 id를 /profile
 	}
 
     /** 내가 작성한 게시글 불러옴 */
+//    @GetMapping("/{userid}/userpost")
+//    public void getMyPosts (@PathVariable Long userid,
+//                            @RequestParam(defaultValue = "0") int pageNo,
+//                            @RequestParam(defaultValue = "8") int pageSize
+//    ){
+//        productService.toResPost(userid, pageNo, pageSize);
+//    }
     @GetMapping("/{userid}/userpost")
     public Page<ProductResponse> getMyPosts(
             @PathVariable Long userid,

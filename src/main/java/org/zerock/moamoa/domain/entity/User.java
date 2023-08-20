@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
@@ -66,9 +67,8 @@ public class User extends BaseEntity {
     private List<WishList> wishLists;
 
     @Builder
-    public User(Long id, String naver, String kakao, String name, String email,
+    public User(String naver, String kakao, String name, String email,
                 String password, String nick, String profImg, String address, String detailAddress, Boolean activate, Instant deletedAt) {
-        this.id = id;
         this.naver = naver;
         this.kakao = kakao;
         this.name = name;
@@ -84,6 +84,14 @@ public class User extends BaseEntity {
 
     public User(Long id) {
         this.id = id;
+    }
+
+    public User(Long id, String name, String email, String password, String nick) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.nick = nick;
     }
 
     public void delete() {

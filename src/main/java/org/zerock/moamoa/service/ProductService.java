@@ -3,6 +3,7 @@ package org.zerock.moamoa.service;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -11,12 +12,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.common.myinfo.MyinfoEvent;
+import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.DTO.product.*;
 import org.zerock.moamoa.domain.DTO.productImage.ImageMapper;
-import org.zerock.moamoa.domain.entity.Party;
-import org.zerock.moamoa.domain.entity.Product;
-import org.zerock.moamoa.domain.entity.ProductImages;
-import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.entity.*;
+import org.zerock.moamoa.domain.enums.NoticeType;
 import org.zerock.moamoa.repository.ProductImageRepository;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
@@ -39,6 +40,7 @@ public class ProductService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final WishListService wishListService;
+    private final ApplicationEventPublisher eventPublisher;
     private static final String PRODUCT_FILE_URL = Folder.PRODUCT.getFolder();
 
     public ProductResponse findOne(Long id) {
@@ -52,6 +54,10 @@ public class ProductService {
 
     public List<Product> findAll() {
         return productRepository.findAll();
+    }
+
+    public Page<Product> findPageByUser(User user, Pageable itemPage){
+        return productRepository.findByUser(user, itemPage);
     }
 
     @Transactional
@@ -95,6 +101,16 @@ public class ProductService {
             product.setProductImages(new ArrayList<>());
         }
         product.updateInfo(request);
+
+        // 알림 보내는 부분: NoticeRequest 작성하기?
+        // 보낼 때 필요한 정보: 발신자(senderID), 수신자(receiverID), 알림타입noticeType(update), 게시글ID(referenceID)
+        // 게시글ID로 파티 불러오면 될듯. 근데 이쪽에서 직접 불러오면 너무좀그렇지않나...
+        // NoticeListener로 불러주면 될듯 makeNotice에서 이렇게 받아서 noticeRequest로 만들어줌
+        // null인 receiverID는 Listener에서 pid로 partyList를 불러와서 채워줌 근데이거 일케해도 되나...
+        // 알림 발송
+        eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
+                                    NoticeType.POST_CHANGED, product.getId()));
+
         return productMapper.toDto(product);
     }
 
@@ -104,6 +120,11 @@ public class ProductService {
         User user = userRepository.findByEmailOrThrow(username);
         checkAuth(product, user);
         product.updateStatus(request.getStatus());
+
+        // 알림 발송
+        eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
+                                    NoticeType.STATUS_CHANGED, product.getId()));
+
         return productMapper.toDto(product);
     }
 
@@ -146,26 +167,26 @@ public class ProductService {
         return resultPage.map(product -> findOne(product.getId()));
     }
 
+    // YJ: 밑코드 EVENTLISTENER로 받도록?
     // 만든공구 리스트
     public Page<ProductResponse> toResPost(Long uid, int pageNo, int pageSize) {
         User user = userService.findById(uid);
 
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Product> productPage = productRepository.findByUser(user, itemPage);
+
         if (productPage.isEmpty()) {
             throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
         return productPage.map(product -> findOne(product.getId()));
+//        eventPublisher.publishEvent(new MyinfoEvent(uid, pageNo, pageSize));
     }
 
     // 참여공구 리스트
     // partyService 불러서 깔끔하게 만들고싶은데 자꾸 순환오류남...
     public Page<ProductResponse> toResParty(Long uid, int pageNo, int pageSize) {
         User buyer = userService.findById(uid);
-//        if (userService.isUserExits(buyer)) {
-//            throw new EntityNotFoundException(ErrorCode.USER_NOT_FOUND);
-//        }
 
         List<Party> parties = buyer.getParties();
         if (parties.isEmpty()) {

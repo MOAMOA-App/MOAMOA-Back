@@ -63,7 +63,6 @@ public class UserService {
                 return userMapper.toDto(user);
             } else throw new Exception("이미 존재하는 이메일입니다.");    // 이메일 중복 확인
         } else {
-            // YJ: 이메일 인증 코드 보내는 코드 작성? (Controller에 있긴함 분리하는게 나을듯
             User user = userMapper.toEntity(request);
             if (request.getNaver() != null && request.getKakao() != null) {
                 user.hashPassword(passwordEncoder); // 비밀번호 암호화

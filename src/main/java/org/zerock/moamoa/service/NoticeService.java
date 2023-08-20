@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.notice.NoticeMapper;
@@ -15,12 +16,13 @@ import org.zerock.moamoa.domain.DTO.notice.NoticeReadUpdateRequest;
 import org.zerock.moamoa.domain.DTO.notice.NoticeResponse;
 import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.entity.Notice;
-import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
-import org.zerock.moamoa.domain.enums.NoticeType;
+import org.zerock.moamoa.repository.EmitterRepository;
 import org.zerock.moamoa.repository.NoticeRepository;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -30,9 +32,8 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final NoticeMapper noticeMapper;
     private final UserService userService;
-//    private final ProductService productService;
-//    private final Emitter emitter;
-    private final SimpMessageSendingOperations messagingTemplate;
+    private final EmitterRepository emitterRepository;
+    private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;    // SSE 연결은 1시간동안 지속됨
 
     public NoticeResponse findOne(Long id) {
         return noticeMapper.toDto(findById(id));
@@ -47,25 +48,75 @@ public class NoticeService {
         return this.noticeRepository.findAll();
     }
 
-    // YJ: db에 추가될때 리스트 추가 + 이벤트리스너가 알림 보내는거 해야됨 각각 메소드 추가하기
-    // -> request 받아서 response 내보내는거 하면 될듯!!
-    public NoticeResponse saveNotice(NoticeSaveRequest request) {
-        Notice notice = noticeMapper.toEntity(request);
-//        User user = notice.getReceiverID();
-//        notice.setUserNotice(user);
-
-//        NoticeType noticeType = NoticeType.values()[request.getType().getCode()];
-//        notice.setType(noticeType);
-
-        Notice savedNotice = noticeRepository.save(notice);
+    // YJ: 이벤트리스너가 알림 보내는거 해야됨
+    public NoticeResponse saveAndSend(NoticeSaveRequest request) {
+        Notice savedNotice = noticeRepository.save(noticeMapper.toEntity(request));
 
         // receiver에게 알림 발송
-        //        sendNotice(savedNotice); // 알림 발송
+        Long receiverId = request.getReceiverID();
+        String eventId = receiverId + "_" + System.currentTimeMillis();
+        System.out.println("Generated eventId: " + eventId);
 
-        // 근데조회는걍... 검색할때마다불러오면되는거잔아 알림만보내고
-        // 조회할때마다 Repo에서 페이지형식으로 전부 불러오기.
+        Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByMemberId(receiverId);
+        sseEmitters.forEach(
+                (key, emitter) -> {
+                    emitterRepository.saveEventCache(key, request);
+                    sendToClient(emitter, eventId, key, noticeMapper.toDto(savedNotice));
+                }
+        );
 
         return noticeMapper.toDto(savedNotice);
+    }
+
+    /**
+     * SSE 연결
+     */
+    public SseEmitter subscribe(Long memberId, String lastEventId) {
+        String emitterId = makeTimeIncludeId(memberId); // username을 포함하여 SseEmitter를 식별하기 위한 고유 아이디 생성
+                                                        // 시간을 emitterId에 붙여두면 데이터가 유실된 시점을 알 수 있음
+        SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
+
+        emitter.onCompletion(() -> emitterRepository.deleteById(emitterId));
+        emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
+
+        String eventId = makeTimeIncludeId(memberId);
+
+        // 503 에러 방지 위해 최초 연결 시 더미 이벤트 전송
+        sendToClient(emitter, eventId, emitterId, "EventStream Created. [userId=" + memberId + "]");
+
+        // Last-Event-ID: 클라이언트가 마지막으로 수신한 데이터의 id값
+        // 클라이언트가 미수신한 Event 목록이 존재할 경우 전송하여 Event 유실을 예방
+        if (hasLostData(lastEventId)) {
+            // 받지 못한 데이터가 있다면 Last-Event-ID를 기준으로 그 뒤의 데이터를 추출해 알림 보냄
+            sendLostData(lastEventId, memberId, emitterId, emitter);
+        }
+
+        return emitter;
+    }
+
+    private String makeTimeIncludeId(Long memberId) {
+        return memberId + "_" + System.currentTimeMillis();
+    }
+
+    private void sendToClient(SseEmitter emitter, String eventId, String emitterId, Object data) {
+        try {
+            emitter.send(SseEmitter.event()
+                    .id(eventId)
+                    .data(data));
+        } catch (IOException exception) {
+            emitterRepository.deleteById(emitterId);
+        }
+    }
+
+    private boolean hasLostData(String lastEventId) {
+        return !lastEventId.isEmpty();
+    }
+
+    private void sendLostData(String lastEventId, Long uid, String emitterId, SseEmitter emitter) {
+        Map<String, Object> eventCaches = emitterRepository.findAllEventCacheStartWithByMemberId(uid);
+        eventCaches.entrySet().stream()
+                .filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
+                .forEach(entry -> sendToClient(emitter, entry.getKey(), emitterId, entry.getValue()));
     }
 
     public void removeNotice(Long id) {
@@ -82,8 +133,7 @@ public class NoticeService {
         return noticeMapper.toDto(temp);
     }
 
-    // 걍 페이지형식으로 확인할때마다 한번에 불러오는게 나을듯?... 나중에 스크롤을하든 어쩌든
-    //
+    // 페이지형식으로 확인할때마다 한번에 불러오는게 나을듯
     public Page<NoticeResponse> getNotices(Long receiverID, int pageNo, int pageSize) {
         User receiver = userService.findById(receiverID);
         Pageable itemPage =  PageRequest.of(pageNo, pageSize);
@@ -95,54 +145,6 @@ public class NoticeService {
 
         return noticePage.map(notice -> findOne(notice.getId()));
     }
-
-    // 알림 발신
-    // type 설정, type에 따라 message를 다르게 하자
-//    private void sendNotice(Notice notice) {
-//        User receiver = notice.getReceiverID();
-//        String message = generateNoticeMessage(notice); // 알림 메시지 생성
-//
-//        // Emitter를 사용하여 알림 발송
-//        emitter.sendNotification(receiver.getId(), message);
-//    }
-
-    public void sendNotice(NoticeSaveRequest noticeSaveReq) {
-        User receiver = userService.findById(noticeSaveReq.getReceiverID());
-        Notice notice = noticeMapper.toEntity(noticeSaveReq);
-        // 밑에는 String버전, 그 밑에 NoticeResponse 반환하는것도 해봄
-//        messagingTemplate.convertAndSend("/sub/" + receiver, generateNoticeMessage(notice));
-        messagingTemplate.convertAndSend("/sub/" + receiver, getResponseObject(notice));
-        // 로깅 추가
-        log.info("Sended WebSocket message to /sub/" + noticeSaveReq.getReceiverID() + " path");
-    }
-
-//    private String generateNoticeMessage(Notice notice) {
-//        StringBuilder messageBuilder = new StringBuilder();
-//
-//        // 알림의 타입에 따라 다른 메시지 추가
-//        String type = notice.getType();
-//        switch (type) {
-//            case "post_changed" -> messageBuilder.append("게시글 변경");
-//            case "post_status_changed" -> messageBuilder.append("게시글 상태 변경");
-//            case "interest_post_changed" -> messageBuilder.append("관심 게시글 변경");
-//            case "notice_added" -> messageBuilder.append("새로운 공지사항 추가");
-//            case "new_chatroom" -> messageBuilder.append("새로운 채팅방 추가");
-//            default -> messageBuilder.append("새 알림");
-//        }//이렇게할바에야그냥... enum으로 type따라 다른 메시지 주는게 낫지않나...
-//        // 얘를 저장해놓고 접속할 시 알림 불러옴/새 알림 있을시 Emitter로 전송?
-//        // 일단 본게 SSE Emitter / 웹소켓/ PubSub
-//        // -> 웹소켓+STOMP
-//
-//
-//        // 메시지에 추가적인 정보를 포함시키고 반환
-//        User user = notice.getSenderID();               //userService.findById(notice.getSenderID());
-//        Product product = (notice.getReferenceID());    //productService.findById(notice.getReferenceID());
-//
-//        messageBuilder.append(" - Sender: ").append(user.getNick());
-//        messageBuilder.append(", Reference Title: ").append(product.getTitle());
-//
-//        return messageBuilder.toString();
-//    }
 
     public NoticeResponse getResponseObject(Notice notice) {
         return noticeMapper.toDto(notice);
