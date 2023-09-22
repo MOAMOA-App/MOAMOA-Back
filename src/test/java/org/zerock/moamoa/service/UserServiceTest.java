@@ -3,7 +3,6 @@ package org.zerock.moamoa.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.UserRepository;
 
 @SpringBootTest
@@ -18,8 +17,9 @@ class UserServiceTest {
     void findById() {
         System.out.println(userService.findById(Long.valueOf(2)));
     }
+
     @Test
-    void  findAll(){
+    void findAll() {
         System.out.println(userService.findAll());
     }
 
@@ -39,13 +39,12 @@ class UserServiceTest {
 //        }
 
 
-
     }
 
-    @Test
-    void removeUser() {
-        userService.removeUser(Long.valueOf(3));
-    }
+//    @Test
+//    void removeUser() {
+//        userService.removeUser(Long.valueOf(3));
+//    }
 
     @Test
     void updateUser() {

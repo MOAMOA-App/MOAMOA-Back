@@ -9,6 +9,7 @@ import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.common.exception.InvalidValueException;
+import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.user.*;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.UserRepository;
@@ -97,10 +98,15 @@ public class UserService {
         }
     }
 
-    public boolean removeUser(Long id) {
-        User user = findById(id);
-        user.delete();
-        return !user.getActivate();
+    @Transactional
+    public ResultResponse removeUser(String username) {
+        if (userRepository.existsByEmail(username)) {
+            User user = userRepository.findByEmailOrThrow(username);
+            if (!user.getActivate()) return ResultResponse.toDto("ALREADY");
+            user.delete();
+            return ResultResponse.toDto("OK");
+        }
+        return ResultResponse.toDto("AUTH_FAIL");
     }
 
     @Transactional
@@ -164,5 +170,18 @@ public class UserService {
      */
     public boolean isEmailExist(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    public ResultResponse emailVerify(VerifyRequest verifyRequest) {
+        if (userRepository.existsByEmail(verifyRequest.getEmail()))
+            return ResultResponse.toDto("ALREADY_USED_EMAIL");
+
+        return ResultResponse.toDto("OK");
+    }
+
+
+    public ResultResponse passwordVerify(UserLoginRequest verifyRequest) {
+        //TODO
+        return ResultResponse.toDto("OK");
     }
 }

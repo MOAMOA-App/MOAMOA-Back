@@ -13,6 +13,7 @@ import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.user.UserLoginRequest;
 import org.zerock.moamoa.domain.DTO.user.UserLoginResponse;
 import org.zerock.moamoa.domain.DTO.user.UserMapper;
+import org.zerock.moamoa.domain.DTO.user.UserRefreshResponse;
 import org.zerock.moamoa.domain.entity.Auth;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.AuthRepository;
@@ -44,9 +45,13 @@ public class AuthService {
     public UserLoginResponse login(UserLoginRequest request) {
         // CHECK USERNAME AND PASSWORD
         User user = userService.findByEmail(request.getEmail());
+
+        if (!user.getActivate()) return new UserLoginResponse("NOT_ACTIVITY_AUTH");
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new AuthException(ErrorCode.AUTH_PASSWORD_UNEQUAL);
         }
+
         CustomUserDetails userDetails = CustomUserDetails.fromEntity(user);
         // GENERATE ACCESS_TOKEN AND REFRESH_TOKEN
         String accessToken = jwtTokenProvider.generateAccessToken(userDetails);
@@ -57,18 +62,21 @@ public class AuthService {
             Auth auth = getByUserId(user.getId());
             auth.updateAccessToken(accessToken);
             auth.updateRefreshToken(refreshToken);
-            return new UserLoginResponse(auth);
+            return new UserLoginResponse("OK", auth, user);
         }
 
         // IF NOT EXISTS AUTH ENTITY, SAVE AUTH ENTITY AND TOKEN
         Auth auth = new Auth();
         auth.createEntity(user, "Bearer", accessToken, refreshToken);
         auth = authRepository.save(auth);
-        return new UserLoginResponse(auth);
+        return new UserLoginResponse("OK", auth, user);
     }
 
     public UserLoginResponse OAuthToken(CustomUserDetails userDetails) {
         User user = userService.findByEmail(userDetails.getUsername());
+
+        if (!user.getActivate()) return new UserLoginResponse("NOT_ACTIVITY_AUTH");
+
         // GENERATE ACCESS_TOKEN AND REFRESH_TOKEN
         String accessToken = jwtTokenProvider.generateAccessToken(userDetails);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
@@ -78,21 +86,21 @@ public class AuthService {
             Auth auth = getByUserId(user.getId());
             auth.updateAccessToken(accessToken);
             auth.updateRefreshToken(refreshToken);
-            return new UserLoginResponse(auth);
+            return new UserLoginResponse("OK", auth, user);
         }
 
         // IF NOT EXISTS AUTH ENTITY, SAVE AUTH ENTITY AND TOKEN
         Auth auth = new Auth();
         auth.createEntity(user, "Bearer", accessToken, refreshToken);
         auth = authRepository.save(auth);
-        return new UserLoginResponse(auth);
+        return new UserLoginResponse("OK", auth, user);
     }
 
     /**
      * Token 갱신
      */
     @Transactional
-    public String refreshToken(String refreshToken) {
+    public UserRefreshResponse refreshToken(String refreshToken) {
         if (this.jwtTokenProvider.validate(refreshToken)) {
             Auth auth = getByRefreshToken(refreshToken);
 
@@ -100,9 +108,9 @@ public class AuthService {
             CustomUserDetails userDetails = CustomUserDetails.fromEntity(user);
             String newAccessToken = this.jwtTokenProvider.generateAccessToken(userDetails);
             auth.updateAccessToken(newAccessToken);
-            return newAccessToken;
+            return UserRefreshResponse.toDto(newAccessToken, "OK");
         }
 
-        return null;
+        return UserRefreshResponse.toDto("AUTH_FAIL");
     }
 }

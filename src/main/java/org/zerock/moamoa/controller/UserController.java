@@ -14,12 +14,8 @@ import org.zerock.moamoa.common.email.EmailMessage;
 import org.zerock.moamoa.common.email.EmailService;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.common.exception.InvalidValueException;
-import org.zerock.moamoa.common.message.SuccessMessage;
-import org.zerock.moamoa.domain.DTO.user.UserLoginRequest;
-import org.zerock.moamoa.domain.DTO.user.UserLoginResponse;
-import org.zerock.moamoa.domain.DTO.user.UserResponse;
-import org.zerock.moamoa.domain.DTO.user.UserSignupRequest;
-import org.zerock.moamoa.domain.entity.Auth;
+import org.zerock.moamoa.domain.DTO.ResultResponse;
+import org.zerock.moamoa.domain.DTO.user.*;
 import org.zerock.moamoa.service.AuthService;
 import org.zerock.moamoa.service.UserService;
 
@@ -42,12 +38,17 @@ public class UserController {
     private final Map<String, LocalDateTime> verificationCodeExpiration = new HashMap<>(); // 유효 기간을 저장하는 맵
     private final JwtTokenProvider jwtTokenProvider;
 
+    /**
+     * 로그인
+     */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginRequest request) {
-        UserLoginResponse response = authService.login(request);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public UserLoginResponse login(@RequestBody UserLoginRequest request) {
+        return authService.login(request);
     }
 
+    /**
+     * oAuth 로그인
+     */
     @GetMapping("/oauth")
     public Claims val(@RequestParam("accessToken") String accessToken,
                       @RequestParam("refreshToken") String refreshToken) {
@@ -58,19 +59,35 @@ public class UserController {
      * 토큰갱신 API
      */
     @GetMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestHeader("refresh_token") String refreshToken) {
-        String newAccessToken = authService.refreshToken(refreshToken);
-        return ResponseEntity.status(HttpStatus.OK).body(newAccessToken);
+    public UserRefreshResponse refreshToken(@RequestHeader("refresh_token") String refreshToken) {
+        return authService.refreshToken(refreshToken);
     }
 
     /**
      * 회원가입
      */
     @PostMapping("/signup")
-    public UserResponse signUp(@RequestBody UserSignupRequest US) throws Exception {
+    public UserResponse signUp(@RequestBody UserSignupRequest userSignupRequest) throws Exception {
         // @RequestBody 어노테이션은 요청의 본문에 포함된 데이터를 AnnounceRequest 객체로 변환하여 announce 변수에 할당
-        return userService.saveUser(US);
+        return userService.saveUser(userSignupRequest);
     }
+
+    /**
+     * 이메일 중복 확인
+     */
+    @PostMapping("/email/verify")
+    public ResultResponse emailVerify(@RequestBody VerifyRequest verifyRequest) throws Exception {
+        return userService.emailVerify(verifyRequest);
+    }
+
+    /**
+     * 이메일 중복 확인
+     */
+    @PostMapping("/password/verify")
+    public ResultResponse passwordVerify(@RequestBody UserLoginRequest verifyRequest) throws Exception {
+        return userService.passwordVerify(verifyRequest);
+    }
+
 
     /**
      * 이메일 인증번호 보냄
@@ -132,13 +149,5 @@ public class UserController {
 //		}
 //	}
 
-    /**
-     * 회원탈퇴
-     */
-    @DeleteMapping("/{id}")
-    public Object deleteUser(@PathVariable Long id) {
-        userService.removeUser(id);
-        return ResponseEntity.ok(SuccessMessage.USER_DELETE);
-    }
 
 }
