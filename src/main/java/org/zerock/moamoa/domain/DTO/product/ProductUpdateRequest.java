@@ -2,17 +2,17 @@ package org.zerock.moamoa.domain.DTO.product;
 
 import lombok.Builder;
 import lombok.Data;
-import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
+import org.zerock.moamoa.utils.TimeUtils;
 
 import java.time.Instant;
 
 @Data
 public class ProductUpdateRequest {
-    private Long product_id;
+    private Long productId;
     private String title;
     private String description;
-    private Category categoryId;
+    private String category;
     private String sellingArea;
     private String detailArea;
     private Integer sellPrice;
@@ -24,13 +24,13 @@ public class ProductUpdateRequest {
     private ProductStatus status;
 
     @Builder
-    public ProductUpdateRequest(Long product_id, String title, String description, Category categoryId, String sellingArea,
+    public ProductUpdateRequest(Long productId, String title, String description, String category, String sellingArea,
                                 String detailArea, Integer sellPrice, Integer viewCount, Integer maxCount, String choiceSend,
-                                Integer countImage, Instant finishedAt, ProductStatus status) {
-        this.product_id = product_id;
+                                Integer countImage, String finishedAt, ProductStatus status) {
+        this.productId = productId;
         this.title = title;
         this.description = description;
-        this.categoryId = categoryId;
+        this.category = category;
         this.sellingArea = sellingArea;
         this.detailArea = detailArea;
         this.sellPrice = sellPrice;
@@ -38,7 +38,7 @@ public class ProductUpdateRequest {
         this.maxCount = maxCount;
         this.choiceSend = choiceSend;
         this.countImage = countImage;
-        this.finishedAt = finishedAt;
+        this.finishedAt = TimeUtils.toInstant(finishedAt);
         this.status = status;
     }
 }

@@ -15,7 +15,7 @@ public class UserProfileUpdateRequest {
     private String detailAddress;
 
     @Builder
-    public UserProfileUpdateRequest(Long id, String nick, String email, String address,
+    public UserProfileUpdateRequest(String nick, String email, String address,
                                     String detailAddress) {
         this.nick = nick;
         this.email = email;

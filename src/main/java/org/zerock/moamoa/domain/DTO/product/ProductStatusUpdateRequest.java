@@ -6,12 +6,12 @@ import org.zerock.moamoa.domain.enums.ProductStatus;
 
 @Data
 public class ProductStatusUpdateRequest {
-    private Long product_id;
+    private Long productId;
     private ProductStatus status;
 
     @Builder
-    public ProductStatusUpdateRequest(Long product_id, ProductStatus status) {
-        this.product_id = product_id;
+    public ProductStatusUpdateRequest(Long productId, ProductStatus status) {
+        this.productId = productId;
         this.status = status;
     }
 }

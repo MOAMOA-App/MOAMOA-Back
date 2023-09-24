@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.zerock.moamoa.domain.DTO.productImage.ImageMapper;
 import org.zerock.moamoa.domain.DTO.user.UserProfileResponse;
 import org.zerock.moamoa.domain.entity.ProductImages;
-import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
+import org.zerock.moamoa.utils.TimeUtils;
 import org.zerock.moamoa.utils.file.dto.FileResponse;
 
 import java.time.Instant;
@@ -19,7 +19,7 @@ import java.util.List;
 public class ProductResponse {
     private Long id;
     private UserProfileResponse user;
-    private Category categoryId;
+    private String category;
     private String sellingArea;
     private String detailArea;
     private String title;
@@ -30,18 +30,17 @@ public class ProductResponse {
     private Integer sellCount;
     private Integer maxCount;
     private String choiceSend;
-    private Instant createdAt;
-    private Instant finishedAt;
-    private Instant updatedAt;
+    private String createdAt;
+    private String finishedAt;
     private List<FileResponse> productImages;
 
     @Builder
-    public ProductResponse(Long id, UserProfileResponse user, Category categoryId, String sellingArea, String detailArea,
+    public ProductResponse(Long id, UserProfileResponse user, String category, String sellingArea, String detailArea,
                            String title, String description, ProductStatus status, Integer sellPrice, Integer viewCount, Integer sellCount,
-                           Integer maxCount, String choiceSend, Instant createdAt, Instant finishedAt, Instant updatedAt, List<ProductImages> productImages) {
+                           Integer maxCount, String choiceSend, Instant createdAt, Instant finishedAt, List<ProductImages> productImages) {
         this.id = id;
         this.user = user;
-        this.categoryId = categoryId;
+        this.category = category;
         this.sellingArea = sellingArea;
         this.detailArea = detailArea;
         this.title = title;
@@ -52,9 +51,8 @@ public class ProductResponse {
         this.sellCount = sellCount;
         this.maxCount = maxCount;
         this.choiceSend = choiceSend;
-        this.createdAt = createdAt;
-        this.finishedAt = finishedAt;
-        this.updatedAt = updatedAt;
+        this.createdAt = TimeUtils.toLocalTime(createdAt);
+        this.finishedAt = TimeUtils.toLocalTime(finishedAt);
         this.productImages = productImages != null ? productImages.stream().map(ImageMapper.INSTANCE::toDto).toList() : new ArrayList<>();
     }
 

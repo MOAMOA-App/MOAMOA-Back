@@ -2,8 +2,6 @@ package org.zerock.moamoa.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.zerock.moamoa.common.exception.EntityNotFoundException;
-import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.party.PartyMapper;
 import org.zerock.moamoa.domain.DTO.party.PartyRequest;
 import org.zerock.moamoa.domain.DTO.party.PartyResponse;
@@ -11,6 +9,7 @@ import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.PartyRepository;
+import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
 import java.util.List;
@@ -19,25 +18,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PartyService {
     private final PartyRepository partyRepository;
+    private final ProductRepository productRepository;
     private final PartyMapper partyMapper;
-    private final ProductService productService;
     private final UserRepository userRepository;
 
-    public PartyResponse findOne(Long id) {
-        return partyMapper.toDto(findById(id));
-    }
-
-    public Party findById(Long id) {
-        return partyRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PARTY_NOT_FOUND));
-    }
 
     public List<Party> findAll() {
         return this.partyRepository.findAll();
     }
 
     public List<PartyResponse> getByProduct(Long pid) {
-        Product product = productService.findById(pid);
+        Product product = productRepository.findByIdOrThrow(pid);
         List<Party> parties = partyRepository.findByProduct(product);
         return parties.stream().map(partyMapper::toDto).toList();
     }
@@ -52,7 +43,7 @@ public class PartyService {
 
     public PartyResponse saveParty(PartyRequest request, Long pid) {
         Party party = partyMapper.toEntity(request);
-        Product product = productService.findById(pid);
+        Product product = productRepository.findByIdOrThrow(pid);
         party.setProduct(product);
 
         // request의 구매자 정보를 불러와서 user의 parties에 저장

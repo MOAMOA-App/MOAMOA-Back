@@ -2,7 +2,6 @@ package org.zerock.moamoa.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListMapper;
@@ -25,17 +24,6 @@ public class WishListService {
     private final WishListRepository wishListRepository;
     private final UserRepository userRepository;
 
-
-    // ID에 해당하는 위시리스트 조회-> WishListMapper 사용해 WishListResponse 객체로 매핑 후 반환
-    public WishListResponse findOne(Long id) {
-        return wishListMapper.toDto(findById(id));
-    }
-
-    @Transactional
-    public WishList findById(Long id) {
-        return this.wishListRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
-    }
 
     public List<WishList> findAll() {
         return this.wishListRepository.findAll();

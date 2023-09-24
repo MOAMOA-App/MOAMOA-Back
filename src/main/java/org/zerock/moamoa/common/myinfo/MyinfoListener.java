@@ -10,9 +10,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.service.PartyService;
 import org.zerock.moamoa.service.ProductService;
@@ -24,7 +26,9 @@ import org.zerock.moamoa.service.WishListService;
 public class MyinfoListener {
     // 하... 솔직히리스너이렇게쓰는거아닌거같긴한데 먼가짬처리처럼되어버림...
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
     private final ProductService productService;
+    private final ProductMapper productMapper;
     private final WishListService wishListService;
     private final PartyService partyService;
 
@@ -38,6 +42,6 @@ public class MyinfoListener {
             throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
-        return productPage.map(product -> productService.findOne(product.getId()));
+        return productPage.map(productMapper::toDto);
     }
 }

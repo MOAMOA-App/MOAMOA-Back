@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 import org.zerock.moamoa.domain.DTO.product.ProductUpdateRequest;
-import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.utils.TimeUtils;
 
@@ -27,8 +26,8 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "seller_id") // foreign key (userId) references User (id)
     private User user; // DB는 오브젝트를 저장할 수 없다. FK, 자바는 오브젝트를 저장할 수 있다. //참조 할 테이블
 
-    @Column(name = "category_id", nullable = false)
-    private Category categoryId;
+    @Column(name = "category", nullable = false)
+    private String category;
 
     @Column(name = "selling_area", nullable = false, length = 254)
     private String sellingArea;
@@ -91,7 +90,7 @@ public class Product extends BaseEntity {
 
 
     public void updateInfo(ProductUpdateRequest product) {
-        this.categoryId = product.getCategoryId();
+        this.category = product.getCategory();
         this.sellingArea = product.getSellingArea();
         this.detailArea = product.getDetailArea();
         this.title = product.getTitle();
@@ -103,11 +102,11 @@ public class Product extends BaseEntity {
     }
 
     @Builder
-    public Product(User user, Category categoryId, String sellingArea, String detailArea, String title,
+    public Product(User user, String category, String sellingArea, String detailArea, String title,
                    ProductStatus status, Integer sellPrice, Integer viewCount, String description, Integer sellCount,
                    Integer maxCount, String choiceSend, Boolean activate, String finishedAt) {
         this.user = user;
-        this.categoryId = categoryId;
+        this.category = category;
         this.sellingArea = sellingArea;
         this.detailArea = detailArea;
         this.title = title;

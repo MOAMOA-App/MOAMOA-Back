@@ -17,10 +17,8 @@ import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.enums.NoticeType;
-import org.zerock.moamoa.repository.ProductImageRepository;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
-import org.zerock.moamoa.utils.file.Folder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,21 +28,14 @@ import java.util.List;
 @Slf4j
 public class ProductService {
     private final ProductRepository productRepository;
-    private final ProductImageRepository imageRepository;
     private final UserRepository userRepository;
     private final ProductMapper productMapper;
     private final WishListService wishListService;
     private final FileService fileService;
     private final ApplicationEventPublisher eventPublisher;
-    private static final String PRODUCT_FILE_URL = Folder.PRODUCT.getFolder();
 
-    public ProductResponse findOne(Long id) {
-        return productMapper.toDto(findById(id));
-    }
-
-    public Product findById(Long id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
+    public ProductResponse findOne(Long pid) {
+        return productMapper.toDto(productRepository.findByIdOrThrow(pid));
     }
 
     public List<Product> findAll() {
@@ -67,7 +58,7 @@ public class ProductService {
 
     @Transactional
     public boolean remove(ProductStatusUpdateRequest request, String username) {
-        Product product = findById(request.getProduct_id());
+        Product product = productRepository.findByIdOrThrow(request.getProductId());
         User user = userRepository.findByEmailOrThrow(username);
         checkAuth(product, user);
         product.delete();
@@ -77,10 +68,10 @@ public class ProductService {
     @Transactional
     // .save, remove -> 함수자체에서 트랜잭션  -> 어노테이션을 쓸 필요가 없는것
     public ProductResponse updateInfo(ProductUpdateRequest request, String username) {
-        Product product = findById(request.getProduct_id());
+        Product product = productRepository.findByIdOrThrow(request.getProductId());
         User user = userRepository.findByEmailOrThrow(username);
         checkAuth(product, user);
-
+        
         product.updateInfo(request);
 
         // 알림 보내는 부분: NoticeRequest 작성하기?
@@ -97,7 +88,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponse updateStatus(ProductStatusUpdateRequest request, String username) {
-        Product product = findById(request.getProduct_id());
+        Product product = productRepository.findByIdOrThrow(request.getProductId());
         User user = userRepository.findByEmailOrThrow(username);
         checkAuth(product, user);
         product.updateStatus(request.getStatus());
@@ -144,8 +135,7 @@ public class ProductService {
         }
         PageRequest pageRequest = PageRequest.of(pageNo, pageSize, sort);
         Page<Product> resultPage = productRepository.findAll(spec, pageRequest);
-        //Pageable itemPage =  PageRequest.of(pageNo, pageSize);
-        return resultPage.map(product -> findOne(product.getId()));
+        return resultPage.map(productMapper::toDto);
     }
 
     // YJ: 밑코드 EVENTLISTENER로 받도록?
@@ -160,8 +150,7 @@ public class ProductService {
             throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
-        return productPage.map(product -> findOne(product.getId()));
-//        eventPublisher.publishEvent(new MyinfoEvent(uid, pageNo, pageSize));
+        return productPage.map(productMapper::toDto);
     }
 
     // 참여공구 리스트
@@ -186,8 +175,7 @@ public class ProductService {
                 .toList();
 
         Sort sort = Sort.by(Sort.Direction.DESC, "party.createdAt");
-        Page<ProductResponse> productPage = listtoPage(list, sort, pageNo, pageSize);
-        return productPage.map(product -> findOne(product.getId()));
+        return listtoPage(list, sort, pageNo, pageSize);
     }
 
     // 찜한공구 리스트
@@ -196,8 +184,8 @@ public class ProductService {
         List<ProductResponse> list = wishListService.wishToProduct(uid).stream()
                 .map(productMapper::toDto)
                 .toList();
-        Page<ProductResponse> productPage = listtoPage(list, sort, pageNo, pageSize);
-        return productPage.map(product -> findOne(product.getId()));
+
+        return listtoPage(list, sort, pageNo, pageSize);
     }
 
     // 리스트 -> 페이지 변환

@@ -16,6 +16,7 @@ import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.ChatMessageRepository;
 import org.zerock.moamoa.repository.ChatRoomRepository;
+import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
 import java.util.List;
@@ -26,12 +27,12 @@ import java.util.List;
 public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final ProductService productService;
+    private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
     public Page<ChatRoomResponse> getPageByProjectId(Long pid, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        Product product = productService.findById(pid);
+        Product product = productRepository.findByIdOrThrow(pid);
         Long id = product.getId();
         Page<ChatRoom> rooms = chatRoomRepository.findAllByProductId(product, pageable);
         return rooms.map(ChatRoomResponse::fromEntity);
@@ -46,7 +47,7 @@ public class ChatService {
     }
 
     public ChatRoomResponse saveChatRoom(ChatRoomRequest request) {
-        Product product = productService.findById(request.getProductId());
+        Product product = productRepository.findByIdOrThrow(request.getProductId());
         User seller = product.getUser();
         User buyer = userRepository.findByIdOrThrow(request.getUserId());
         ChatRoom chatRoom = new ChatRoom();
