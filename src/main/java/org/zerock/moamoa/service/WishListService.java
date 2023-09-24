@@ -11,7 +11,7 @@ import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.WishList;
-import org.zerock.moamoa.domain.enums.NoticeType;
+import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.repository.WishListRepository;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.Optional;
 public class WishListService {
     private final WishListMapper wishListMapper;
     private final WishListRepository wishListRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
 
     // ID에 해당하는 위시리스트 조회-> WishListMapper 사용해 WishListResponse 객체로 매핑 후 반환
@@ -71,7 +71,7 @@ public class WishListService {
 
     public List<Product> wishToProduct(Long userId) {
         // 유저에  저장된 위시리스트 가져옴
-        User user = userService.findById(userId);
+        User user = userRepository.findByIdOrThrow(userId);
         List<WishList> wishLists = wishListRepository.findByUser(user);
 
         // 상품 가져와서 리스트 추가
@@ -81,7 +81,7 @@ public class WishListService {
             products.add(product);
         }
 
-        if (products.isEmpty()){
+        if (products.isEmpty()) {
             throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         } else {
             return products;

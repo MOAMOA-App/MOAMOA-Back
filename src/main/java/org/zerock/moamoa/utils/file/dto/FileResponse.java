@@ -2,7 +2,6 @@ package org.zerock.moamoa.utils.file.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import org.zerock.moamoa.domain.entity.Product;
 
 import java.time.Instant;
 
@@ -12,14 +11,15 @@ public class FileResponse {
     private long fileSize;
     private String contentType;
     private Instant uploadTimeStamp;
-    private Product product;
+    private String fileRoot;
 
     @Builder
-    public FileResponse(String fileName, long fileSize, String contentType, Instant uploadTimeStamp) {
+    public FileResponse(String fileName, long fileSize, String contentType, Instant uploadTimeStamp, String fileRoot) {
         this.fileName = fileName;
         this.fileSize = fileSize;
         this.contentType = contentType;
         this.uploadTimeStamp = uploadTimeStamp;
+        this.fileRoot = fileRoot;
     }
 }
 

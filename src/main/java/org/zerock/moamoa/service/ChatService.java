@@ -16,6 +16,7 @@ import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.ChatMessageRepository;
 import org.zerock.moamoa.repository.ChatRoomRepository;
+import org.zerock.moamoa.repository.UserRepository;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class ChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ProductService productService;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     public Page<ChatRoomResponse> getPageByProjectId(Long pid, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
@@ -47,7 +48,7 @@ public class ChatService {
     public ChatRoomResponse saveChatRoom(ChatRoomRequest request) {
         Product product = productService.findById(request.getProductId());
         User seller = product.getUser();
-        User buyer = userService.findById(request.getUserId());
+        User buyer = userRepository.findByIdOrThrow(request.getUserId());
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.build(product, seller, buyer);
         chatRoom = chatRoomRepository.save(chatRoom);
@@ -55,7 +56,7 @@ public class ChatService {
     }
 
     public ChatMessage saveChatMessage(String message, Long chatRoomId, Long senderId) {
-        User sender = userService.findById(senderId);
+        User sender = userRepository.findByIdOrThrow(senderId);
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new RuntimeException("chatRoom not found"));
 

@@ -103,7 +103,6 @@ public class User extends BaseEntity {
 
     public void updateProfile(UserProfileUpdateRequest UP) {
         this.nick = UP.getNick();
-        this.profImg = UP.getProfImg();
         this.email = UP.getEmail();
         this.address = UP.getAddress();
         this.detailAddress = UP.getDetailAddress();
@@ -113,6 +112,9 @@ public class User extends BaseEntity {
         this.password = password;
     }
 
+    public void updateImage(String file) {
+        profImg = file;
+    }
 
     /**
      * 비밀번호 암호화
@@ -153,4 +155,6 @@ public class User extends BaseEntity {
 
         this.nick = nickarr1.get(rnum1) + nickarr2.get(rnum2);
     }
+
+
 }

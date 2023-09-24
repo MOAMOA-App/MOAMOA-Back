@@ -81,13 +81,12 @@ public class UserController {
     }
 
     /**
-     * 이메일 중복 확인
+     * 비밀번호 중복 확인
      */
     @PostMapping("/password/verify")
     public ResultResponse passwordVerify(@RequestBody UserLoginRequest verifyRequest) throws Exception {
         return userService.passwordVerify(verifyRequest);
     }
-
 
     /**
      * 이메일 인증번호 보냄

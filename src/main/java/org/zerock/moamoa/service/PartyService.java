@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.domain.DTO.notice.NoticeResponse;
 import org.zerock.moamoa.domain.DTO.party.PartyMapper;
 import org.zerock.moamoa.domain.DTO.party.PartyRequest;
 import org.zerock.moamoa.domain.DTO.party.PartyResponse;
@@ -12,8 +11,8 @@ import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.PartyRepository;
+import org.zerock.moamoa.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,7 +21,7 @@ public class PartyService {
     private final PartyRepository partyRepository;
     private final PartyMapper partyMapper;
     private final ProductService productService;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     public PartyResponse findOne(Long id) {
         return partyMapper.toDto(findById(id));
@@ -44,7 +43,7 @@ public class PartyService {
     }
 
     public List<PartyResponse> getByBuyer(Long uid) {
-        User user = userService.findById(uid);
+        User user = userRepository.findByIdOrThrow(uid);
         List<Party> parties = user.getParties();
         // partyRepository.findByBuyer(user)
 

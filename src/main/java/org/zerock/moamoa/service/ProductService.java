@@ -8,27 +8,22 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.common.myinfo.MyinfoEvent;
 import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.DTO.product.*;
-import org.zerock.moamoa.domain.DTO.productImage.ImageMapper;
-import org.zerock.moamoa.domain.entity.*;
+import org.zerock.moamoa.domain.entity.Party;
+import org.zerock.moamoa.domain.entity.Product;
+import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.enums.NoticeType;
 import org.zerock.moamoa.repository.ProductImageRepository;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.utils.file.Folder;
-import org.zerock.moamoa.utils.file.ImageUtils;
-import org.zerock.moamoa.utils.file.dto.FileResponse;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,10 +31,10 @@ import java.util.stream.Collectors;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ProductImageRepository imageRepository;
-    private final ProductMapper productMapper;
     private final UserRepository userRepository;
-    private final UserService userService;
+    private final ProductMapper productMapper;
     private final WishListService wishListService;
+    private final FileService fileService;
     private final ApplicationEventPublisher eventPublisher;
     private static final String PRODUCT_FILE_URL = Folder.PRODUCT.getFolder();
 
@@ -56,50 +51,36 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Page<Product> findPageByUser(User user, Pageable itemPage){
+    public Page<Product> findPageByUser(User user, Pageable itemPage) {
         return productRepository.findByUser(user, itemPage);
     }
 
     @Transactional
-    public ProductResponse saveProduct(ProductSaveRequest request, MultipartFile[] images, String username) {
+    public ProductResponse saveProduct(ProductSaveRequest request, String username) {
         User user = userRepository.findByEmailOrThrow(username);
         request.setUser(user);
 
         Product product = productRepository.save(productMapper.toEntity(request));
 
-        if (images != null) {
-            List<ProductImages> articleImages = saveImage(images, product);
-            product.setProductImages(articleImages);
-        }
         return productMapper.toDto(product);
     }
 
     @Transactional
-    public boolean remove(Long id, String username) {
-        Product product = findById(id);
+    public boolean remove(ProductStatusUpdateRequest request, String username) {
+        Product product = findById(request.getProduct_id());
         User user = userRepository.findByEmailOrThrow(username);
         checkAuth(product, user);
-        removeImage(product);
-        imageRepository.deleteAll(product.getProductImages());
         product.delete();
         return !product.getActivate();
     }
 
     @Transactional
     // .save, remove -> 함수자체에서 트랜잭션  -> 어노테이션을 쓸 필요가 없는것
-    public ProductResponse updateInfo(Long pid, ProductUpdateRequest request, MultipartFile[] images, String username) {
-        Product product = findById(pid);
+    public ProductResponse updateInfo(ProductUpdateRequest request, String username) {
+        Product product = findById(request.getProduct_id());
         User user = userRepository.findByEmailOrThrow(username);
         checkAuth(product, user);
 
-        removeImage(product);
-        imageRepository.deleteAll(product.getProductImages());
-        if (images != null) {
-            List<ProductImages> articleImages = saveImage(images, product);
-            product.setProductImages(articleImages);
-        } else {
-            product.setProductImages(new ArrayList<>());
-        }
         product.updateInfo(request);
 
         // 알림 보내는 부분: NoticeRequest 작성하기?
@@ -109,21 +90,21 @@ public class ProductService {
         // null인 receiverID는 Listener에서 pid로 partyList를 불러와서 채워줌 근데이거 일케해도 되나...
         // 알림 발송
         eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
-                                    NoticeType.POST_CHANGED, product.getId()));
+                NoticeType.POST_CHANGED, product.getId()));
 
         return productMapper.toDto(product);
     }
 
     @Transactional
-    public ProductResponse updateStatus(Long pid, ProductStatusUpdateRequest request, String username) {
-        Product product = findById(pid);
+    public ProductResponse updateStatus(ProductStatusUpdateRequest request, String username) {
+        Product product = findById(request.getProduct_id());
         User user = userRepository.findByEmailOrThrow(username);
         checkAuth(product, user);
         product.updateStatus(request.getStatus());
 
         // 알림 발송
         eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
-                                    NoticeType.STATUS_CHANGED, product.getId()));
+                NoticeType.STATUS_CHANGED, product.getId()));
 
         return productMapper.toDto(product);
     }
@@ -170,7 +151,7 @@ public class ProductService {
     // YJ: 밑코드 EVENTLISTENER로 받도록?
     // 만든공구 리스트
     public Page<ProductResponse> toResPost(Long uid, int pageNo, int pageSize) {
-        User user = userService.findById(uid);
+        User user = userRepository.findByIdOrThrow(uid);
 
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Product> productPage = productRepository.findByUser(user, itemPage);
@@ -185,8 +166,8 @@ public class ProductService {
 
     // 참여공구 리스트
     // partyService 불러서 깔끔하게 만들고싶은데 자꾸 순환오류남...
-    public Page<ProductResponse> toResParty(Long uid, int pageNo, int pageSize) {
-        User buyer = userService.findById(uid);
+    public Page<ProductResponse> toResParty(String username, int pageNo, int pageSize) {
+        User buyer = userRepository.findByEmailOrThrow(username);
 
         List<Party> parties = buyer.getParties();
         if (parties.isEmpty()) {
@@ -235,25 +216,4 @@ public class ProductService {
     }
 
 
-    private void removeImage(Product product) {
-        List<FileResponse> images = product.getProductImages().stream().map(ImageMapper.INSTANCE::toDto).toList();
-
-        for (FileResponse temp : images) {
-            ImageUtils.removeFile(temp.getFileName(), PRODUCT_FILE_URL);
-        }
-    }
-
-    @Transactional
-    private List<ProductImages> saveImage(MultipartFile[] images, Product product) {
-        List<FileResponse> responses = Arrays.stream(images)
-                .map(file -> ImageUtils.saveFile(file, PRODUCT_FILE_URL, file.getOriginalFilename().split("\\.")[0]))
-                .toList();
-
-        responses.forEach(temp -> temp.setProduct(product));
-
-        return responses.stream()
-                .map(ImageMapper.INSTANCE::toEntity)
-                .map(imageRepository::save)
-                .collect(Collectors.toList());
-    }
 }

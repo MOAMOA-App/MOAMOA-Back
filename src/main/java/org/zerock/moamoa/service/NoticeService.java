@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -19,6 +18,7 @@ import org.zerock.moamoa.domain.entity.Notice;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.EmitterRepository;
 import org.zerock.moamoa.repository.NoticeRepository;
+import org.zerock.moamoa.repository.UserRepository;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.Optional;
 public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final NoticeMapper noticeMapper;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final EmitterRepository emitterRepository;
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;    // SSE 연결은 1시간동안 지속됨
 
@@ -73,7 +73,7 @@ public class NoticeService {
      */
     public SseEmitter subscribe(Long memberId, String lastEventId) {
         String emitterId = makeTimeIncludeId(memberId); // username을 포함하여 SseEmitter를 식별하기 위한 고유 아이디 생성
-                                                        // 시간을 emitterId에 붙여두면 데이터가 유실된 시점을 알 수 있음
+        // 시간을 emitterId에 붙여두면 데이터가 유실된 시점을 알 수 있음
         SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
 
         emitter.onCompletion(() -> emitterRepository.deleteById(emitterId));
@@ -135,11 +135,11 @@ public class NoticeService {
 
     // 페이지형식으로 확인할때마다 한번에 불러오는게 나을듯
     public Page<NoticeResponse> getNotices(Long receiverID, int pageNo, int pageSize) {
-        User receiver = userService.findById(receiverID);
-        Pageable itemPage =  PageRequest.of(pageNo, pageSize);
+        User receiver = userRepository.findByIdOrThrow(receiverID);
+        Pageable itemPage = PageRequest.of(pageNo, pageSize);
 
         Page<Notice> noticePage = noticeRepository.findByReceiverID(receiver, itemPage);
-        if (noticePage.isEmpty()){
+        if (noticePage.isEmpty()) {
             throw new EntityNotFoundException(ErrorCode.NOTICE_NOT_FOUND);
         }
 

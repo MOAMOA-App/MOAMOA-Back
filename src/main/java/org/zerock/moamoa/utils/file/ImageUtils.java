@@ -16,24 +16,24 @@ public class ImageUtils extends FileUtils {
         super();
     }
 
-    public static FileResponse saveFile(MultipartFile file, String uploadDir, String fileName) {
+    public static FileResponse saveFile(MultipartFile file, String category) {
         if (validImageExtension(file.getOriginalFilename())) {
-            return FileUtils.saveFile(file, uploadDir, fileName);
+            return FileUtils.saveFile(file, category);
         } else throw new InvalidValueException(ErrorCode.FILE_NOT_VALID_EXTENSION);
     }
 
-    public static List<FileResponse> saveFiles(MultipartFile files[], String uploadDir, String fileName) {
+    public static List<FileResponse> saveFiles(MultipartFile files[], String category) {
         List<FileResponse> result = new ArrayList<>();
         for (MultipartFile file : files) {
             if (validImageExtension(file.getOriginalFilename())) {
-                result.add(FileUtils.saveFile(file, uploadDir, fileName));
+                result.add(FileUtils.saveFile(file, category));
             } else throw new InvalidValueException(ErrorCode.FILE_NOT_VALID_EXTENSION);
         }
         return result;
     }
 
-    public static void removeFile(String filename, String uploadDir) {
-        FileUtils.remove(filename, uploadDir);
+    public static void removeFile(String filename) {
+        FileUtils.remove(filename);
     }
 
     /**

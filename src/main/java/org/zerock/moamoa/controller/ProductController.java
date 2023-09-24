@@ -1,12 +1,10 @@
 package org.zerock.moamoa.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.zerock.moamoa.common.message.OkResponse;
 import org.zerock.moamoa.common.message.SuccessMessage;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
@@ -45,42 +43,32 @@ public class ProductController {
     }
 
     @PostMapping("")
-    public ProductResponse Save(
-            Authentication authentication,
-            @ModelAttribute("product") ProductSaveRequest request,
-            @RequestParam(value = "images", required = false) MultipartFile[] images) {
-
-        ProductResponse response = productService.saveProduct(request, images, authentication.getPrincipal().toString());
-        return response;
+    public ProductResponse Save(Authentication authentication, @RequestBody ProductSaveRequest request) {
+        return productService.saveProduct(request, authentication.getPrincipal().toString());
     }
 
     /**
      * 게시글 수정하기
      */
-    @PutMapping("/{pid}")
-    public ProductResponse UpdateContents(@PathVariable Long pid,
-                                          Authentication authentication,
-                                          @Valid @ModelAttribute("product") ProductUpdateRequest product,
-                                          @RequestParam("images") MultipartFile[] images) {
-        return productService.updateInfo(pid, product, images, authentication.getPrincipal().toString());
+    @PutMapping("")
+    public ProductResponse UpdateContents(Authentication authentication, @RequestBody ProductUpdateRequest request) {
+        return productService.updateInfo(request, authentication.getPrincipal().toString());
     }
 
     /**
      * 게시글 상태 변경하기 [참여 모집 | 거래 진행 | 거래 완료 ]
      */
-    @PutMapping("/{pid}/status")
-    public ProductResponse UpdateStatus(@PathVariable Long pid,
-                                        Authentication authentication,
-                                        @Valid @ModelAttribute("product") ProductStatusUpdateRequest product) {
-        return productService.updateStatus(pid, product, authentication.getPrincipal().toString());
+    @PutMapping("status")
+    public ProductResponse UpdateStatus(Authentication authentication, @RequestBody ProductStatusUpdateRequest request) {
+        return productService.updateStatus(request, authentication.getPrincipal().toString());
     }
 
     /**
      * 게시글 삭제하기 : 게시글 진짜 삭제하는게 아니라 Product 활성화 비활성화 처리
      */
-    @DeleteMapping("{pid}")
-    public Object DeleteContents(Authentication authentication, @PathVariable Long pid) {
-        productService.remove(pid, authentication.getPrincipal().toString());
+    @DeleteMapping("")
+    public Object DeleteContents(Authentication authentication, @RequestBody ProductStatusUpdateRequest request) {
+        productService.remove(request, authentication.getPrincipal().toString());
         return new OkResponse(SuccessMessage.PRODUCT_DELETE).makeAnswer();
     }
 

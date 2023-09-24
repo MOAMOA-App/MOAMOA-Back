@@ -8,6 +8,7 @@ import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.UserBlocked;
 import org.zerock.moamoa.repository.UserBlockedRepository;
+import org.zerock.moamoa.repository.UserRepository;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserBlockedService {
     private final UserBlockedRepository userBlockedRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
 
     @Transactional
@@ -25,8 +26,8 @@ public class UserBlockedService {
 
     @Transactional
     public UserBlocked saveUserBlocked(Long user_id, Long target_id) {
-        User user = userService.findById(user_id);
-        User target = userService.findById(target_id);
+        User user = userRepository.findByIdOrThrow(user_id);
+        User target = userRepository.findByIdOrThrow(target_id);
         UserBlocked userBlocked = new UserBlocked();
 //		userBlocked.setUser(user);
 //		userBlocked.setTarget(target);

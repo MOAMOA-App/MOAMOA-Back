@@ -88,14 +88,18 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateProfile(UserProfileUpdateRequest UP) {
-        User temp = userRepository.findByIdOrThrow(UP.getId());
-        temp.updateProfile(UP);
-        return userMapper.toDto(temp);
+    public UserResponse updateProfile(UserProfileUpdateRequest request, String username) {
+        if (userRepository.existsByEmail(username)) {
+            User user = userRepository.findByEmailOrThrow(username);
+
+            user.updateProfile(request);
+            return userMapper.toDto(user);
+        }
+        return userMapper.toDto(null);
     }
 
     @Transactional
-    public UserResponse updatePw(UserPwUpdateRequest request) throws Exception {
+    public UserResponse updatePw(UserPwUpdateRequest request) {
         // 일단 유저 비밀번호 받아서 입력된 비밀번호와 맞는지 확인
         User temp = userRepository.findByIdOrThrow(request.getId());
         String encodePw = temp.getPassword();

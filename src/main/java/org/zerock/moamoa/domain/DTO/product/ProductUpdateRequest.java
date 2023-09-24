@@ -9,6 +9,7 @@ import java.time.Instant;
 
 @Data
 public class ProductUpdateRequest {
+    private Long product_id;
     private String title;
     private String description;
     private Category categoryId;
@@ -23,9 +24,10 @@ public class ProductUpdateRequest {
     private ProductStatus status;
 
     @Builder
-    public ProductUpdateRequest(String title, String description, Category categoryId, String sellingArea,
+    public ProductUpdateRequest(Long product_id, String title, String description, Category categoryId, String sellingArea,
                                 String detailArea, Integer sellPrice, Integer viewCount, Integer maxCount, String choiceSend,
                                 Integer countImage, Instant finishedAt, ProductStatus status) {
+        this.product_id = product_id;
         this.title = title;
         this.description = description;
         this.categoryId = categoryId;
