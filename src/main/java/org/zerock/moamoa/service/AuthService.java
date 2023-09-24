@@ -12,21 +12,20 @@ import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.user.UserLoginRequest;
 import org.zerock.moamoa.domain.DTO.user.UserLoginResponse;
-import org.zerock.moamoa.domain.DTO.user.UserMapper;
 import org.zerock.moamoa.domain.DTO.user.UserRefreshResponse;
 import org.zerock.moamoa.domain.entity.Auth;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.AuthRepository;
+import org.zerock.moamoa.repository.UserRepository;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class AuthService {
-    private final UserService userService;
-    private final UserMapper userMapper;
     private final AuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
     public Auth getByUserId(Long userId) {
         return authRepository.findByUserId(userId)
@@ -43,40 +42,33 @@ public class AuthService {
      */
     @Transactional
     public UserLoginResponse login(UserLoginRequest request) {
-        // CHECK USERNAME AND PASSWORD
-        User user = userService.findByEmail(request.getEmail());
+        User user = userRepository.findByEmailOrThrow(request.getEmail());
 
+        //탈퇴 계정 확인
         if (!user.getActivate()) return new UserLoginResponse("NOT_ACTIVITY_AUTH");
 
+        //비밀번호 확인
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new AuthException(ErrorCode.AUTH_PASSWORD_UNEQUAL);
         }
 
         CustomUserDetails userDetails = CustomUserDetails.fromEntity(user);
-        // GENERATE ACCESS_TOKEN AND REFRESH_TOKEN
-        String accessToken = jwtTokenProvider.generateAccessToken(userDetails);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
 
-        // 이미 인증이 존재하는 경우
-        if (authRepository.existsByUser(user)) {
-            Auth auth = getByUserId(user.getId());
-            auth.updateAccessToken(accessToken);
-            auth.updateRefreshToken(refreshToken);
-            return new UserLoginResponse("OK", auth, user);
-        }
-
-        // IF NOT EXISTS AUTH ENTITY, SAVE AUTH ENTITY AND TOKEN
-        Auth auth = new Auth();
-        auth.createEntity(user, "Bearer", accessToken, refreshToken);
-        auth = authRepository.save(auth);
+        Auth auth = createAuth(user, userDetails);
         return new UserLoginResponse("OK", auth, user);
     }
 
     public UserLoginResponse OAuthToken(CustomUserDetails userDetails) {
-        User user = userService.findByEmail(userDetails.getUsername());
+        User user = userRepository.findByEmailOrThrow(userDetails.getUsername());
 
+        //탈퇴 계정 확인
         if (!user.getActivate()) return new UserLoginResponse("NOT_ACTIVITY_AUTH");
 
+        Auth auth = createAuth(user, userDetails);
+        return new UserLoginResponse("OK", auth, user);
+    }
+
+    private Auth createAuth(User user, CustomUserDetails userDetails) {
         // GENERATE ACCESS_TOKEN AND REFRESH_TOKEN
         String accessToken = jwtTokenProvider.generateAccessToken(userDetails);
         String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
@@ -86,15 +78,16 @@ public class AuthService {
             Auth auth = getByUserId(user.getId());
             auth.updateAccessToken(accessToken);
             auth.updateRefreshToken(refreshToken);
-            return new UserLoginResponse("OK", auth, user);
+            return auth;
         }
 
-        // IF NOT EXISTS AUTH ENTITY, SAVE AUTH ENTITY AND TOKEN
+        // 인증이 존재하지 않는 경우
         Auth auth = new Auth();
         auth.createEntity(user, "Bearer", accessToken, refreshToken);
         auth = authRepository.save(auth);
-        return new UserLoginResponse("OK", auth, user);
+        return auth;
     }
+
 
     /**
      * Token 갱신
