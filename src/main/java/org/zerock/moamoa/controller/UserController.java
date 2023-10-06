@@ -2,27 +2,34 @@ package org.zerock.moamoa.controller;
 
 import io.jsonwebtoken.Claims;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.auth.JwtTokenProvider;
-import org.zerock.moamoa.common.email.EmailAuthRequest;
-import org.zerock.moamoa.common.email.EmailAuthResponse;
+import org.zerock.moamoa.common.email.EmailRequest;
 import org.zerock.moamoa.common.email.EmailMessage;
-import org.zerock.moamoa.common.email.EmailService;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.common.exception.InvalidValueException;
+import org.zerock.moamoa.common.message.OkResponse;
+import org.zerock.moamoa.common.message.SuccessMessage;
+import org.zerock.moamoa.domain.DTO.joinEmails.*;
+import org.zerock.moamoa.domain.DTO.user.*;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.user.*;
 import org.zerock.moamoa.service.AuthService;
+import org.zerock.moamoa.service.JoinEmailService;
 import org.zerock.moamoa.service.UserService;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @RestController
 @RequestMapping("/user")
@@ -30,8 +37,8 @@ import java.util.Map;
 @Slf4j
 public class UserController {
     private final UserService userService;
-    private final EmailService emailService;
     private final AuthService authService;
+    private final JoinEmailService joinEmailService;
 
     // 일단 만들어놓음 (나중에 백엔드에서 인증코드 비교하게 되면 사용)
     private final Map<String, String> verificationCodes = new HashMap<>();
@@ -91,62 +98,22 @@ public class UserController {
     /**
      * 이메일 인증번호 보냄
      */
-    @PostMapping("/signup/sendemail")
-    public ResponseEntity<?> sendVerifyEmail(@RequestBody EmailAuthRequest emailReq) throws MessagingException, UnsupportedEncodingException {
-        // EmailAuthResponse
-        // 이메일 중복 검사
+    @PostMapping("/email/request")
+    public CompletableFuture<JoinEmailtoClientResponse> sendVerifyEmail(@RequestBody EmailRequest emailReq)
+            throws MessagingException, UnsupportedEncodingException {
+        // User 엔티티에 이메일 있는지 이메일 중복 검사
         String email = emailReq.getEmail();
         if (userService.isEmailExist(email)) {
             throw new InvalidValueException(ErrorCode.INVALID_EMAIL_EXIST);
         }
-        EmailMessage emailMessage = EmailMessage.builder()
-                .to(email)
-                .subject("모아모아에서 발급된 이메일 인증 코드입니다.")
-                .build();
-
-        String code = emailService.sendMail(emailMessage);
-        EmailAuthResponse emailAuthRes = new EmailAuthResponse();
-        emailAuthRes.setCode(code);
-
-        // 임시
-//		// EmailMessage의 email 설정
-//		EmailMessage emailMessage = new EmailMessage();
-//		emailMessage.setTo(emailReq.getEmail());
-//
-//		// 인증 코드 발송
-//		String authCode = emailService.sendEmail(emailMessage);
-//
-//		// 인증 코드를 저장하여 나중에 비교할 수 있도록 함
-//		verificationCodes.put(email, authCode);
-//		// 유효 기간 설정 (현재 시간 + 15분)
-//		LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(15);
-//		verificationCodeExpiration.put(email, expirationTime);
-
-        // 프론트엔드로 인증 코드 전송
-        return ResponseEntity.ok(HttpStatus.OK);
-//								emailAuthRes
-
+        return joinEmailService.sendEmail(emailReq);
     }
-//
-//	@PostMapping("verifyAuthCode")
-//	public ResponseEntity<String> verifyAuthCode(@RequestBody EmailCodeRequest emailCodeReq) {
-//		String email = emailCodeReq.getEmail();
-//		String authCode = emailCodeReq.getCode();
-//
-//		// 유효 기간 확인
-//		LocalDateTime expirationTime = verificationCodeExpiration.get(email);
-//		if (expirationTime == null || LocalDateTime.now().isAfter(expirationTime)) {
-//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 코드의 유효 기간이 지났습니다.");
-//		}
-//
-//		// 인증 코드 비교
-//		String storedAuthCode = verificationCodes.get(email);
-//		if (storedAuthCode.equals(authCode)) {
-//			return ResponseEntity.ok("인증 성공");
-//		} else {
-//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 실패");
-//		}
-//	}
 
+    // updateauth 인증번호 확인
+    // 이쪽에서 유저가 입력한 인증코드 받아서 이메일이랑 인증코드 같은지 확인하고 같을시 ㅇㅋ맞음, 다를시 ㄴㄴ틀림 보내줘야
+    @PutMapping("/email/response")
+    public JoinEmailtoClientResponse updateEmailAuth(@RequestBody JoinEmailAuthUpdateRequest authReq) {
+        return joinEmailService.updateAuth(authReq);
+    }
 
 }

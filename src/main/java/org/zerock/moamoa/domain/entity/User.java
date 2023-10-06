@@ -65,9 +65,6 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Product> myPosts;   // 내가 생성한 공동구매
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<WishList> wishLists;
-
     @Builder
     public User(String naver, String kakao, String name, String email,
                 String password, String nick, String profImg, String address, String detailAddress, Boolean activate, Instant deletedAt) {

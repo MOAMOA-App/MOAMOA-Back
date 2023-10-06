@@ -41,6 +41,7 @@ public class MyinfoListener {
         if (productPage.isEmpty()) {
             throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         }
+//        productService.getProductPage(productPage);
 
         return productPage.map(productMapper::toDto);
     }

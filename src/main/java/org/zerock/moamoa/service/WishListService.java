@@ -1,9 +1,14 @@
 package org.zerock.moamoa.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListRequest;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
@@ -30,10 +35,11 @@ public class WishListService {
     }
 
     public WishListResponse saveWish(WishListRequest request) {
-        WishList wishList = wishListMapper.toEntity(request);
-        User user = wishList.getUser();
-        wishList.addUserWish(user);
-        return wishListMapper.toDto(wishListRepository.save(wishList));
+        WishList wishList = wishListRepository.save(wishListMapper.toEntity(request));
+//        WishList wishList = wishListMapper.toEntity(request);
+//        User user = wishList.getUser();
+//        wishList.addUserWish(user);
+        return wishListMapper.toDto(wishList);
     }
 
     public void removeWish(Long id) {
@@ -46,13 +52,13 @@ public class WishListService {
         }
 
         // optionalWishList에서 실제 WishList 객체 가져옴
-        WishList wishList = optionalWishList.get();
+//        WishList wishList = optionalWishList.get();
         // WishList 객체에 연결된 User 객체 가져옴
-        User user = wishList.getUser();
+//        User user = wishList.getUser();
 
-        if (user != null) {
-            wishList.removeUserWish();
-        }
+//        if (user != null) {
+//            wishList.removeUserWish();
+//        }
 
         wishListRepository.deleteById(id);
     }
@@ -74,5 +80,19 @@ public class WishListService {
         } else {
             return products;
         }
+    }
+
+    // 찜한공구 리스트
+    public Page<WishListResponse> toResWish(String username, int pageNo, int pageSize) {
+        User user = userRepository.findByEmailOrThrow(username);
+        Pageable itemPage = PageRequest.of(pageNo, pageSize);
+        Page<WishList> wishListPage = wishListRepository.findByUser(user, itemPage);
+
+
+        if (wishListPage.isEmpty()) {
+            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        return wishListPage.map(wishListMapper::toDto);
     }
 }

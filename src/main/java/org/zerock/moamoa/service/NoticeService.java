@@ -35,20 +35,11 @@ public class NoticeService {
     private final EmitterRepository emitterRepository;
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;    // SSE 연결은 1시간동안 지속됨
 
-    public NoticeResponse findOne(Long id) {
-        return noticeMapper.toDto(findById(id));
-    }
-
-    public Notice findById(Long id) {
-        return this.noticeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.NOTICE_NOT_FOUND));
-    }
 
     public List<Notice> findAll() {
         return this.noticeRepository.findAll();
     }
 
-    // YJ: 이벤트리스너가 알림 보내는거 해야됨
     public NoticeResponse saveAndSend(NoticeSaveRequest request) {
         Notice savedNotice = noticeRepository.save(noticeMapper.toEntity(request));
 
@@ -127,15 +118,15 @@ public class NoticeService {
 
     // 읽을 시 상태 변경
     @Transactional
-    public NoticeResponse updateRead(NoticeReadUpdateRequest NR) {
-        Notice temp = findById(NR.getId());
+    public NoticeResponse updateRead(NoticeReadUpdateRequest req) {
+        Notice temp = noticeRepository.findByIdOrThrow(req.getId());
         temp.updateRead(true);
         return noticeMapper.toDto(temp);
     }
 
     // 페이지형식으로 확인할때마다 한번에 불러오는게 나을듯
-    public Page<NoticeResponse> getNotices(Long receiverID, int pageNo, int pageSize) {
-        User receiver = userRepository.findByIdOrThrow(receiverID);
+    public Page<NoticeResponse> getNotices(String receiverName, int pageNo, int pageSize) {
+        User receiver = userRepository.findByEmailOrThrow(receiverName);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
 
         Page<Notice> noticePage = noticeRepository.findByReceiverID(receiver, itemPage);
@@ -143,10 +134,6 @@ public class NoticeService {
             throw new EntityNotFoundException(ErrorCode.NOTICE_NOT_FOUND);
         }
 
-        return noticePage.map(notice -> findOne(notice.getId()));
-    }
-
-    public NoticeResponse getResponseObject(Notice notice) {
-        return noticeMapper.toDto(notice);
+        return noticePage.map(noticeMapper::toDto);
     }
 }

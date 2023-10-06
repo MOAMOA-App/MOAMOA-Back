@@ -23,7 +23,7 @@ public class ChatHandler extends TextWebSocketHandler {
 
 
     //WebSocketSession : 연결된 클라이언트를 나타내는 객체
-    //
+    // afterConnectionEstablished: 웹소켓이 연결되면 호출되는 함수
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         //방금 참여한 사용자를 저장
@@ -34,6 +34,8 @@ public class ChatHandler extends TextWebSocketHandler {
 
 
     //WebSocket 메세지를 받으면 실행
+    // WebSocketSession session : 전송 주체 정보가 담긴 세션
+    // TextMessage message : 전송 받은 메세지 정보
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();

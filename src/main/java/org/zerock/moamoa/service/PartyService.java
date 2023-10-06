@@ -35,8 +35,8 @@ public class PartyService {
 
     public List<PartyResponse> getByBuyer(Long uid) {
         User user = userRepository.findByIdOrThrow(uid);
-        List<Party> parties = user.getParties();
-        // partyRepository.findByBuyer(user)
+        List<Party> parties = partyRepository.findByBuyer(user);
+//                user.getParties();
 
         return parties.stream().map(partyMapper::toDto).toList();
     }
@@ -58,8 +58,6 @@ public class PartyService {
 //        User buyer = userService.findById(userId);
 //        List<Party> parties = partyRepository.findByBuyer(buyer);
 //
-//        // YJ: 파티 존재하지 않을 시의 경우도 고려해야 함
-//        // 상품 가져와서 리스트 추가
 //        List<Product> products = new ArrayList<>();
 //        for (Party party : parties) {
 //            Product product = party.getProduct();

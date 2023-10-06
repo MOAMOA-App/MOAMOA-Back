@@ -10,16 +10,17 @@ import org.zerock.moamoa.service.WishListService;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/heart")
 public class WishListController {
     private final WishListService wishListService;
 
-    @PostMapping("/product/{pid}/wish")
+    @PostMapping("/{pid}")
     public WishListResponse saveWish(@PathVariable Long pid,
                                      @RequestParam WishListRequest wishListRequest){
         return wishListService.saveWish(wishListRequest);
     }
 
-    @DeleteMapping("/product/{pid}/wish/{wid}")
+    @DeleteMapping("/{pid}/wish/{wid}")
     public Object removeWish(@PathVariable Long pid,
                              @RequestParam Long wid) {
         wishListService.removeWish(wid);

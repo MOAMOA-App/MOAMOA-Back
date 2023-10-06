@@ -5,9 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.domain.DTO.chat.ChatMessageRequest;
+import org.zerock.moamoa.domain.DTO.chat.ChatMessageResponse;
 import org.zerock.moamoa.domain.DTO.chat.ChatRoomRequest;
 import org.zerock.moamoa.domain.DTO.chat.ChatRoomResponse;
 import org.zerock.moamoa.domain.entity.ChatMessage;
@@ -29,6 +33,7 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate template; //특정 브로커로 메세지 전달
 
     public Page<ChatRoomResponse> getPageByProjectId(Long pid, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
@@ -38,6 +43,20 @@ public class ChatService {
         return rooms.map(ChatRoomResponse::fromEntity);
     }
 
+    // 유저의 채팅방 불러옴
+    public Page<ChatRoomResponse> getPageByUserId(String username, int pageNo, int pageSize) {
+        User user = userRepository.findByEmailOrThrow(username);
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        // 채팅방 seller랑 user 둘다로 찾음!
+        Page<ChatRoom> rooms = chatRoomRepository.findAllBySellerIdAndUserId(user, user, pageable);
+        return rooms.map(ChatRoomResponse::fromEntity);
+    }
+
+    public ChatRoom findByRoomId(Long id){
+        return chatRoomRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ROOM_NOT_FOUND));
+    }
+
     public List<ChatRoom> roomFindAll() {
         return chatRoomRepository.findAll();
     }
@@ -45,6 +64,15 @@ public class ChatService {
     public List<ChatMessage> messageFindAll() {
         return chatMessageRepository.findAll();
     }
+
+    public List<ChatMessage> roomMessageFindAll(ChatRoom chatRoom){
+        return chatMessageRepository.findAllChatByChatRoom(chatRoom);
+    }
+
+    public Boolean isChatRoomExists(Product product, User seller, User user) {
+        return chatRoomRepository.existsByProductIdAndSellerIdAndUserId(product, seller, user);
+    }
+
 
     public ChatRoomResponse saveChatRoom(ChatRoomRequest request) {
         Product product = productRepository.findByIdOrThrow(request.getProductId());
@@ -56,22 +84,19 @@ public class ChatService {
         return ChatRoomResponse.fromEntity(chatRoom);
     }
 
-    public ChatMessage saveChatMessage(String message, Long chatRoomId, Long senderId) {
-        User sender = userRepository.findByIdOrThrow(senderId);
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new RuntimeException("chatRoom not found"));
+    public void saveAndSendChat(ChatMessageRequest req) {
+        // send
+        template.convertAndSend("/queue/chatroom/" + req.getChatRoom(), req); // destination으로 payload 보냄
 
-        ChatMessage chatMessage = new ChatMessage();
-        // chatMessage.setMessage(message);
-        // chatMessage.setSender(sender);
-        // chatMessage.setChatRoom(chatRoom);
-        return chatMessageRepository.save(chatMessage);
+        // 메시지 저장
+        User sender = userRepository.findByIdOrThrow(req.getSender());
+        ChatRoom chatRoom = findByRoomId(req.getChatRoom());
+        ChatMessage chatMessage = new ChatMessage(chatRoom, sender, req.getMessage(), false);
+        chatMessageRepository.save(chatMessage);
     }
-
 
     public ChatRoomResponse findRoomById(Long id) {
-        ChatRoom Room = chatRoomRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(ErrorCode.ROOM_NOT_FOUND));
+        ChatRoom Room = findByRoomId(id);
         return ChatRoomResponse.fromEntity(Room);
     }
-
 }

@@ -35,18 +35,18 @@ public class WishList extends BaseEntity {
         this.createdAt = createdAt;
     }
 
-    public void addUserWish(User user) {
-        this.user = user;
-        if (!user.getWishLists().contains(this)) {
-            user.getWishLists().add(this);
-        }
-    }
+//    public void addUserWish(User user) {
+//        this.user = user;
+//        if (!user.getWishLists().contains(this)) {
+//            user.getWishLists().add(this);
+//        }
+//    }
 
-    public void removeUserWish() {
-        if (user != null) {
-            User user = this.user;
-            user.getWishLists().remove(this);
-            this.user = null;
-        }
-    }
+//    public void removeUserWish() {
+//        if (user != null) {
+//            User user = this.user;
+//            user.getWishLists().remove(this);
+//            this.user = null;
+//        }
+//    }
 }
