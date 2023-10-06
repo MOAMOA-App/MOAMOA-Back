@@ -31,12 +31,10 @@ public class NoticeResponse {
 
     @Builder
     public NoticeResponse(Long id, UserProfileResponse senderID, UserProfileResponse receiverID, Boolean readOrNot,
-                          NoticeType type, ProductResponse referenceID, Instant createdAt // , String message
-                          ) {
+                          NoticeType type, ProductResponse referenceID, Instant createdAt) {
         this.id = id;
         this.senderID = senderID;
         this.receiverID = receiverID;
-//        this.message = message;
         this.readOrNot = readOrNot;
         this.type = type;
         this.referenceID = referenceID;

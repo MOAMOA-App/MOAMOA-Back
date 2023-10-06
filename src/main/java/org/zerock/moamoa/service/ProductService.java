@@ -30,7 +30,6 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final ProductMapper productMapper;
-    private final WishListService wishListService;
     private final FileService fileService;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -71,7 +70,7 @@ public class ProductService {
         Product product = productRepository.findByIdOrThrow(request.getProductId());
         User user = userRepository.findByEmailOrThrow(username);
         checkAuth(product, user);
-        
+
         product.updateInfo(request);
 
         // 알림 보내는 부분: NoticeRequest 작성하기?
@@ -138,11 +137,9 @@ public class ProductService {
         return resultPage.map(productMapper::toDto);
     }
 
-    // YJ: 밑코드 EVENTLISTENER로 받도록?
     // 만든공구 리스트
-    public Page<ProductResponse> toResPost(Long uid, int pageNo, int pageSize) {
-        User user = userRepository.findByIdOrThrow(uid);
-
+    public Page<ProductResponse> toResPost(String username, int pageNo, int pageSize) {
+        User user = userRepository.findByEmailOrThrow(username);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Product> productPage = productRepository.findByUser(user, itemPage);
 
@@ -151,52 +148,6 @@ public class ProductService {
         }
 
         return productPage.map(productMapper::toDto);
-    }
-
-    // 참여공구 리스트
-    // partyService 불러서 깔끔하게 만들고싶은데 자꾸 순환오류남...
-    public Page<ProductResponse> toResParty(String username, int pageNo, int pageSize) {
-        User buyer = userRepository.findByEmailOrThrow(username);
-
-        List<Party> parties = buyer.getParties();
-        if (parties.isEmpty()) {
-            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
-        // 상품 가져와서 리스트 추가
-        List<Product> products = new ArrayList<>();
-
-        for (Party party : parties) {
-            Product product = party.getProduct();
-            products.add(product);
-        }
-
-        List<ProductResponse> list = products.stream()
-                .map(productMapper::toDto)
-                .toList();
-
-        Sort sort = Sort.by(Sort.Direction.DESC, "party.createdAt");
-        return listtoPage(list, sort, pageNo, pageSize);
-    }
-
-    // 찜한공구 리스트
-    public Page<ProductResponse> toResWish(Long uid, int pageNo, int pageSize) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "wishlist.createdAt");
-        List<ProductResponse> list = wishListService.wishToProduct(uid).stream()
-                .map(productMapper::toDto)
-                .toList();
-
-        return listtoPage(list, sort, pageNo, pageSize);
-    }
-
-    // 리스트 -> 페이지 변환
-    public Page<ProductResponse> listtoPage(List<ProductResponse> list, Sort sort, int pageNo, int pageSize) {
-
-        PageRequest pageRequest = PageRequest.of(pageNo, pageSize, sort);
-        int start = (int) pageRequest.getOffset();    // 페이지의 시작 인덱스. Offset: 페이지 시작 위치
-        int end = Math.min((start + pageRequest.getPageSize()), list.size());    // 페이지의 끝 인덱스
-        // end값 list 크기랑 비교, 만약 end>list -> end 값을 list의 크기로 대체 -> 리스트의 범위 초과하는 페이지 요청 방지
-
-        return new PageImpl<>(list.subList(start, end), pageRequest, list.size());
     }
 
     public void checkAuth(Product product, User user) {

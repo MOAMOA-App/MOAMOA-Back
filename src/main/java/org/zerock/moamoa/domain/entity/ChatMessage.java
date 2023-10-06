@@ -1,9 +1,14 @@
 package org.zerock.moamoa.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
+import org.zerock.moamoa.domain.DTO.chat.ChatMessageResponse;
+import org.zerock.moamoa.domain.DTO.chat.ChatRoomResponse;
+
+import java.time.Instant;
 
 @Entity
 @Getter
@@ -31,5 +36,15 @@ public class ChatMessage extends BaseEntity {
 
     @Column(name = "read_or_not", nullable = false)
     private Boolean readOrNot;
-    
+
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    @Builder
+    public ChatMessage(ChatRoom chatRoom, User sender, String message, Boolean readOrNot) {
+        this.chatRoom = chatRoom;
+        this.sender = sender;
+        this.message = message;
+        this.readOrNot = readOrNot;
+    }
 }
