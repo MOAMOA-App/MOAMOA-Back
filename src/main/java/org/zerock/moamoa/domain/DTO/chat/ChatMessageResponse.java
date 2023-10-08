@@ -12,13 +12,12 @@ public class ChatMessageResponse {
     private String message;
     private Boolean readOrNot;
 
-    public static ChatMessageResponse fromEntity(ChatMessage chatMessage){
-        ChatMessageResponse response = new ChatMessageResponse();
-        response.setId(chatMessage.getId());
-        response.setChatRoom(chatMessage.getChatRoom());
-        response.setSender(chatMessage.getSender().getId());
-        response.setMessage(chatMessage.getMessage());
-        response.setReadOrNot(chatMessage.getReadOrNot());
-        return response;
+    public static ChatMessageResponse toDto(ChatMessage chatMessage){
+        ChatMessageResponse res = new ChatMessageResponse();
+        res.chatRoom = chatMessage.getChatRoom();
+        res.message = chatMessage.getMessage();
+        res.sender = chatMessage.getSender().getId();
+        res.readOrNot = chatMessage.getReadOrNot();
+        return res;
     }
 }

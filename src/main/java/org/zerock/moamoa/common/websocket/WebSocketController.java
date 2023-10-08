@@ -2,15 +2,24 @@ package org.zerock.moamoa.common.websocket;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.*;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.zerock.moamoa.domain.DTO.chat.ChatMessageRequest;
 import org.zerock.moamoa.domain.DTO.chat.ChatMessageResponse;
 import org.zerock.moamoa.domain.entity.ChatMessage;
 import org.zerock.moamoa.domain.entity.ChatRoom;
+import org.zerock.moamoa.repository.ChatMessageRepository;
 import org.zerock.moamoa.repository.ChatRoomRepository;
+import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.service.ChatService;
 
 import java.util.List;
@@ -21,12 +30,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class WebSocketController {
     // STOMP over WebSocket
-    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final SimpMessagingTemplate template;   //특정 브로커로 메세지 전달
     private final ChatService chatService;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final UserRepository userRepository;
 
-    @MessageMapping("/chat")
 
+    @MessageMapping("")
     public void sendChat(
             @Payload ChatMessage chatMessage,
             // STOMP over WebSocket은 Header를 포함할 수 있다
@@ -45,39 +56,33 @@ public class WebSocketController {
 //        );
     }
 
+    // 클라이언트에서 /app/chat/send 로 메시지를 발행 -> 컨트롤러에서 @MessageMapping으로 받아줌
+    // 받은 메시지를 데이터베이스에 저장하기 위해 chatService의 saveChat 메소드 호출
+    // messagingTemplate의 convertAndSend 메소드를 통해 /queue/채팅방id를 구독한 유저에게 해당 메시지를 보냄
+    @MessageMapping("/chat/send")
+    public void message(@Payload ChatMessageRequest req) {
+        chatService.saveChat(req);
 
-//    // 채팅방 들어가면 원래 있었던 메시지 msg로 다 보내주는식인가봄 (전에 보냈던거 다시)
-//    @MessageMapping(value = "/chat/enter")
-//    public void enter(ChatMessage chatMessage){
-//
-//    }
-
-    // Client 가 SEND 할 수 있는 경로
-    // 참여자 목록에서 채팅하기 보낼 때
-    // 아니면 걍 이걸 불러오는걸로하고 보내는건 아예 딴걸로
-    // MessageMapping: 이 경로로 메시지 보냄
-    @MessageMapping("/chatroom/{rid}/enter")    // 실제론 메세지 매핑으로 /chat/chatroom/{id}/enter 임
-//    @SendTo("/queue/chats")    // WebSocketStompConfig에서 설정했던 곳으로
-    public void sendMessage(@DestinationVariable("rid") Long rid,
-                            @Payload ChatMessageRequest req) {
-        ChatRoom chatRoom = chatRoomRepository.findByIdOrThrow(req.getChatRoom());
-        // 입장시 메시지 보내주는 부분
-        List < ChatMessage > chatList = chatService.roomMessageFindAll(chatRoom);
-        if (chatList != null) {
-            for (ChatMessage c : chatList) {
-                req.setSender(c.getSender().getId());
-                req.setMessage(c.getMessage());
-            }
-        }
-        chatService.saveAndSendChat(req);
     }
 
-    // 방에 들어온 상태에서 메시지 보낼 때
-    // 처음 채팅방에 들어와서(참여자 목록에서 채팅하기 누를때 화면?) 메시지 보낼 때 채팅방 생성, 이후 메시지만 보냄
-    // 이후 채팅하기나 채팅방 목록으로 들어가면 메시지만 보낼 수 있도록 하면 될 듯
-    @MessageMapping("/chatroom/{rid}")
-    public void message(@DestinationVariable("rid") Long rid, ChatMessageRequest req) {
-        chatService.saveAndSendChat(req);
+    // 채팅방id로 채팅 이력 불러옴
+    @GetMapping("/chat/find/{rid}")
+    public ResponseEntity<List<ChatMessageResponse>> getChats(@PathVariable Long rid
+//                                                              Authentication auth,
+//                                                              Pageable pageable
+    ) {
+//        userRepository.findByEmailOrThrow(auth.getName());
+        ChatRoom chatRoom = chatRoomRepository.findByIdOrThrow(rid);
+
+//        Page<ChatMessageResponse> chatPage = chatService.roomMessageFindAll(chatRoom, pageable)
+//                .map(ChatMessageResponse::toDto);
+
+        List<ChatMessageResponse> chatList = chatMessageRepository.findAllChatByChatRoom(chatRoom)
+                .stream()
+                .map(ChatMessageResponse::toDto)
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(chatList);
     }
 }
 

@@ -36,7 +36,6 @@ public class PartyService {
     public List<PartyResponse> getByBuyer(Long uid) {
         User user = userRepository.findByIdOrThrow(uid);
         List<Party> parties = partyRepository.findByBuyer(user);
-//                user.getParties();
 
         return parties.stream().map(partyMapper::toDto).toList();
     }
@@ -45,26 +44,9 @@ public class PartyService {
         Party party = partyMapper.toEntity(request);
         Product product = productRepository.findByIdOrThrow(pid);
         party.setProduct(product);
-
-        // request의 구매자 정보를 불러와서 user의 parties에 저장
-        User buyer = request.getBuyer();
-        party.setUser(buyer);
-
         return partyMapper.toDto(partyRepository.save(party));
 
     }
-
-//    public List<Product> partyToProduct(Long userId) {
-//        User buyer = userService.findById(userId);
-//        List<Party> parties = partyRepository.findByBuyer(buyer);
-//
-//        List<Product> products = new ArrayList<>();
-//        for (Party party : parties) {
-//            Product product = party.getProduct();
-//            products.add(product);
-//        }
-//        return products;
-//    }
 }
 
 // public boolean removeParty(Long id) {

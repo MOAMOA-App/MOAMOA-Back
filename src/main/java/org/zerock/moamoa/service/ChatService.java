@@ -6,12 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.chat.ChatMessageRequest;
-import org.zerock.moamoa.domain.DTO.chat.ChatMessageResponse;
 import org.zerock.moamoa.domain.DTO.chat.ChatRoomRequest;
 import org.zerock.moamoa.domain.DTO.chat.ChatRoomResponse;
 import org.zerock.moamoa.domain.entity.ChatMessage;
@@ -33,7 +32,9 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    private final SimpMessagingTemplate template; //특정 브로커로 메세지 전달
+
+    private final SimpMessagingTemplate template;   //특정 브로커로 메세지 전달
+
 
     public Page<ChatRoomResponse> getPageByProjectId(Long pid, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
@@ -65,8 +66,8 @@ public class ChatService {
         return chatMessageRepository.findAll();
     }
 
-    public List<ChatMessage> roomMessageFindAll(ChatRoom chatRoom){
-        return chatMessageRepository.findAllChatByChatRoom(chatRoom);
+    public Page<ChatMessage> roomMessageFindAll(ChatRoom chatRoom, Pageable pageable){
+        return chatMessageRepository.findAllChatByChatRoom(chatRoom, pageable);
     }
 
     public Boolean isChatRoomExists(Product product, User seller, User user) {
@@ -84,12 +85,13 @@ public class ChatService {
         return ChatRoomResponse.fromEntity(chatRoom);
     }
 
-    public void saveAndSendChat(ChatMessageRequest req) {
-        // send
-        template.convertAndSend("/queue/chatroom/" + req.getChatRoom(), req); // destination으로 payload 보냄
+    public void saveChat(ChatMessageRequest req) {
+        template.convertAndSend("/topic/chat/" + req.getChatRoom(), req);
 
         // 메시지 저장
+//        User sender = userRepository.findByEmailOrThrow(name);
         User sender = userRepository.findByIdOrThrow(req.getSender());
+
         ChatRoom chatRoom = findByRoomId(req.getChatRoom());
         ChatMessage chatMessage = new ChatMessage(chatRoom, sender, req.getMessage(), false);
         chatMessageRepository.save(chatMessage);

@@ -44,11 +44,4 @@ public class Party extends BaseEntity {
         }
     }
 
-    public void setUser(User user) {
-        this.buyer = user;
-        if (!user.getParties().contains(this)) {
-            user.getParties().add(this);
-        }
-    }
-
 }
