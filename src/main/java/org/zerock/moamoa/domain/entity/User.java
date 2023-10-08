@@ -59,12 +59,6 @@ public class User extends BaseEntity {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
-    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
-    private List<Party> parties;    // 내가 참여한 공동구매?
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Product> myPosts;   // 내가 생성한 공동구매
-
     @Builder
     public User(String naver, String kakao, String name, String email,
                 String password, String nick, String profImg, String address, String detailAddress, Boolean activate, Instant deletedAt) {
@@ -137,9 +131,6 @@ public class User extends BaseEntity {
     /**
      * 닉네임 설정
      */
-    // 가입할때 함 설정해주면 될거같은데 나머지는 프로필에서 뭐 알아서 랜덤으로 하든 설정을 하든 하겠지...
-    // 일케 해놓고보니 닉네임 랜덤설정도 따로빼야되나싶기도함
-    // YJ: 프사설정!!!!
     public void randomNick() {
         ArrayList<String> nickarr1 = new ArrayList<>(
                 Arrays.asList("무지개", "분홍", "오렌지", "개나리", "연두", "해변의", "퍼렁", "보라", "갈색", "하얀"));

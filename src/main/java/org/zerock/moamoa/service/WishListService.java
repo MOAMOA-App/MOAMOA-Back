@@ -36,30 +36,14 @@ public class WishListService {
 
     public WishListResponse saveWish(WishListRequest request) {
         WishList wishList = wishListRepository.save(wishListMapper.toEntity(request));
-//        WishList wishList = wishListMapper.toEntity(request);
-//        User user = wishList.getUser();
-//        wishList.addUserWish(user);
         return wishListMapper.toDto(wishList);
     }
 
     public void removeWish(Long id) {
-//        if (wishListRepository.findById(id).isEmpty())
-//            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
-
         Optional<WishList> optionalWishList = wishListRepository.findById(id);
         if (optionalWishList.isEmpty()) {
             throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         }
-
-        // optionalWishList에서 실제 WishList 객체 가져옴
-//        WishList wishList = optionalWishList.get();
-        // WishList 객체에 연결된 User 객체 가져옴
-//        User user = wishList.getUser();
-
-//        if (user != null) {
-//            wishList.removeUserWish();
-//        }
-
         wishListRepository.deleteById(id);
     }
 
@@ -87,12 +71,9 @@ public class WishListService {
         User user = userRepository.findByEmailOrThrow(username);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<WishList> wishListPage = wishListRepository.findByUser(user, itemPage);
-
-
         if (wishListPage.isEmpty()) {
             throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         }
-
         return wishListPage.map(wishListMapper::toDto);
     }
 }
