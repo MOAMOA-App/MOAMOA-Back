@@ -11,9 +11,8 @@ import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.DTO.user.UserProfileResponse;
 import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
 import org.zerock.moamoa.domain.DTO.user.UserResponse;
-import org.zerock.moamoa.service.PartyService;
-import org.zerock.moamoa.service.ProductService;
-import org.zerock.moamoa.service.UserService;
+import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
+import org.zerock.moamoa.service.*;
 
 import java.util.List;
 
@@ -25,6 +24,8 @@ public class MyInfoController { // 맨 긑에 붙은 id를 /profile
     private final UserService userService;
     private final ProductService productService;
     private final PartyService partyService;
+    private final WishListService wishListService;
+
 
     @GetMapping("profile")
     private UserProfileResponse getMyProfile(Authentication authentication) {
@@ -46,11 +47,11 @@ public class MyInfoController { // 맨 긑에 붙은 id를 /profile
      */
     @GetMapping("post")
     public Page<ProductResponse> getMyPosts(
-            @PathVariable Long userid,
+            Authentication auth,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "8") int pageSize
     ) {
-        return productService.toResPost(userid, pageNo, pageSize);
+        return productService.toResPost(auth.getPrincipal().toString(), pageNo, pageSize);
     }
 
 //    /**
@@ -76,10 +77,10 @@ public class MyInfoController { // 맨 긑에 붙은 id를 /profile
      * 내가 찜한 게시글 불러옴
      */
     @GetMapping("heart")
-    public Page<ProductResponse> getUserWishList(@PathVariable("id") Long userId,
-                                                 @RequestParam(defaultValue = "0") int pageNo,
-                                                 @RequestParam(defaultValue = "8") int pageSize) {
-        return productService.toResWish(userId, pageNo, pageSize);
+    public Page<WishListResponse> getUserWishList(Authentication auth,
+                                                  @RequestParam(defaultValue = "0") int pageNo,
+                                                  @RequestParam(defaultValue = "8") int pageSize) {
+        return wishListService.toResWish(auth.getPrincipal().toString(), pageNo, pageSize);
     }
 
     /**

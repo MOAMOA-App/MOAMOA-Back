@@ -25,16 +25,16 @@ public class ProductController {
 
     @GetMapping("")
     public Page<ProductResponse> searchProducts(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String description,
+            @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(required = false) List<String> categories,
             @RequestParam(required = false) List<String> statuses,
-            @RequestParam(defaultValue = "createdAt") String orderBy,
-            @RequestParam(defaultValue = "DESC") String sortOrder,
+            @RequestParam(defaultValue = "subdesc") String search,
+            @RequestParam(defaultValue = "recent") String order,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "20") int pageSize
     ) {
-        return productService.search(title, description, categories, statuses, orderBy, sortOrder, pageNo, pageSize);
+        String[] keywords = keyword.split(" ");
+        return productService.search(keywords, categories, statuses, search, order, pageNo, pageSize);
     }
 
     @GetMapping("/{pid}")

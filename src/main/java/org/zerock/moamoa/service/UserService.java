@@ -18,9 +18,7 @@ import org.zerock.moamoa.repository.UserRepository;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-
     private final UserMapper userMapper;
-
     private final PasswordEncoder passwordEncoder;
 
 
@@ -48,7 +46,7 @@ public class UserService {
         } else {
             user = userMapper.toEntity(request);
             user.updatePw(request.getPassword());
-            user.hashPassword(passwordEncoder);     // 비밀번호 암호화\
+            user.hashPassword(passwordEncoder);     // 비밀번호 암호화
             user.randomNick();  // 닉네임 랜덤설정
             return userMapper.toDto(userRepository.save(user));
         }
@@ -78,24 +76,18 @@ public class UserService {
 
     @Transactional
     public ResultResponse removeUser(String username) {
-        if (userRepository.existsByEmail(username)) {
-            User user = userRepository.findByEmailOrThrow(username);
-            if (!user.getActivate()) return ResultResponse.toDto("ALREADY");
-            user.delete();
-            return ResultResponse.toDto("OK");
-        }
-        return ResultResponse.toDto("AUTH_FAIL");
+        User user = userRepository.findByEmailOrThrow(username);
+        if (!user.getActivate()) return ResultResponse.toDto("ALREADY");
+        user.delete();
+        return ResultResponse.toDto("OK");
     }
 
     @Transactional
     public UserResponse updateProfile(UserProfileUpdateRequest request, String username) {
-        if (userRepository.existsByEmail(username)) {
-            User user = userRepository.findByEmailOrThrow(username);
+        User user = userRepository.findByEmailOrThrow(username);
 
-            user.updateProfile(request);
-            return userMapper.toDto(user);
-        }
-        return userMapper.toDto(null);
+        user.updateProfile(request);
+        return userMapper.toDto(user);
     }
 
     @Transactional

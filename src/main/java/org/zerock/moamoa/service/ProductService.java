@@ -4,7 +4,10 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +16,6 @@ import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.DTO.product.*;
-import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.enums.NoticeType;
@@ -21,7 +23,9 @@ import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -99,43 +103,83 @@ public class ProductService {
         return productMapper.toDto(product);
     }
 
-    public Page<ProductResponse> search(
-            String title, String description,
-            List<String> categories, List<String> statuses,
-            String orderBy, String sortOrder,
-            int pageNo, int pageSize
-    ) {
+    public Page<ProductResponse> search(String[] keywords, List<String> categories, List<String> statuses,
+                                        String search, String order, int pageNo, int pageSize) {
+
         Specification<Product> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (title != null && !title.isEmpty()) {
-                predicates.add(
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
+            // 검색어가 있으면 키워드에 따라 like 검색
+            if (keywords.length > 0) {
+                Predicate[] keywordPredicates = new Predicate[keywords.length];
+                Predicate[] likePredicates;
+
+                switch (search) {
+                    case "sub" -> likePredicates = Arrays.stream(keywords)
+                            .map(key -> criteriaBuilder.like(root.get("title"), "%" + key + "%"))
+                            .toArray(Predicate[]::new);
+
+                    case "descript" -> likePredicates = Arrays.stream(keywords)
+                            .map(key -> criteriaBuilder.like(root.get("description"), "%" + key + "%"))
+                            .toArray(Predicate[]::new);
+
+                    default -> likePredicates = Arrays.stream(keywords)
+                            .flatMap(key -> Stream.of(
+                                    criteriaBuilder.like(root.get("title"), "%" + key + "%"),
+                                    criteriaBuilder.like(root.get("description"), "%" + key + "%")
+                            ))
+                            .toArray(Predicate[]::new);
+                }
+
+                for (int i = 0; i < keywords.length; i++) keywordPredicates[i] = criteriaBuilder.or(likePredicates);
+
+                predicates.add(criteriaBuilder.or(keywordPredicates));
+
             }
-            if (description != null && !description.isEmpty()) {
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("description")),
-                        "%" + description.toLowerCase() + "%"));
+            //상태 카테고리 추가
+            if (statuses != null) {
+                Predicate[] statusPredicates = new Predicate[statuses.size()];
             }
-            if (categories != null && !categories.isEmpty()) {
-                predicates.add(root.get("category").in(categories));
+            if (categories != null) {
+                Predicate[] categoryPredicates = new Predicate[categories.size()];
             }
-            if (statuses != null && !statuses.isEmpty()) {
-                predicates.add(root.get("status").in(statuses));
-            }
-            predicates.add(root.get("activate").in(true));
+
+            predicates.add(criteriaBuilder.equal(root.get("activate"), true));
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        Sort sort;
-        if (sortOrder.equalsIgnoreCase("desc")) {
-            sort = Sort.by(Sort.Direction.DESC, orderBy);
+        Pageable pageable;
+        String[] sortData = findSortField(order);
+
+        // 정렬 설정
+        if (sortData[1].equals("desc")) {
+            pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.DESC, sortData[0]));
         } else {
-            sort = Sort.by(Sort.Direction.ASC, orderBy);
+            pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.ASC, sortData[0]));
         }
-        PageRequest pageRequest = PageRequest.of(pageNo, pageSize, sort);
-        Page<Product> resultPage = productRepository.findAll(spec, pageRequest);
-        return resultPage.map(productMapper::toDto);
+
+        Page<Product> tourCourses = productRepository.findAll(spec, pageable);
+        return tourCourses.map(productMapper::toDto);
     }
+
+    private String[] findSortField(String order) {
+        switch (order) {
+            case "recent" -> {  //최신순
+                return new String[]{"createdAt", "desc"};
+            }
+            case "oldest" -> {  //오래된순
+                return new String[]{"createdAt", "asc"};
+            }
+            case "imminent" -> {
+                return new String[]{"finishedAt", "asc"};
+            }
+            default -> {
+                return new String[]{"createdAt", "desc"};
+            }
+        }
+    }
+
 
     // 만든공구 리스트
     public Page<ProductResponse> toResPost(String username, int pageNo, int pageSize) {
