@@ -8,6 +8,7 @@ import org.zerock.moamoa.common.domain.entity.BaseEntity;
 import org.zerock.moamoa.domain.enums.NoticeType;
 
 import java.time.Instant;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -47,6 +48,7 @@ public class Notice extends BaseEntity {
     }
 
     public void updateRead(Boolean readOrNot) {
+
         this.readOrNot = readOrNot;
     }
 }

@@ -37,7 +37,7 @@ public enum ErrorCode {
     INVALID_PW_VALUE(HttpStatus.BAD_REQUEST, "PW_001", "비밀번호가 맞지 않습니다."),
 
 
-    ;
+    SEARCH_KEYWORD_NOT_FOUND(HttpStatus.BAD_REQUEST, "SK_001", "검색어가 없습니다.");
 
     //------------------------------------------------------------------------//
     private final HttpStatus httpStatus;

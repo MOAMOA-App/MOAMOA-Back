@@ -1,6 +1,7 @@
 package org.zerock.moamoa.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceRequest;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceResponse;
@@ -15,10 +16,11 @@ public class AnnounceController {
     private final AnnounceService announceService;
 
     @PostMapping("/{pid}/announce")
-    public AnnounceResponse saveAnnounce(@PathVariable Long pid,
+    public AnnounceResponse saveAnnounce(Authentication authentication,
+                                         @PathVariable Long pid,
                                          @RequestBody AnnounceRequest announce) {
 
-        return announceService.saveAnnounce(announce, pid);
+        return announceService.saveAnnounce(announce, pid, authentication.getPrincipal().toString());
     }
 
     @GetMapping("/{pid}/announce")

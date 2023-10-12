@@ -2,10 +2,12 @@ package org.zerock.moamoa.domain.DTO.announce;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
 @Data
+@NoArgsConstructor
 public class AnnounceResponse {
     private String message;
     private Long id;
@@ -21,5 +23,12 @@ public class AnnounceResponse {
         this.contents = contents;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+
+    public static AnnounceResponse toMessage(String message) {
+        AnnounceResponse response = new AnnounceResponse();
+        response.message = message;
+        return response;
     }
 }
