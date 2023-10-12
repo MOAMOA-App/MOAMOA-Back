@@ -41,10 +41,6 @@ public class ProductService {
         return productMapper.toDto(productRepository.findByIdOrThrow(pid));
     }
 
-    public List<Product> findAll() {
-        return productRepository.findAll();
-    }
-
     public Page<Product> findPageByUser(User user, Pageable itemPage) {
         return productRepository.findByUser(user, itemPage);
     }

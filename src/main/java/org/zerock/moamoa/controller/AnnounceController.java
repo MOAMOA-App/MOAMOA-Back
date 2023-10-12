@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceRequest;
 import org.zerock.moamoa.domain.DTO.announce.AnnounceResponse;
+import org.zerock.moamoa.domain.DTO.announce.AnnounceResultResponse;
 import org.zerock.moamoa.service.AnnounceService;
 
 import java.util.List;
@@ -15,21 +16,21 @@ import java.util.List;
 public class AnnounceController {
     private final AnnounceService announceService;
 
-    @PostMapping("/{pid}/announce")
-    public AnnounceResponse saveAnnounce(Authentication authentication,
-                                         @PathVariable Long pid,
-                                         @RequestBody AnnounceRequest announce) {
+    @PostMapping("{pid}/announce")
+    public AnnounceResultResponse saveAnnounce(Authentication authentication,
+                                               @PathVariable Long pid,
+                                               @RequestBody AnnounceRequest announce) {
 
         return announceService.saveAnnounce(announce, pid, authentication.getPrincipal().toString());
     }
 
-    @GetMapping("/{pid}/announce")
+    @GetMapping("{pid}/announce")
     public List<AnnounceResponse> getList(@PathVariable Long pid) {
         return announceService.getByProduct(pid);
     }
 
-    @GetMapping("/{pid}/announce/{aid}")
-    public AnnounceResponse getById(@PathVariable Long aid, @PathVariable Long pid) {
+    @GetMapping("{pid}/announce/{aid}")
+    public AnnounceResultResponse getById(@PathVariable Long aid, @PathVariable Long pid) {
         return announceService.findOne(pid, aid);
     }
 

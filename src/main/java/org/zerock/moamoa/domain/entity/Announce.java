@@ -28,7 +28,7 @@ public class Announce extends BaseEntity {
 
     public void updateInfo(AnnounceRequest announce) {
         this.lock = announce.getLock();
-        this.contents = announce.getContents();
+        if (!announce.getContents().isEmpty()) this.contents = announce.getContents();
     }
 
     public void setProduct(Product product) {
@@ -37,6 +37,7 @@ public class Announce extends BaseEntity {
             product.getAnnounces().add(this);
         }
     }
+
 
     @Builder
     public Announce(Long id, Boolean lock, String contents, Product product) {

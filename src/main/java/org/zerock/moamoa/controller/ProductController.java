@@ -12,6 +12,8 @@ import org.zerock.moamoa.domain.DTO.product.ProductSaveRequest;
 import org.zerock.moamoa.domain.DTO.product.ProductStatusUpdateRequest;
 import org.zerock.moamoa.domain.DTO.product.ProductUpdateRequest;
 import org.zerock.moamoa.service.ProductService;
+import org.zerock.moamoa.utils.redis.RedisResponse;
+import org.zerock.moamoa.utils.redis.SearchRedisUtils;
 
 import java.util.List;
 
@@ -34,12 +36,18 @@ public class ProductController {
             @RequestParam(defaultValue = "20") int pageSize
     ) {
         String[] keywords = keyword.split(" ");
+        SearchRedisUtils.addSearchKeyword(keywords);
         return productService.search(keywords, categories, statuses, search, order, pageNo, pageSize);
     }
 
-    @GetMapping("/{pid}")
+    @GetMapping("{pid}")
     public ProductResponse getById(@PathVariable Long pid) {
         return productService.findOne(pid);
+    }
+
+    @GetMapping("top/{number}")
+    public List<RedisResponse> getTopN(@PathVariable int number) {
+        return SearchRedisUtils.readTopSearchKeywords(number);
     }
 
     @PostMapping("")
