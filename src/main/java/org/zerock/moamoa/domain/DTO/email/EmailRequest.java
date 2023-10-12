@@ -1,18 +1,17 @@
-package org.zerock.moamoa.domain.DTO.joinEmails;
+package org.zerock.moamoa.domain.DTO.email;
 
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class JoinEmailRequest {
+public class EmailRequest {
     private String email;
     private String token;
     private String code;
     private Boolean authenticate;
 
     @Builder
-    public JoinEmailRequest(String email, String code, Boolean authenticate) {
+    public EmailRequest(String email, String code, Boolean authenticate) {
         this.email = email;
         this.code = code;
         this.authenticate = authenticate;

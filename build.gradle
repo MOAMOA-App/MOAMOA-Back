@@ -91,7 +91,8 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.21.0'
     testImplementation 'org.springframework.security:spring-security-test'
 
-
+    // 암호화
+    implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
 }
 
 tasks.named('test') {

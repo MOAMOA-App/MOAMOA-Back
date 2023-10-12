@@ -1,21 +1,19 @@
 package org.zerock.moamoa.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
-import org.zerock.moamoa.domain.DTO.joinEmails.JoinEmailAuthUpdateRequest;
-import org.zerock.moamoa.domain.DTO.joinEmails.JoinEmailRequest;
-import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
+import org.zerock.moamoa.domain.DTO.email.EmailAuthUpdateRequest;
+import org.zerock.moamoa.domain.DTO.email.EmailRequest;
 
 import java.time.Instant;
 
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "join_email")
-public class JoinEmail extends BaseEntity {
+@Table(name = "emails")
+public class Email extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,22 +30,22 @@ public class JoinEmail extends BaseEntity {
     @Column(name = "authenticate", nullable = false)
     private Boolean authenticate = false;
 
-    public static JoinEmail toEntity(JoinEmailRequest req) {
-        JoinEmail joinEmail = new JoinEmail();
-        joinEmail.email = req.getEmail();
-        joinEmail.token = req.getEmail() + Instant.now();
-        joinEmail.code = req.getCode();
-        joinEmail.authenticate = req.getAuthenticate();
-        return joinEmail;
+    public static Email toEntity(EmailRequest req) {
+        Email email = new Email();
+        email.email = req.getEmail();
+        email.token = req.getEmail() + Instant.now();
+        email.code = req.getCode();
+        email.authenticate = req.getAuthenticate();
+        return email;
     }
 
-    public void updateCode(JoinEmailRequest req){
+    public void updateCode(EmailRequest req){
         this.email = req.getEmail();
         this.token = req.getEmail() + Instant.now();
         this.code = req.getCode();
     }
 
-    public void updateAuth(JoinEmailAuthUpdateRequest req){
+    public void updateAuth(EmailAuthUpdateRequest req){
         this.token = req.getToken();
         this.authenticate = true;
     }
