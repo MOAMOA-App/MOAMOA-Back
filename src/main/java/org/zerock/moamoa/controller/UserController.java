@@ -2,26 +2,18 @@ package org.zerock.moamoa.controller;
 
 import io.jsonwebtoken.Claims;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.auth.JwtTokenProvider;
-import org.zerock.moamoa.common.email.EmailRequest;
-import org.zerock.moamoa.common.email.EmailMessage;
+import org.zerock.moamoa.domain.DTO.email.EmailAddrRequest;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.common.exception.InvalidValueException;
-import org.zerock.moamoa.common.message.OkResponse;
-import org.zerock.moamoa.common.message.SuccessMessage;
-import org.zerock.moamoa.domain.DTO.joinEmails.*;
+import org.zerock.moamoa.domain.DTO.email.*;
 import org.zerock.moamoa.domain.DTO.user.*;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
-import org.zerock.moamoa.domain.DTO.user.*;
 import org.zerock.moamoa.service.AuthService;
-import org.zerock.moamoa.service.JoinEmailService;
+import org.zerock.moamoa.service.EmailService;
 import org.zerock.moamoa.service.UserService;
 
 import java.io.UnsupportedEncodingException;
@@ -29,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 @RestController
 @RequestMapping("/user")
@@ -38,7 +29,7 @@ import java.util.concurrent.Future;
 public class UserController {
     private final UserService userService;
     private final AuthService authService;
-    private final JoinEmailService joinEmailService;
+    private final EmailService emailService;
 
     // 일단 만들어놓음 (나중에 백엔드에서 인증코드 비교하게 되면 사용)
     private final Map<String, String> verificationCodes = new HashMap<>();
@@ -99,21 +90,21 @@ public class UserController {
      * 이메일 인증번호 보냄
      */
     @PostMapping("/email/request")
-    public CompletableFuture<JoinEmailtoClientResponse> sendVerifyEmail(@RequestBody EmailRequest emailReq)
+    public CompletableFuture<EmailtoClientResponse> sendVerifyEmail(@RequestBody EmailAddrRequest emailReq)
             throws MessagingException, UnsupportedEncodingException {
         // User 엔티티에 이메일 있는지 이메일 중복 검사
         String email = emailReq.getEmail();
         if (userService.isEmailExist(email)) {
             throw new InvalidValueException(ErrorCode.INVALID_EMAIL_EXIST);
         }
-        return joinEmailService.sendEmail(emailReq);
+        return emailService.sendEmail(emailReq);
     }
 
     // updateauth 인증번호 확인
     // 이쪽에서 유저가 입력한 인증코드 받아서 이메일이랑 인증코드 같은지 확인하고 같을시 ㅇㅋ맞음, 다를시 ㄴㄴ틀림 보내줘야
     @PutMapping("/email/response")
-    public JoinEmailtoClientResponse updateEmailAuth(@RequestBody JoinEmailAuthUpdateRequest authReq) {
-        return joinEmailService.updateAuth(authReq);
+    public ResultResponse updateEmailAuth(@RequestBody EmailAuthUpdateRequest authReq) {
+        return emailService.updateAuth(authReq);
     }
 
 }
