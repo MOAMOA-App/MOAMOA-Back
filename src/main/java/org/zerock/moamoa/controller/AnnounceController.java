@@ -24,6 +24,22 @@ public class AnnounceController {
         return announceService.saveAnnounce(announce, pid, authentication.getPrincipal().toString());
     }
 
+    @PutMapping("{pid}/announce")
+    public AnnounceResultResponse updateAnnounce(Authentication authentication,
+                                                 @PathVariable Long pid,
+                                                 @RequestBody AnnounceRequest announce) {
+
+        return announceService.updateInfo(announce, pid, authentication.getPrincipal().toString());
+    }
+
+    @DeleteMapping("{pid}/announce")
+    public AnnounceResultResponse removeAnnounce(Authentication authentication,
+                                                 @PathVariable Long pid,
+                                                 @RequestBody AnnounceRequest announce) {
+
+        return announceService.remove(announce, pid, authentication.getPrincipal().toString());
+    }
+
     @GetMapping("{pid}/announce")
     public List<AnnounceResponse> getList(@PathVariable Long pid) {
         return announceService.getByProduct(pid);

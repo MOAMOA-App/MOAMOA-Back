@@ -26,9 +26,16 @@ public class Announce extends BaseEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(name = "activate")
+    private Boolean activate = true;
+
     public void updateInfo(AnnounceRequest announce) {
         this.lock = announce.getLock();
         if (!announce.getContents().isEmpty()) this.contents = announce.getContents();
+    }
+
+    public void remove() {
+        this.activate = false;
     }
 
     public void setProduct(Product product) {

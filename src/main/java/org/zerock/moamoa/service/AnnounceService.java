@@ -31,61 +31,74 @@ public class AnnounceService {
     public AnnounceResultResponse findOne(Long pid, Long aid) {
         Product product = productRepository.findByIdOrThrow(pid);
         Announce announce = announceRepository.findByIdOrThrow(aid);
-        if (product.equals(announce.getProduct())) {
-            return AnnounceResultResponse.toDto("OK", announceMapper.toDto(announce));
-        }
-        return AnnounceResultResponse.toMessage("PRODUCT_NOT_EQUAL");
+
+        if (!product.equals(announce.getProduct()))
+            return AnnounceResultResponse.toMessage("PRODUCT_NOT_EQUAL");
+
+        if (!isAnnounceActive(announce))
+            return AnnounceResultResponse.toMessage("ALREADY_REMOVED");
+
+        return AnnounceResultResponse.toDto("OK", announceMapper.toDto(announce));
     }
 
     @Transactional
-    public AnnounceResultResponse updateInfo(AnnounceRequest request, String username) {
+    public AnnounceResultResponse updateInfo(AnnounceRequest request, long pid, String username) {
         User user = userRepository.findByEmailOrThrow(username);
         Announce announce = announceRepository.findByIdOrThrow(request.getId());
 
-        if (announce.getProduct().getUser().equals(user)) {
-            if (announce.getId() != null) {
-                announce.updateInfo(request);
-                return AnnounceResultResponse.toMessage("OK");
-            }
-            return AnnounceResultResponse.toMessage("FAIL");
-        }
-        return AnnounceResultResponse.toMessage("FAIL");
+        if (!isRightAuth(pid, user)) return AnnounceResultResponse.toMessage("AUTH_FAIL");
+        if (!isAnnounceActive(announce)) return AnnounceResultResponse.toMessage("ALREADY_REMOVED");
+
+        announce.updateInfo(request);
+        return AnnounceResultResponse.toDto("OK", announceMapper.toDto(announce));
     }
 
     public List<AnnounceResponse> getByProduct(Long pid) {
         Product product = productRepository.findByIdOrThrow(pid);
         List<Announce> announceList = product.getAnnounces();
-        return announceList.stream().map(announceMapper::toDto).toList();
+        return announceList.stream().filter(Announce::getActivate).map(announceMapper::toDto).toList();
     }
 
     public AnnounceResultResponse saveAnnounce(AnnounceRequest request, Long pid, String username) {
         User user = userRepository.findByEmailOrThrow(username);
         Product product = productRepository.findByIdOrThrow(pid);
-        if (product.getUser().equals(user)) {
 
-            request.setProduct(product);
-            Announce announce = announceRepository.save(announceMapper.toEntity(request));
+        if (!product.getUser().equals(user)) return AnnounceResultResponse.toMessage("AUTH_FAIL");
 
-            // 알림 발송
-            eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
-                    NoticeType.NEW_ANNOUNCE, product.getId()));
+        request.setProduct(product);
+        Announce announce = announceRepository.save(announceMapper.toEntity(request));
 
-            return AnnounceResultResponse.toDto("OK", announceMapper.toDto(announce));
-        }
-        return AnnounceResultResponse.toMessage("AUTH_FAIL");
+        // 알림 발송
+        eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
+                NoticeType.NEW_ANNOUNCE, product.getId()));
+
+        return AnnounceResultResponse.toDto("OK", announceMapper.toDto(announce));
     }
 
-    public AnnounceResultResponse remove(AnnounceRequest request, String username) {
+    @Transactional
+    public AnnounceResultResponse remove(AnnounceRequest request, long pid, String username) {
         User user = userRepository.findByEmailOrThrow(username);
         Announce announce = announceRepository.findByIdOrThrow(request.getId());
 
-        if (announce.getProduct().getUser().equals(user)) {
-            if (announce.getId() != null) {
-                //TODO remove
-                return AnnounceResultResponse.toMessage("OK");
+        if (!isRightAuth(pid, user)) return AnnounceResultResponse.toMessage("AUTH_FAIL");
+
+        if (announce.getId() != null) {
+            if (!isAnnounceActive(announce)) {
+                return AnnounceResultResponse.toMessage("ALREADY_REMOVED");
             }
-            return AnnounceResultResponse.toMessage("FAIL");
+            announce.remove();
+            return AnnounceResultResponse.toMessage("OK");
         }
-        return AnnounceResultResponse.toMessage("FAIL");
+        return AnnounceResultResponse.toMessage("REQUEST_FAIL");
+
+    }
+
+    private boolean isAnnounceActive(Announce announce) {
+        return announce.getActivate();
+    }
+
+    private boolean isRightAuth(long pid, User user) {
+        Product product = productRepository.findByIdOrThrow(pid);
+        return product.getUser().equals(user) && product.getId().equals(pid);
     }
 }
