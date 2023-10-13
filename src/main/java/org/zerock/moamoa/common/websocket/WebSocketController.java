@@ -77,7 +77,7 @@ public class WebSocketController {
 //        Page<ChatMessageResponse> chatPage = chatService.roomMessageFindAll(chatRoom, pageable)
 //                .map(ChatMessageResponse::toDto);
 
-        List<ChatMessageResponse> chatList = chatMessageRepository.findAllChatByChatRoom(chatRoom)
+        List<ChatMessageResponse> chatList= chatMessageRepository.findAllChatByChatRoom(chatRoom)
                 .stream()
                 .map(ChatMessageResponse::toDto)
                 .toList();

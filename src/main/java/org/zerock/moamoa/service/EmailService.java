@@ -97,7 +97,7 @@ public class EmailService {
             // 메일 보냄, db에 저장
             javaMailSender.send(mimeMessage);
 
-            EmailRequest emailRequest = new EmailRequest(emailMessage.getTo(), authCode, false);
+            EmailRequest emailRequest = new EmailRequest(emailMessage.getTo(), authCode);
 
             if (!emailRepository.existsByEmail(emailRequest.getEmail())) {
                 // 이메일 존재하지 않을 시 새로 저장

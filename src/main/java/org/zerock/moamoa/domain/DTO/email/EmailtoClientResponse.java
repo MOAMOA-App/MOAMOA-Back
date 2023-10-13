@@ -13,10 +13,4 @@ public class EmailtoClientResponse {
         res.msg = msg;
         return res;
     }
-
-    public static EmailtoClientResponse toDto(String msg) {
-        EmailtoClientResponse res = new EmailtoClientResponse();
-        res.msg = msg;
-        return res;
-    }
 }

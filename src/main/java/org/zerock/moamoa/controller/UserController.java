@@ -87,7 +87,7 @@ public class UserController {
     }
 
     /**
-     * 이메일 인증번호 보냄
+     * 회원가입 이메일 인증번호
      */
     @PostMapping("/email/request")
     public CompletableFuture<EmailtoClientResponse> sendVerifyEmail(@RequestBody EmailAddrRequest emailReq)
@@ -105,6 +105,27 @@ public class UserController {
     @PutMapping("/email/response")
     public ResultResponse updateEmailAuth(@RequestBody EmailAuthUpdateRequest authReq) {
         return emailService.updateAuth(authReq);
+    }
+
+    @PostMapping("/password/request")
+    public CompletableFuture<EmailtoClientResponse> sendPWVerifyEmail(@RequestBody EmailAddrRequest emailReq)
+            throws MessagingException, UnsupportedEncodingException {
+        // User 엔티티에 이메일 있는지 검사, 있으면 메일 보냄, 없으면 오류
+        String email = emailReq.getEmail();
+        if (!userService.isEmailExist(email)) {
+            throw new InvalidValueException(ErrorCode.INVALID_EMAIL_VALUE);
+        }
+        return emailService.sendEmail(emailReq);
+    }
+
+    @PutMapping("/password/response")
+    public ResultResponse updatePWEmail(@RequestBody EmailAuthUpdateRequest authReq) {
+        return emailService.updateAuth(authReq);
+    }
+
+    @PutMapping("/password")
+    public ResultResponse updatePwByToken(@RequestBody EmailUserPwRequest req){
+        return userService.updatePwEmail(req);
     }
 
 }
