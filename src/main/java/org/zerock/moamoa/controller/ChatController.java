@@ -46,9 +46,10 @@ public class ChatController {
     @GetMapping("/{pid}")
     public Page<ChatRoomResponse> getByProject(
             @PathVariable Long pid,
+            Authentication auth,
             @RequestParam(value = "no", defaultValue = "0") int pageNo,
             @RequestParam(value = "size", defaultValue = "20") int pageSize) {
-        return chatService.getPageByProjectId(pid, pageNo, pageSize);
+        return chatService.getPageByProjectId(pid, auth.getPrincipal().toString(), pageNo, pageSize);
     }
 
     @GetMapping("/{id}/name")

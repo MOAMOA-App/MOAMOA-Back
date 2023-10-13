@@ -19,7 +19,7 @@ public class ChatRoomResponse {
 
     private UserProfileResponse userId;
 
-    private List<ChatMessage> messages;
+    private List<ChatMessageResponse> messages;
     private String roomName;
 
     public static ChatRoomResponse fromEntity(ChatRoom chatRoom) {
@@ -28,7 +28,7 @@ public class ChatRoomResponse {
         response.productId = ProductMapper.INSTANCE.toDto(chatRoom.getProductId());
         response.sellerId = UserProfileResponse.builder(chatRoom.getSellerId());
         response.userId = UserProfileResponse.builder(chatRoom.getUserId());
-        response.roomName = "test";
+        response.roomName = chatRoom.getProductId().getTitle();
         return response;
     }
 }

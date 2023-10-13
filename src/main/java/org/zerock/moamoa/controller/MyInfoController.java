@@ -10,6 +10,7 @@ import org.zerock.moamoa.domain.DTO.party.PartyResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.DTO.user.UserProfileResponse;
 import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
+import org.zerock.moamoa.domain.DTO.user.UserPwChangeRequest;
 import org.zerock.moamoa.domain.DTO.user.UserResponse;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
 import org.zerock.moamoa.service.*;
@@ -40,6 +41,15 @@ public class MyInfoController { // 맨 긑에 붙은 id를 /profile
     public UserResponse updateProfile(Authentication authentication,
                                       @ModelAttribute("profile") UserProfileUpdateRequest profileUpdateRequest) {
         return userService.updateProfile(profileUpdateRequest, authentication.getPrincipal().toString());
+    }
+
+    /**
+     * 로그인한 상태에서 비밀번호 찾기
+     */
+    @PostMapping("password")
+    public ResultResponse updatePW(Authentication authentication,
+                                   @ModelAttribute("userpw") UserPwChangeRequest request){
+        return userService.updatePwLogin(request, authentication.getPrincipal().toString());
     }
 
     /**

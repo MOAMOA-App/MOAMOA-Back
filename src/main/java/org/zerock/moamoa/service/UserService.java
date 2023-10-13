@@ -7,11 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.common.exception.InvalidValueException;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
+import org.zerock.moamoa.domain.DTO.email.EmailUserPwRequest;
 import org.zerock.moamoa.domain.DTO.user.*;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.repository.EmailRepository;
 import org.zerock.moamoa.repository.UserRepository;
+
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -20,6 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final EmailRepository emailRepository;
 
 
     public UserProfileResponse getMyProfile(String email) {
@@ -90,22 +94,46 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
+    /**
+     * 비로그인 상태에서 비밀번호 바꿔줌
+     */
     @Transactional
-    public UserResponse updatePw(UserPwUpdateRequest request) {
-        // 일단 유저 비밀번호 받아서 입력된 비밀번호와 맞는지 확인
-        User temp = userRepository.findByIdOrThrow(request.getId());
-        String encodePw = temp.getPassword();
-
-        // 원래 비밀번호 뭐였는지 확인
-        if (passwordEncoder.matches(request.getOldPw(), encodePw)) {
-            // 맞을 시 새 비밀번호 해싱해서 저장
-            request.setNewPw(passwordEncoder.encode(request.getOldPw())); // 비밀번호 암호화
-            temp.updatePw(request.getNewPw());
-            return userMapper.toDto(temp);
-        } else {
-            // 비밀번호 틀릴 시
-            throw new InvalidValueException(ErrorCode.INVALID_PW_VALUE);
+    public ResultResponse updatePwEmail(EmailUserPwRequest req) {
+        // req의 토큰으로 이메일 찾아서 유저 비밀번호 바꿈
+        String email = emailRepository.findByTokenOrThrow(req.getToken()).getEmail();
+        User user = userRepository.findByEmailOrThrow(email);
+        if (user.getPassword() == null){
+            return ResultResponse.toDto("소셜로그인한 회원입니다.");
         }
+        user.updatePw(req.getPassword());
+        user.hashPassword(passwordEncoder);
+
+        return ResultResponse.toDto("OK");
+    }
+
+    /**
+     * 로그인 상태에서 비밀번호 바꿔줌
+     */
+    @Transactional
+    public ResultResponse updatePwLogin(UserPwChangeRequest req, String username) {
+        // 1. Authentication이랑 req 이메일 같은지 비교
+        if (!Objects.equals(req.getEmail(), username)){
+            throw new RuntimeException();
+        }
+        User user = userRepository.findByEmailOrThrow(username);
+
+        // 2. 기존 암호 복호화해서 같은지 비교 -> 다를 시 비밀번호가 틀립니다
+        if (!passwordEncoder.matches(req.getOldPassword(), user.getPassword()))
+            return ResultResponse.toDto("INCORRECT_PW");
+
+        // 3. 새 비밀번호랑 기존 비밀번호랑 같은지 확인 후 받은 newPw 암호화해서 저장
+        if (!Objects.equals(req.getOldPassword(), req.getNewPassword())){
+            return ResultResponse.toDto("SAME_PW");
+        }
+        user.updatePw(req.getNewPassword());
+        user.hashPassword(passwordEncoder);
+
+        return ResultResponse.toDto("OK");
     }
 
     /**

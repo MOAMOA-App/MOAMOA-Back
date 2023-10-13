@@ -11,9 +11,9 @@ public class EmailRequest {
     private Boolean authenticate;
 
     @Builder
-    public EmailRequest(String email, String code, Boolean authenticate) {
+    public EmailRequest(String email, String code) {
         this.email = email;
         this.code = code;
-        this.authenticate = authenticate;
+        this.authenticate = false;
     }
 }
