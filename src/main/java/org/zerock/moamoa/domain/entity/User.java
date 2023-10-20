@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
-import org.zerock.moamoa.domain.DTO.email.EmailUserPwRequest;
 import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
 
 import java.time.Instant;
@@ -44,7 +43,7 @@ public class User extends BaseEntity {
     @Column(name = "nick", length = 32, nullable = false)
     private String nick;
 
-    @Column(name = "prof_img", length = 32)
+    @Column(name = "prof_img", length = 128)
     private String profImg;
 
     @Column(name = "address", length = 254)
@@ -109,6 +108,7 @@ public class User extends BaseEntity {
 
     /**
      * 비밀번호 암호화
+     *
      * @param passwordEncoder 암호화 할 인코더 클래스
      */
     public void hashPassword(PasswordEncoder passwordEncoder) {
