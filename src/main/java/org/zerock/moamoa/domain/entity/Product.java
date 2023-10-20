@@ -145,4 +145,8 @@ public class Product extends BaseEntity {
     public Product(Long id) {
         this.id = id;
     }
+
+    public void updateViewCount(Integer count) {
+        this.viewCount += count;
+    }
 }

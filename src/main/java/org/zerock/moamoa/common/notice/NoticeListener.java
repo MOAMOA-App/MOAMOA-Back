@@ -7,10 +7,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.DTO.party.PartyResponse;
+import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
+import org.zerock.moamoa.domain.enums.NoticeType;
 import org.zerock.moamoa.service.NoticeService;
 import org.zerock.moamoa.service.PartyService;
+import org.zerock.moamoa.service.WishListService;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 @Slf4j
@@ -18,15 +22,31 @@ import java.util.List;
 public class NoticeListener {
     private final NoticeService noticeService;
     private final PartyService partyService;
+    private final WishListService wishListService;
 
     @TransactionalEventListener
     @Async
-    public void handleNotice(NoticeSaveRequest request) {
+    public CompletableFuture<Void> handleNotice(NoticeSaveRequest req) {
+        log.info("noticehandler");
+
         // partyService에서 product의 파티 리스트 불러옴, 각각 알림 보내준다
-        List<PartyResponse> partyResponseList = partyService.getByProduct(request.getReferenceID());
+        List<PartyResponse> partyResponseList = partyService.getByProduct(req.getReferenceID());
+        List<WishListResponse> wishResponseList = wishListService.getByProduct(req.getReferenceID());
+        log.info("req.getReferenceID() : " + req.getReferenceID());
+        log.info("noticehandler : " + partyResponseList + wishResponseList);
+
         partyResponseList.forEach(partyResponse -> {
-            request.setReceiverID(partyResponse.getBuyer().getId());    // null값이었던 receiverID에 uid값 넣어줌
-            noticeService.saveAndSend(request);
+            req.setReceiverID(partyResponse.getBuyer().getId());    // null값이었던 receiverID에 uid값 넣어줌
+            noticeService.saveAndSend(req);
         });
+        wishResponseList.forEach(wishListResponse -> {
+            req.setReceiverID(wishListResponse.getUserId().getId());
+            noticeService.saveAndSend(req);
+        });
+
+        log.info("success");
+        return CompletableFuture.completedFuture(null);
     }
+
+
 }

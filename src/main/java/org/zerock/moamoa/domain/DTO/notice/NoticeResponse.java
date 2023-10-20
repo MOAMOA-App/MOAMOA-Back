@@ -21,14 +21,6 @@ public class NoticeResponse {
     private ProductResponse referenceID;
     private Instant createdAt;
 
-    public String getSenderNickname() { // User 닉네임 가져옴
-        return senderID.getNick();
-    }
-
-    public String getReferenceTitle(){
-        return referenceID.getTitle();  // Product 제목 가져옴
-    }
-
     @Builder
     public NoticeResponse(Long id, UserProfileResponse senderID, UserProfileResponse receiverID, Boolean readOrNot,
                           NoticeType type, ProductResponse referenceID, Instant createdAt) {

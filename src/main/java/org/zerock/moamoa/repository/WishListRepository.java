@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.WishList;
 
@@ -18,7 +19,9 @@ public interface WishListRepository  extends JpaRepository<WishList,Long> {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    List<WishList> findByUser(User user);
+    List<WishList> findByProduct(Product product);
 
     Page<WishList> findByUser(User user, Pageable pageable);
+
+    WishList findByProductAndUser(Product product, User user);
 }

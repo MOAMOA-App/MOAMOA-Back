@@ -1,5 +1,6 @@
 package org.zerock.moamoa.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.zerock.moamoa.domain.DTO.product.ProductUpdateRequest;
 import org.zerock.moamoa.service.ProductService;
 import org.zerock.moamoa.utils.redis.RedisResponse;
 import org.zerock.moamoa.utils.redis.SearchRedisUtils;
+import org.zerock.moamoa.utils.redis.ViewsRedisUtils;
 
 import java.util.List;
 
@@ -41,7 +43,9 @@ public class ProductController {
     }
 
     @GetMapping("{pid}")
-    public ProductResponse getById(@PathVariable Long pid) {
+    public ProductResponse getById(@PathVariable Long pid, HttpServletRequest request) {
+        String agent = request.getHeader("User-Agent");
+        ViewsRedisUtils.addViewCount(pid, agent);
         return productService.findOne(pid);
     }
 

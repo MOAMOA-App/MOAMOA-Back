@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("myinfo")
-public class MyInfoController { // 맨 긑에 붙은 id를 /profile
+public class MyInfoController {
     private final UserService userService;
     private final ProductService productService;
     private final PartyService partyService;
@@ -61,26 +61,17 @@ public class MyInfoController { // 맨 긑에 붙은 id를 /profile
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "8") int pageSize
     ) {
-        return productService.toResPost(auth.getPrincipal().toString(), pageNo, pageSize);
+        return productService.findPageByUser(auth.getPrincipal().toString(), pageNo, pageSize);
     }
 
-//    /**
-//     * 내가 참여한 게시글 불러옴
-//     */
-//    // YJ: 참여했을 때 이 리스트에 추가되어야 함: Party 생성되었을 때 buyer에 userid 있으면 생성
-//    // 페이지 형식으로 받아야-> 정렬 기준 날짜가 참여일이 되어야 함 (party의 createdat 사용!) <해결
-//    // 거래 취소도 가능해야->
-//    @GetMapping("post")
-//    public Page<ProductResponse> getMyUserParty(Authentication authentication,
-//                                                @RequestParam(defaultValue = "0") int pageNo,
-//                                                @RequestParam(defaultValue = "8") int pageSize) {
-//        return productService.toResParty(authentication.getPrincipal().toString(), pageNo, pageSize);
-//    }
-
-    // 내가 참여한 리스트 불러옴
+    /**
+     * 내가 참여한 리스트 불러옴
+     */
     @GetMapping("party")
-    public List<PartyResponse> getJoinParty(@PathVariable Long userid) {
-        return partyService.getByBuyer(userid);
+    public Page<PartyResponse> getJoinParty(Authentication auth,
+                                            @RequestParam(defaultValue = "0") int pageNo,
+                                            @RequestParam(defaultValue = "8") int pageSize) {
+        return partyService.findPageByBuyer(auth.getPrincipal().toString(), pageNo, pageSize);
     }
 
     /**
@@ -90,7 +81,7 @@ public class MyInfoController { // 맨 긑에 붙은 id를 /profile
     public Page<WishListResponse> getUserWishList(Authentication auth,
                                                   @RequestParam(defaultValue = "0") int pageNo,
                                                   @RequestParam(defaultValue = "8") int pageSize) {
-        return wishListService.toResWish(auth.getPrincipal().toString(), pageNo, pageSize);
+        return wishListService.findPageByUser(auth.getPrincipal().toString(), pageNo, pageSize);
     }
 
     /**

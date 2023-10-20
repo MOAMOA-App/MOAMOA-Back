@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.notice.NoticeMapper;
 import org.zerock.moamoa.domain.DTO.notice.NoticeReadUpdateRequest;
 import org.zerock.moamoa.domain.DTO.notice.NoticeResponse;
@@ -33,20 +34,20 @@ public class NoticeService {
     private final NoticeMapper noticeMapper;
     private final UserRepository userRepository;
     private final EmitterRepository emitterRepository;
-    private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;    // SSE 연결은 1시간동안 지속됨
-
 
     public List<Notice> findAll() {
         return this.noticeRepository.findAll();
     }
 
-    public NoticeResponse saveAndSend(NoticeSaveRequest request) {
+    @Transactional
+    public void saveAndSend(NoticeSaveRequest request) {
+        log.info("start save");
         Notice savedNotice = noticeRepository.save(noticeMapper.toEntity(request));
 
         // receiver에게 알림 발송
         Long receiverId = request.getReceiverID();
         String eventId = receiverId + "_" + System.currentTimeMillis();
-        System.out.println("Generated eventId: " + eventId);
+        log.info("Generated eventId: " + eventId);
 
         Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByMemberId(receiverId);
         sseEmitters.forEach(
@@ -55,38 +56,7 @@ public class NoticeService {
                     sendToClient(emitter, eventId, key, noticeMapper.toDto(savedNotice));
                 }
         );
-
-        return noticeMapper.toDto(savedNotice);
-    }
-
-    /**
-     * SSE 연결
-     */
-    public SseEmitter subscribe(Long memberId, String lastEventId) {
-        String emitterId = makeTimeIncludeId(memberId); // username을 포함하여 SseEmitter를 식별하기 위한 고유 아이디 생성
-        // 시간을 emitterId에 붙여두면 데이터가 유실된 시점을 알 수 있음
-        SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
-
-        emitter.onCompletion(() -> emitterRepository.deleteById(emitterId));
-        emitter.onTimeout(() -> emitterRepository.deleteById(emitterId));
-
-        String eventId = makeTimeIncludeId(memberId);
-
-        // 503 에러 방지 위해 최초 연결 시 더미 이벤트 전송
-        sendToClient(emitter, eventId, emitterId, "EventStream Created. [userId=" + memberId + "]");
-
-        // Last-Event-ID: 클라이언트가 마지막으로 수신한 데이터의 id값
-        // 클라이언트가 미수신한 Event 목록이 존재할 경우 전송하여 Event 유실을 예방
-        if (hasLostData(lastEventId)) {
-            // 받지 못한 데이터가 있다면 Last-Event-ID를 기준으로 그 뒤의 데이터를 추출해 알림 보냄
-            sendLostData(lastEventId, memberId, emitterId, emitter);
-        }
-
-        return emitter;
-    }
-
-    private String makeTimeIncludeId(Long memberId) {
-        return memberId + "_" + System.currentTimeMillis();
+//        return noticeMapper.toDto(savedNotice);
     }
 
     private void sendToClient(SseEmitter emitter, String eventId, String emitterId, Object data) {
@@ -97,31 +67,6 @@ public class NoticeService {
         } catch (IOException exception) {
             emitterRepository.deleteById(emitterId);
         }
-    }
-
-    private boolean hasLostData(String lastEventId) {
-        return !lastEventId.isEmpty();
-    }
-
-    private void sendLostData(String lastEventId, Long uid, String emitterId, SseEmitter emitter) {
-        Map<String, Object> eventCaches = emitterRepository.findAllEventCacheStartWithByMemberId(uid);
-        eventCaches.entrySet().stream()
-                .filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
-                .forEach(entry -> sendToClient(emitter, entry.getKey(), emitterId, entry.getValue()));
-    }
-
-    public void removeNotice(Long id) {
-        // 알림 완전삭제 X, 유저의 noticeList에서만 사라지면 될듯
-        Optional<Notice> noticeOptional = noticeRepository.findById(id);
-//        noticeOptional.ifPresent(Notice::removeUserNotice); // = (notice -> {notice.removeUserNotice();})
-    }
-
-    // 읽을 시 상태 변경
-    @Transactional
-    public NoticeResponse updateRead(NoticeReadUpdateRequest req) {
-        Notice temp = noticeRepository.findByIdOrThrow(req.getId());
-        temp.updateRead(true);
-        return noticeMapper.toDto(temp);
     }
 
     // 페이지형식으로 확인할때마다 한번에 불러오는게 나을듯
@@ -136,4 +81,30 @@ public class NoticeService {
 
         return noticePage.map(noticeMapper::toDto);
     }
+
+    public ResultResponse removeNotice(String username, Long id) {
+        userRepository.findByEmailOrThrow(username);
+        Notice notice = noticeRepository.findByIdOrThrow(id);
+        noticeRepository.delete(notice);
+        return ResultResponse.toDto("OK");
+    }
+
+    // 읽을 시 상태 변경
+    @Transactional
+    public ResultResponse updateRead(String username, Long nid) {
+        userRepository.findByEmailOrThrow(username);
+        Notice temp = noticeRepository.findByIdOrThrow(nid);
+        temp.updateRead(true);
+        return ResultResponse.toDto("OK");
+    }
+
+    public ResultResponse updateReadAll(String username) {
+        User user = userRepository.findByEmailOrThrow(username);
+        List<Notice> notices = noticeRepository.findByReceiverID(user);
+        if (notices == null)
+            return ResultResponse.toDto(ErrorCode.NOTICE_NOT_FOUND.getMessage());
+        notices.forEach(notice -> notice.updateRead(true));
+        return ResultResponse.toDto("OK");
+    }
+
 }

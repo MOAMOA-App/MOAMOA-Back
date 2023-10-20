@@ -40,10 +40,6 @@ public class ProductService {
         return productMapper.toDto(productRepository.findByIdOrThrow(pid));
     }
 
-    public Page<Product> findPageByUser(User user, Pageable itemPage) {
-        return productRepository.findByUser(user, itemPage);
-    }
-
     @Transactional
     public ProductResponse saveProduct(ProductSaveRequest request, String username) {
         User user = userRepository.findByEmailOrThrow(username);
@@ -177,7 +173,7 @@ public class ProductService {
 
 
     // 만든공구 리스트
-    public Page<ProductResponse> toResPost(String username, int pageNo, int pageSize) {
+    public Page<ProductResponse> findPageByUser(String username, int pageNo, int pageSize) {
         User user = userRepository.findByEmailOrThrow(username);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Product> productPage = productRepository.findByUser(user, itemPage);

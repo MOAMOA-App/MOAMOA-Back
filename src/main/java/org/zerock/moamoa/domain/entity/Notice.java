@@ -36,9 +36,6 @@ public class Notice extends BaseEntity {
     @JoinColumn(name = "reference_id", nullable = false)
     private Product referenceID;    // 게시글
 
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
-
     @Builder
     public Notice(User senderID, User receiverID, NoticeType type, Product referenceID) {
         this.senderID = senderID;
@@ -48,7 +45,6 @@ public class Notice extends BaseEntity {
     }
 
     public void updateRead(Boolean readOrNot) {
-
         this.readOrNot = readOrNot;
     }
 }
