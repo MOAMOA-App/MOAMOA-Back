@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.chat.ChatRoomRequest;
 import org.zerock.moamoa.domain.DTO.chat.ChatRoomResponse;
 import org.zerock.moamoa.repository.ChatRoomRepository;
@@ -58,7 +59,7 @@ public class ChatController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<HttpStatus> createRoom(@RequestBody ChatRoomRequest req) {
+    public ResultResponse createRoom(@RequestBody ChatRoomRequest req) {
         // 채팅방 만들어지는 시점: 참여자 목록에서 채팅 메시지 보낼때 -> pid/sellerid/uid 중복있는지 검사 (3가지 동시에),
         // 중복 없으면 방 만들기: 채팅방 초대(ChatRoom에 추가) + 메시지 보내기(WebSocketController)
         if (chatRoomRepository.existsByProductIdAndSellerIdAndUserId(
@@ -66,9 +67,9 @@ public class ChatController {
                 userRepository.findById(req.getSellerId()),
                 userRepository.findById(req.getUserId()))
         ){
-            throw new RuntimeException();
+            return ResultResponse.toDto("ALREADY_EXIST");
         }
         chatService.saveChatRoom(req);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResultResponse.toDto("OK");
     }
 }

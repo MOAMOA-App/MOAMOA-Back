@@ -4,15 +4,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import org.zerock.moamoa.common.auth.CustomUserDetails;
 import org.zerock.moamoa.common.message.OkResponse;
 import org.zerock.moamoa.common.message.SuccessMessage;
-import org.zerock.moamoa.domain.DTO.notice.NoticeReadUpdateRequest;
+import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.notice.NoticeResponse;
+import org.zerock.moamoa.service.EmitterService;
 import org.zerock.moamoa.service.NoticeService;
 
 @Slf4j
@@ -21,10 +22,11 @@ import org.zerock.moamoa.service.NoticeService;
 @RequestMapping("/reminder")
 public class NoticeController {
     private final NoticeService noticeService;
+    private final EmitterService emitterService;
 
     /** 알림 조회 */
     // 페이지 형식으로 다 불러오게끔 함 나중에 무한스크롤하든 어쩌든 하면될듯
-    @GetMapping("/{receiverid}")
+    @GetMapping("")
     public Page<NoticeResponse> getNotices(Authentication auth,
                                            @RequestParam(defaultValue = "0") int pageNo,
                                            @RequestParam(defaultValue = "5") int pageSize) {
@@ -45,33 +47,36 @@ public class NoticeController {
 	  	noticeService에서 만들고 해당 사건이 발생하는 곳에 끼워넣어주기.
 	 */
 
-    /** 알림 발신 */
+    /** SSE 구독 */
     // @ApiOperation(value = "알림 구독", notes = "알림을 구독한다.")
     // text/event-stream이 SSE통신 위한 표준 MediaType
-    // @AuthenticationPrincipal: 로그인 세션 정보 UserDetails에 접근할 수 있는 어노테이션
-    // YJ: 이거 로그인안한사람한테도 보낼수잇어야댈텐데... 이거맞나  근데 뭐하러 절케하지 그냥 Authentication 넣으면 안되나
-    @GetMapping(value = "/subscribe", produces = "text/event-stream")
+    // 로그인시 구독할 수 있도록 해야됨 (그래야 알림 받으니까)
+    // 채팅처럼 그냥 지나간 알림은 Get으로 불러오고 새 알림은 일케 받는것도 ㄱㅊ을듯
+    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public SseEmitter subscribe(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "")
-                                    String lastEventId) {
-        return noticeService.subscribe(customUserDetails.getId(), lastEventId);
+    public ResponseEntity<SseEmitter> subscribe(Authentication auth
+//                                               @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "")
+//                                    String lastEventId
+    ) {
+        SseEmitter emitter = emitterService.subscribe(auth.getPrincipal().toString());
+        return ResponseEntity.ok(emitter);
     }
 
+    /** 전체 알림 읽음 상태 변경 */
+    @PutMapping("")
+    public ResultResponse updateReadAll(Authentication auth) {
+        return noticeService.updateReadAll(auth.getPrincipal().toString());
+    }
 
-    /** 알림 읽음 상태 변경 */
-    @PutMapping("/{noticeId}")
-    public NoticeResponse updateRead(Authentication auth,
-                                     @PathVariable Long noticeId,
-                                     @ModelAttribute("profile") NoticeReadUpdateRequest NR) {
-        return noticeService.updateRead(NR);
-
+    /** 단일 알림 읽음 상태 변경 */
+    @PutMapping("/{nid}")
+    public ResultResponse updateRead(Authentication auth, @PathVariable Long nid) {
+        return noticeService.updateRead(auth.getPrincipal().toString(), nid);
     }
 
     /** 알림 삭제 */
-    @DeleteMapping("/{noticeId}")
-    public Object DeleteNotice(Authentication auth, @PathVariable Long noticeId) {
-        noticeService.removeNotice(noticeId);
-        return new OkResponse(SuccessMessage.NOTICE_DELETE).makeAnswer();
+    @DeleteMapping("/{nid}")
+    public ResultResponse DeleteNotice(Authentication auth, @PathVariable Long nid) {
+        return noticeService.removeNotice(auth.getPrincipal().toString(), nid);
     }
 }

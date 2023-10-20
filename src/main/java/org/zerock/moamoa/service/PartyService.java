@@ -1,13 +1,19 @@
 package org.zerock.moamoa.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.zerock.moamoa.common.exception.EntityNotFoundException;
+import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.party.PartyMapper;
 import org.zerock.moamoa.domain.DTO.party.PartyRequest;
 import org.zerock.moamoa.domain.DTO.party.PartyResponse;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.repository.PartyRepository;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
@@ -46,6 +52,16 @@ public class PartyService {
         party.setProduct(product);
         return partyMapper.toDto(partyRepository.save(party));
 
+    }
+
+    public Page<PartyResponse> findPageByBuyer(String username, int pageNo, int pageSize){
+        User user = userRepository.findByEmailOrThrow(username);
+        Pageable itemPage = PageRequest.of(pageNo, pageSize);
+        Page<Party> parties = partyRepository.findByBuyer(user, itemPage);
+        if (parties.isEmpty()) {
+            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        return parties.map(partyMapper::toDto);
     }
 }
 

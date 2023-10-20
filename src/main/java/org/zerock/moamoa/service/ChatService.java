@@ -1,5 +1,6 @@
 package org.zerock.moamoa.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -94,15 +95,13 @@ public class ChatService {
         return chatMessageRepository.findAllChatByChatRoom(chatRoom, pageable);
     }
 
+    @Transactional
     public void saveChatRoom(ChatRoomRequest request) {
         Product product = productRepository.findByIdOrThrow(request.getProductId());
         User seller = product.getUser();
         User buyer = userRepository.findByIdOrThrow(request.getUserId());
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.build(product, seller, buyer);
-
-        eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
-                NoticeType.NEW_CHATROOM, product.getId()));
 
         chatRoomRepository.save(chatRoom);
     }

@@ -1,11 +1,14 @@
 package org.zerock.moamoa.config;
 
+import org.hibernate.sql.Delete;
 import org.quartz.JobDetail;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
+import org.zerock.moamoa.common.scheduler.DeleteViewsUserInfoScheduler;
+import org.zerock.moamoa.common.scheduler.ProductViewsScheduler;
 import org.zerock.moamoa.common.scheduler.SearchTotalizationScheduler;
 
 @Configuration
@@ -44,6 +47,7 @@ public class SchedulerConfig {
         return factory;
     }
 
+
 //    @Bean
 //    public SimpleTriggerFactoryBean SearchKeywordTrigger(JobDetail searchTotalizationJobDetail) {
 //        SimpleTriggerFactoryBean factory = new SimpleTriggerFactoryBean();
@@ -61,5 +65,35 @@ public class SchedulerConfig {
         return factory;
     }
 
+    @Bean
+    public JobDetailFactoryBean viewCountJobDetail(){
+        JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
+        factoryBean.setJobClass(ProductViewsScheduler.class);
+        factoryBean.setDurability(true);
+        return factoryBean;
+    }
 
+    @Bean
+    public CronTriggerFactoryBean viewCountTrigger(JobDetail viewCountJobDetail){
+        CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();
+        factoryBean.setJobDetail(viewCountJobDetail);
+        factoryBean.setCronExpression("0 0/3 * * * ?"); // 매 3분마다 실행
+        return factoryBean;
+    }
+
+    @Bean
+    public JobDetailFactoryBean deleteUserInfoJobDetail(){
+        JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
+        factoryBean.setJobClass(DeleteViewsUserInfoScheduler.class);
+        factoryBean.setDurability(true);
+        return factoryBean;
+    }
+
+    @Bean
+    public CronTriggerFactoryBean deleteUserInfoTrigger(JobDetail deleteUserInfoJobDetail){
+        CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();
+        factoryBean.setJobDetail(deleteUserInfoJobDetail);
+        factoryBean.setCronExpression("0 0 0 * * ?"); // 매 정각 실행
+        return factoryBean;
+    }
 }
