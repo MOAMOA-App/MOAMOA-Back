@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.zerock.moamoa.utils.file.dto.FileResponse;
 
 import java.time.Instant;
 
@@ -21,7 +22,7 @@ public class ProductImages {
     private Instant uploadTimeStamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
+    @JoinColumn()
     private Product product;
 
 
@@ -32,5 +33,15 @@ public class ProductImages {
         this.contentType = contentType;
         this.uploadTimeStamp = uploadTimeStamp;
         this.product = product;
+    }
+
+    public static ProductImages toEntity(Product product, FileResponse image) {
+        ProductImages images = new ProductImages();
+        images.fileName = image.getFileName();
+        images.fileSize = image.getFileSize();
+        images.contentType = image.getContentType();
+        images.uploadTimeStamp = image.getUploadTimeStamp();
+        images.product = product;
+        return images;
     }
 }

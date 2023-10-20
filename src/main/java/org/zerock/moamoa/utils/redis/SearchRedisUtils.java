@@ -28,7 +28,7 @@ public class SearchRedisUtils {
             // 검색어의 Score 증가
             searchRedisTemplate.opsForZSet().incrementScore(searchKey, keyword, 1);
 
-            // 검색어에 1시간 동안의 유효 기간 설정
+            // 검색어에 1일 동안의 유효 기간 설정
             searchRedisTemplate.expire(searchKey, 1, TimeUnit.DAYS);
         }
     }
