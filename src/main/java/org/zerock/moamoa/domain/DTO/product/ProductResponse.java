@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.zerock.moamoa.domain.DTO.productImage.ImageMapper;
-import org.zerock.moamoa.domain.DTO.user.UserProfileResponse;
+import org.zerock.moamoa.domain.DTO.user.UserProductResponse;
 import org.zerock.moamoa.domain.entity.ProductImages;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.utils.TimeUtils;
@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 public class ProductResponse {
     private Long id;
-    private UserProfileResponse user;
+    private UserProductResponse user;
     private String category;
     private String sellingArea;
     private String detailArea;
@@ -30,14 +30,18 @@ public class ProductResponse {
     private Integer sellCount;
     private Integer maxCount;
     private String choiceSend;
+    private double longtitue;
+    private double lattitue;
     private String createdAt;
     private String finishedAt;
     private List<FileResponse> productImages;
 
+
     @Builder
-    public ProductResponse(Long id, UserProfileResponse user, String category, String sellingArea, String detailArea,
+    public ProductResponse(Long id, UserProductResponse user, String category, String sellingArea, String detailArea,
                            String title, String description, ProductStatus status, Integer sellPrice, Integer viewCount, Integer sellCount,
-                           Integer maxCount, String choiceSend, Instant createdAt, Instant finishedAt, List<ProductImages> productImages) {
+                           Integer maxCount, String choiceSend, Instant createdAt, Instant finishedAt, double longtitue, double lattitue,
+                           List<ProductImages> productImages) {
         this.id = id;
         this.user = user;
         this.category = category;
@@ -53,6 +57,8 @@ public class ProductResponse {
         this.choiceSend = choiceSend;
         this.createdAt = TimeUtils.toLocalTime(createdAt);
         this.finishedAt = TimeUtils.toLocalTime(finishedAt);
+        this.longtitue = longtitue;
+        this.lattitue = lattitue;
         this.productImages = productImages != null ? productImages.stream().map(ImageMapper.INSTANCE::toDto).toList() : new ArrayList<>();
     }
 

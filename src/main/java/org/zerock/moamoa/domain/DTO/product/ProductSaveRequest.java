@@ -15,17 +15,18 @@ public class ProductSaveRequest {
     private String detailArea;
     private Integer maxCount;
     private String choiceSend;
-    private Integer countImage;
     private String finishedAt;
     private Integer sellPrice;
     private Integer viewCount = 0;
     private Integer sellCount = 0;
     private ProductStatus status;
+    private double longtitue;
+    private double lattitue;
     private Boolean activate = true;
 
     @Builder
     public ProductSaveRequest(String title, String description, String category, String sellingArea,
-                              String detailArea, Integer maxCount, String choiceSend, Integer countImage,
+                              String detailArea, Integer maxCount, String choiceSend, double longtitue, double lattitue,
                               String finishedAt, ProductStatus productStatus) {
         this.title = title;
         this.description = description;
@@ -34,7 +35,8 @@ public class ProductSaveRequest {
         this.detailArea = detailArea;
         this.maxCount = maxCount;
         this.choiceSend = choiceSend;
-        this.countImage = countImage;
+        this.longtitue = longtitue;
+        this.lattitue = lattitue;
         this.finishedAt = finishedAt;
         this.status = productStatus != null ? productStatus : ProductStatus.READY;
     }

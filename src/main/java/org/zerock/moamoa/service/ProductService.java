@@ -34,7 +34,6 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final ProductMapper productMapper;
-    private final FileService fileService;
     private final ApplicationEventPublisher eventPublisher;
 
     public ProductResponse findOne(Long pid) {
