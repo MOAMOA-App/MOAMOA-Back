@@ -94,8 +94,8 @@ public class ProductService {
         return productMapper.toDto(product);
     }
 
-    public Page<ProductResponse> search(String[] keywords, List<String> categories, List<String> statuses,
-                                        String search, String order, int pageNo, int pageSize) {
+    public Page<ProductListResponse> search(String[] keywords, List<String> categories, List<String> statuses,
+                                            String search, String order, int pageNo, int pageSize) {
 
         Specification<Product> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -151,7 +151,7 @@ public class ProductService {
         }
 
         Page<Product> tourCourses = productRepository.findAll(spec, pageable);
-        return tourCourses.map(productMapper::toDto);
+        return tourCourses.map(productMapper::toListDto);
     }
 
     private String[] findSortField(String order) {
@@ -164,6 +164,12 @@ public class ProductService {
             }
             case "imminent" -> {
                 return new String[]{"finishedAt", "asc"};
+            }
+            case "views" -> {
+                return new String[]{"viewCount", "desc"};
+            }
+            case "popularity" -> {
+                return new String[]{"", "desc"};
             }
             default -> {
                 return new String[]{"createdAt", "desc"};

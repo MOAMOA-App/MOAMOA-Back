@@ -8,10 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.message.OkResponse;
 import org.zerock.moamoa.common.message.SuccessMessage;
-import org.zerock.moamoa.domain.DTO.product.ProductResponse;
-import org.zerock.moamoa.domain.DTO.product.ProductSaveRequest;
-import org.zerock.moamoa.domain.DTO.product.ProductStatusUpdateRequest;
-import org.zerock.moamoa.domain.DTO.product.ProductUpdateRequest;
+import org.zerock.moamoa.domain.DTO.product.*;
 import org.zerock.moamoa.service.ProductService;
 import org.zerock.moamoa.utils.redis.RedisResponse;
 import org.zerock.moamoa.utils.redis.SearchRedisUtils;
@@ -28,7 +25,7 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("")
-    public Page<ProductResponse> searchProducts(
+    public Page<ProductListResponse> searchProducts(
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(required = false) List<String> categories,
             @RequestParam(required = false) List<String> statuses,
@@ -38,7 +35,7 @@ public class ProductController {
             @RequestParam(defaultValue = "20") int pageSize
     ) {
         String[] keywords = keyword.split(" ");
-        SearchRedisUtils.addSearchKeyword(keywords);
+        if (keywords != null && !keywords[0].equals("")) SearchRedisUtils.addSearchKeyword(keywords);
         return productService.search(keywords, categories, statuses, search, order, pageNo, pageSize);
     }
 
