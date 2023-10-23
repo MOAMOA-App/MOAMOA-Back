@@ -9,6 +9,10 @@ import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.enums.ProductStatus;
+
+import java.time.Instant;
+import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
@@ -19,4 +23,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
         return findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
     }
+
+    List<Product> findAllByStatusIsAndFinishedAtBefore(ProductStatus productStatus, Instant nowDate);
 }
