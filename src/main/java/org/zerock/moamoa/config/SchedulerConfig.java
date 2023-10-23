@@ -85,8 +85,7 @@ public class SchedulerConfig {
     public CronTriggerFactoryBean productStatusChangeTrigger(JobDetail productStatusChangeJobDetail) {
         CronTriggerFactoryBean factory = new CronTriggerFactoryBean();
         factory.setJobDetail(productStatusChangeJobDetail);
-        factory.setCronExpression("0 0/3 * * * ?"); // 매 3분마다 실행
-//        factory.setCronExpression("0 0 12 * * ?"); // 매일 정각 12시에 실행
+        factory.setCronExpression("0 0 12 * * ?"); // 매일 정각 12시에 실행
         return factory;
     }
 
