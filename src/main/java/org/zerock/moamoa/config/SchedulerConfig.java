@@ -6,10 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
-import org.zerock.moamoa.common.scheduler.DeleteViewsUserInfoScheduler;
-import org.zerock.moamoa.common.scheduler.ExpiredEmailScheduler;
-import org.zerock.moamoa.common.scheduler.ProductViewsScheduler;
-import org.zerock.moamoa.common.scheduler.SearchTotalizationScheduler;
+import org.zerock.moamoa.common.scheduler.*;
 
 @Configuration
 @EnableScheduling
@@ -69,8 +66,26 @@ public class SchedulerConfig {
     public CronTriggerFactoryBean expiredEmailRequestDeleteTrigger(JobDetail expiredEmailRequestDeleteJobDetail) {
         CronTriggerFactoryBean factory = new CronTriggerFactoryBean();
         factory.setJobDetail(expiredEmailRequestDeleteJobDetail);
-        factory.setCronExpression("0 0/3 * * * ?"); // 매 3분마다 실행
-//        factory.setCronExpression("0 0 12 * * ?"); // 매일 정각 12시에 실행
+        factory.setCronExpression("0 0 12 * * ?"); // 매일 정각 12시에 실행
+        return factory;
+    }
+
+    /**
+     * 거래 진행 기간 만료 상품 상태 변경
+     */
+    @Bean
+    public JobDetailFactoryBean productStatusChangeJobDetail() {
+        JobDetailFactoryBean factory = new JobDetailFactoryBean();
+        factory.setJobClass(ProductStatusChangeScheduler.class);
+        factory.setDurability(true);
+        return factory;
+    }
+
+    @Bean
+    public CronTriggerFactoryBean productStatusChangeTrigger(JobDetail productStatusChangeJobDetail) {
+        CronTriggerFactoryBean factory = new CronTriggerFactoryBean();
+        factory.setJobDetail(productStatusChangeJobDetail);
+        factory.setCronExpression("0 0 12 * * ?"); // 매일 정각 12시에 실행
         return factory;
     }
 
