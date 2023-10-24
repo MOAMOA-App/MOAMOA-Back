@@ -1,26 +1,16 @@
 package org.zerock.moamoa.domain.DTO.wishlist;
 
-import lombok.Builder;
 import lombok.Data;
-import org.zerock.moamoa.domain.DTO.product.ProductResponse;
-import org.zerock.moamoa.domain.DTO.user.UserProfileResponse;
-import org.zerock.moamoa.domain.entity.Product;
-import org.zerock.moamoa.domain.entity.User;
-
-import java.time.Instant;
 
 @Data
 public class WishListResponse {
-    private Long id;
-    private ProductResponse productId;
-    private UserProfileResponse userId;
-    private Instant createdAt;
+    private Long pid;
+    private boolean status;
+    private String message;
 
-    @Builder
-    public WishListResponse(Long id, ProductResponse productId, UserProfileResponse userId, Instant createdAt) {
-        this.id = id;
-        this.productId = productId;
-        this.userId = userId;
-        this.createdAt = createdAt;
+    public WishListResponse(Long pid, boolean status, String message) {
+        this.pid = pid;
+        this.status = status;
+        this.message = message;
     }
 }

@@ -10,5 +10,5 @@ public interface WishListMapper {
 
     WishList toEntity(WishListRequest wishListRequest);
 
-    WishListResponse toDto(WishList wishList);
+    WishListResponse toDto(WishListRequest wishList, String message);
 }

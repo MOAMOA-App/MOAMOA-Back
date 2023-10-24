@@ -6,9 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.zerock.moamoa.common.exception.EntityNotFoundException;
-import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.domain.DTO.ResultResponse;
+import org.zerock.moamoa.domain.DTO.product.ProductListResponse;
+import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListRequest;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
@@ -20,59 +19,79 @@ import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.repository.WishListRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class WishListService {
-    private final WishListMapper wishListMapper;
     private final WishListRepository wishListRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final WishListMapper wishListMapper;
+    private final ProductMapper productMapper;
+
+    /**
+     * 위시리스트 변경
+     */
+    public WishListResponse changeWishList(WishListRequest request, String username) {
+        User user = userRepository.findByEmailOrThrow(username);
+        Product product = productRepository.findByIdOrThrow(request.getPid());
+
+        request.setUser(user);
+        request.setProduct(product);
+
+        if (isSameUser(request)) return wishListMapper.toDto(request, "CANT WISH OWN PRODUCT");
 
 
-    public List<WishList> findAll() {
-        return this.wishListRepository.findAll();
+        // true : 찜하기
+        if (request.isStatus()) return updateTrue(request);
+        // false : 찜하기 해제
+        return updateFalse(request);
     }
 
-    public ResultResponse saveWish(String username, Long pid) {
-        User user = userRepository.findByEmailOrThrow(username);
-        Product product = productRepository.findByIdOrThrow(pid);
-        WishListRequest request = new WishListRequest(product, user);
+    private WishListResponse updateFalse(WishListRequest request) {
+        boolean check = isExist(request);
+        if (!check) return wishListMapper.toDto(request, "ALREADY SAME STATUS");
+        wishListRepository.delete(wishListRepository.findByUserAndProduct(request.getUser(), request.getProduct()));
+        return wishListMapper.toDto(request, "OK");
+    }
+
+    private WishListResponse updateTrue(WishListRequest request) {
+        boolean check = isExist(request);
+        if (check) return wishListMapper.toDto(request, "ALREADY SAME STATUS");
+
+
         wishListRepository.save(wishListMapper.toEntity(request));
-        return ResultResponse.toDto("OK");
+
+        return wishListMapper.toDto(request, "OK");
     }
 
-    public ResultResponse removeWish(String username, Long pid) {
-        User user = userRepository.findByEmailOrThrow(username);
-        Product product = productRepository.findByIdOrThrow(pid);
-        WishList wishlist = wishListRepository.findByProductAndUser(product, user);
-//
-//        Optional<WishList> optionalWishList = wishListRepository.findById(pid);
-//        if (optionalWishList.isEmpty()) {
-//            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
-//        }
-        wishListRepository.deleteById(wishlist.getId());
-
-        return ResultResponse.toDto("OK");
+    private boolean isExist(WishListRequest request) {
+        return wishListRepository.existsByUserAndProduct(request.getUser(), request.getProduct());
     }
 
-    // 찜한공구 리스트
-    public Page<WishListResponse> findPageByUser(String username, int pageNo, int pageSize) {
+    private boolean isSameUser(WishListRequest request) {
+        return request.getProduct().getUser().equals(request.getUser());
+    }
+
+    /**
+     * 사용자가 찜한 상품 리스트 출력
+     */
+    public Page<ProductListResponse> findPageByUser(String username, int pageNo, int pageSize) {
         User user = userRepository.findByEmailOrThrow(username);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<WishList> wishListPage = wishListRepository.findByUser(user, itemPage);
-        if (wishListPage.isEmpty()) {
-            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
-        return wishListPage.map(wishListMapper::toDto);
+
+        return wishListPage.map(WishList::getProduct).map(productMapper::toListDto);
     }
 
-    public List<WishListResponse> getByProduct(Long referenceID) {
+    /**
+     * 해당 상품을 찜한 사용자 리스트 출력
+     */
+    public List<User> findByProduct(Long referenceID) {
         Product product = productRepository.findByIdOrThrow(referenceID);
         List<WishList> wishLists = wishListRepository.findByProduct(product);
-
-        return wishLists.stream().map(wishListMapper::toDto).toList();
+        return wishLists.stream().map(WishList::getUser).toList();
     }
+
 }
