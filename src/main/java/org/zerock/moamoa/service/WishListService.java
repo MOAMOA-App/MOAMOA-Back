@@ -35,7 +35,7 @@ public class WishListService {
      */
     public WishListResponse changeWishList(WishListRequest request, String username) {
         User user = userRepository.findByEmailOrThrow(username);
-        Product product = productRepository.findByIdOrThrow(request.getPid());
+        Product product = productRepository.findByIdOrThrow(request.getProductId());
 
         request.setUser(user);
         request.setProduct(product);

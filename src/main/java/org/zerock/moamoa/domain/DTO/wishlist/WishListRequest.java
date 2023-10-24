@@ -6,7 +6,7 @@ import org.zerock.moamoa.domain.entity.User;
 
 @Data
 public class WishListRequest {
-    private Long pid;
+    private Long productId;
     private boolean status;
     private User user;
     private Product product;

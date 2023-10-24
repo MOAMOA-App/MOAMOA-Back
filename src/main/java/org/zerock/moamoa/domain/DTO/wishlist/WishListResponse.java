@@ -4,12 +4,12 @@ import lombok.Data;
 
 @Data
 public class WishListResponse {
-    private Long pid;
+    private Long productId;
     private boolean status;
     private String message;
 
-    public WishListResponse(Long pid, boolean status, String message) {
-        this.pid = pid;
+    public WishListResponse(Long productId, boolean status, String message) {
+        this.productId = productId;
         this.status = status;
         this.message = message;
     }
