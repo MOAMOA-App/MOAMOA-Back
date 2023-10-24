@@ -14,13 +14,15 @@ import java.util.List;
 public class PartyController {
     private final PartyService partyService;
 
+    //TODO : 전체적으로 수정 필요
+
     @GetMapping("/{pid}/party")
-    public List<PartyResponse> readByProductList(@PathVariable Long pid) {
+    public List<PartyResponse> getByProductList(@PathVariable Long pid) {
         return partyService.getByProduct(pid);
     }
 
     @PostMapping("/{pid}/party")
-    public PartyResponse addPartyMember(@PathVariable Long pid, @ModelAttribute("party") PartyRequest partyRequest) {
+    public PartyResponse setPartyMember(@PathVariable Long pid, @ModelAttribute("party") PartyRequest partyRequest) {
         PartyResponse response = partyService.saveParty(partyRequest, pid);
         return response;
     }

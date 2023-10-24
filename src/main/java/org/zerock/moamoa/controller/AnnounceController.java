@@ -16,6 +16,25 @@ import java.util.List;
 public class AnnounceController {
     private final AnnounceService announceService;
 
+    /**
+     * 공지 단일 출력
+     */
+    @GetMapping("{pid}/announce/{aid}")
+    public AnnounceResultResponse getById(@PathVariable Long aid, @PathVariable Long pid) {
+        return announceService.findOne(pid, aid);
+    }
+
+    /**
+     * 공지 리스트
+     */
+    @GetMapping("{pid}/announce")
+    public List<AnnounceResponse> getList(@PathVariable Long pid) {
+        return announceService.getByProduct(pid);
+    }
+
+    /**
+     * 공지 생성
+     */
     @PostMapping("{pid}/announce")
     public AnnounceResultResponse saveAnnounce(Authentication authentication,
                                                @PathVariable Long pid,
@@ -24,6 +43,9 @@ public class AnnounceController {
         return announceService.saveAnnounce(announce, pid, authentication.getPrincipal().toString());
     }
 
+    /**
+     * 공지 수정
+     */
     @PutMapping("{pid}/announce")
     public AnnounceResultResponse updateAnnounce(Authentication authentication,
                                                  @PathVariable Long pid,
@@ -32,6 +54,9 @@ public class AnnounceController {
         return announceService.updateInfo(announce, pid, authentication.getPrincipal().toString());
     }
 
+    /**
+     * 공지 삭제
+     */
     @DeleteMapping("{pid}/announce")
     public AnnounceResultResponse removeAnnounce(Authentication authentication,
                                                  @PathVariable Long pid,
@@ -40,14 +65,5 @@ public class AnnounceController {
         return announceService.remove(announce, pid, authentication.getPrincipal().toString());
     }
 
-    @GetMapping("{pid}/announce")
-    public List<AnnounceResponse> getList(@PathVariable Long pid) {
-        return announceService.getByProduct(pid);
-    }
-
-    @GetMapping("{pid}/announce/{aid}")
-    public AnnounceResultResponse getById(@PathVariable Long aid, @PathVariable Long pid) {
-        return announceService.findOne(pid, aid);
-    }
 
 }

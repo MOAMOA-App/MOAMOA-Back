@@ -13,7 +13,6 @@ import org.zerock.moamoa.domain.DTO.party.PartyResponse;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
-import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.repository.PartyRepository;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
@@ -54,7 +53,7 @@ public class PartyService {
 
     }
 
-    public Page<PartyResponse> findPageByBuyer(String username, int pageNo, int pageSize){
+    public Page<PartyResponse> findPageByBuyer(String username, int pageNo, int pageSize) {
         User user = userRepository.findByEmailOrThrow(username);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Party> parties = partyRepository.findByBuyer(user, itemPage);
@@ -64,23 +63,4 @@ public class PartyService {
         return parties.map(partyMapper::toDto);
     }
 }
-
-// public boolean removeParty(Long id) {
-//     Party party = findById(id);
-//     if (party.getId() != null) {
-//         party.getBuyer().removeParty(party);
-//         party.getProduct().removeParty(party);
-//         partyRepository.delete(party);
-//         return true;
-//     }
-//     return false;
-// }
-//
-// @Transactional
-// public Party updateParty(Party party) {
-//     Party temp = findById(party.getId());
-//     temp.setAddress(party.getAddress());
-//     temp.setCount(party.getCount());
-//     return this.partyRepository.save(temp);
-// }
 
