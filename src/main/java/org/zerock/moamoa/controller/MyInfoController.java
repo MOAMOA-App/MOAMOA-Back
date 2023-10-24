@@ -7,15 +7,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.party.PartyResponse;
+import org.zerock.moamoa.domain.DTO.product.ProductListResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
 import org.zerock.moamoa.domain.DTO.user.UserProfileResponse;
 import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
 import org.zerock.moamoa.domain.DTO.user.UserPwChangeRequest;
 import org.zerock.moamoa.domain.DTO.user.UserResponse;
-import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
-import org.zerock.moamoa.service.*;
-
-import java.util.List;
+import org.zerock.moamoa.service.PartyService;
+import org.zerock.moamoa.service.ProductService;
+import org.zerock.moamoa.service.UserService;
+import org.zerock.moamoa.service.WishListService;
 
 @RestController
 @Slf4j
@@ -28,6 +29,9 @@ public class MyInfoController {
     private final WishListService wishListService;
 
 
+    /**
+     * 본인 프로필 불러오기
+     */
     @GetMapping("profile")
     private UserProfileResponse getMyProfile(Authentication authentication) {
         String email = authentication.getName();
@@ -48,7 +52,7 @@ public class MyInfoController {
      */
     @PostMapping("password")
     public ResultResponse updatePW(Authentication authentication,
-                                   @ModelAttribute("userpw") UserPwChangeRequest request){
+                                   @ModelAttribute("userpw") UserPwChangeRequest request) {
         return userService.updatePwLogin(request, authentication.getPrincipal().toString());
     }
 
@@ -78,9 +82,9 @@ public class MyInfoController {
      * 내가 찜한 게시글 불러옴
      */
     @GetMapping("heart")
-    public Page<WishListResponse> getUserWishList(Authentication auth,
-                                                  @RequestParam(defaultValue = "0") int pageNo,
-                                                  @RequestParam(defaultValue = "8") int pageSize) {
+    public Page<ProductListResponse> getUserWishList(Authentication auth,
+                                                     @RequestParam(defaultValue = "0") int pageNo,
+                                                     @RequestParam(defaultValue = "8") int pageSize) {
         return wishListService.findPageByUser(auth.getPrincipal().toString(), pageNo, pageSize);
     }
 

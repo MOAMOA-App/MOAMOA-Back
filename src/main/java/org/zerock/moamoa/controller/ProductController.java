@@ -24,6 +24,17 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
+    /**
+     * 게시글 조회
+     *
+     * @param keyword    검색어
+     * @param categories 카테고리
+     * @param statuses   거래 상태
+     * @param search     검색 기준 -> sub 제목 |  descript 내용 | subdesc 제목 + 내용
+     * @param order      정렬 기준
+     * @param pageNo     페이지 번호
+     * @param pageSize   페이지 크기
+     */
     @GetMapping("")
     public Page<ProductListResponse> searchProducts(
             @RequestParam(required = false, defaultValue = "") String keyword,
@@ -39,6 +50,9 @@ public class ProductController {
         return productService.search(keywords, categories, statuses, search, order, pageNo, pageSize);
     }
 
+    /**
+     * 상품 상세 조회
+     */
     @GetMapping("{pid}")
     public ProductResponse getById(@PathVariable Long pid, HttpServletRequest request) {
         String agent = request.getHeader("User-Agent");
@@ -46,13 +60,19 @@ public class ProductController {
         return productService.findOne(pid);
     }
 
+    /**
+     * 실시간 검색어 순위 24시간 기준
+     */
     @GetMapping("top/{number}")
     public List<RedisResponse> getTopN(@PathVariable int number) {
         return SearchRedisUtils.readTopSearchKeywords(number);
     }
 
+    /**
+     * 게시글 생성하기
+     */
     @PostMapping("")
-    public ProductResponse Save(Authentication authentication, @RequestBody ProductSaveRequest request) {
+    public ProductResponse save(Authentication authentication, @RequestBody ProductSaveRequest request) {
         return productService.saveProduct(request, authentication.getPrincipal().toString());
     }
 
@@ -60,7 +80,7 @@ public class ProductController {
      * 게시글 수정하기
      */
     @PutMapping("")
-    public ProductResponse UpdateContents(Authentication authentication, @RequestBody ProductUpdateRequest request) {
+    public ProductResponse updateContents(Authentication authentication, @RequestBody ProductUpdateRequest request) {
         return productService.updateInfo(request, authentication.getPrincipal().toString());
     }
 
@@ -68,7 +88,7 @@ public class ProductController {
      * 게시글 상태 변경하기 [참여 모집 | 거래 진행 | 거래 완료 ]
      */
     @PutMapping("status")
-    public ProductResponse UpdateStatus(Authentication authentication, @RequestBody ProductStatusUpdateRequest request) {
+    public ProductResponse updateStatus(Authentication authentication, @RequestBody ProductStatusUpdateRequest request) {
         return productService.updateStatus(request, authentication.getPrincipal().toString());
     }
 
@@ -76,9 +96,10 @@ public class ProductController {
      * 게시글 삭제하기 : 게시글 진짜 삭제하는게 아니라 Product 활성화 비활성화 처리
      */
     @DeleteMapping("")
-    public Object DeleteContents(Authentication authentication, @RequestBody ProductStatusUpdateRequest request) {
+    public Object deleteContents(Authentication authentication, @RequestBody ProductStatusUpdateRequest request) {
         productService.remove(request, authentication.getPrincipal().toString());
         return new OkResponse(SuccessMessage.PRODUCT_DELETE).makeAnswer();
     }
+
 
 }

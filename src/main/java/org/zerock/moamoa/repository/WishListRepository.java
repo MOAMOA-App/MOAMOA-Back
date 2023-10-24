@@ -13,7 +13,7 @@ import org.zerock.moamoa.domain.entity.WishList;
 import java.util.List;
 
 @Repository
-public interface WishListRepository  extends JpaRepository<WishList,Long> {
+public interface WishListRepository extends JpaRepository<WishList, Long> {
     default WishList findByIdOrThrow(Long id) {
         return findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -23,5 +23,7 @@ public interface WishListRepository  extends JpaRepository<WishList,Long> {
 
     Page<WishList> findByUser(User user, Pageable pageable);
 
-    WishList findByProductAndUser(Product product, User user);
+    WishList findByUserAndProduct(User user, Product product);
+
+    boolean existsByUserAndProduct(User user, Product product);
 }
