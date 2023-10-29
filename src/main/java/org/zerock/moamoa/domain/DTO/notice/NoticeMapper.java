@@ -13,9 +13,6 @@ import java.util.List;
 public interface NoticeMapper {
     NoticeMapper INSTANCE = Mappers.getMapper(NoticeMapper.class);
 
-    @Mapping(target = "senderID", source = "noticeSaveRequest.senderID")
-    @Mapping(target = "receiverID", source = "noticeSaveRequest.receiverID")
-    @Mapping(target = "referenceID", source = "noticeSaveRequest.referenceID")
     Notice toEntity(NoticeSaveRequest noticeSaveRequest);
 
     NoticeResponse toDto(Notice notice);

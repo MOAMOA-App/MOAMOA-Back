@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 import org.zerock.moamoa.domain.DTO.email.EmailAuthUpdateRequest;
 import org.zerock.moamoa.domain.DTO.email.EmailRequest;
+import org.zerock.moamoa.domain.enums.EmailType;
 
 import java.time.Instant;
 
@@ -24,6 +25,9 @@ public class Email extends BaseEntity {
     @Column(name = "token", nullable = false)
     private String token;
 
+    @Column(name = "type", nullable = false)
+    private EmailType type;
+
     @Column(name = "code", length = 6, nullable = false)
     private String code;
 
@@ -33,7 +37,8 @@ public class Email extends BaseEntity {
     public static Email toEntity(EmailRequest req) {
         Email email = new Email();
         email.email = req.getEmail();
-        email.token = req.getEmail() + Instant.now();
+        email.token = req.getEmail() + System.currentTimeMillis();
+        email.type = req.getType();
         email.code = req.getCode();
         email.authenticate = req.getAuthenticate();
         return email;
@@ -41,7 +46,8 @@ public class Email extends BaseEntity {
 
     public void updateCode(EmailRequest req){
         this.email = req.getEmail();
-        this.token = req.getEmail() + Instant.now();
+        this.type = req.getType();
+        this.token = req.getEmail() + System.currentTimeMillis();
         this.code = req.getCode();
     }
 

@@ -25,11 +25,6 @@ public class WishList {
     @JoinColumn(nullable = false)
     private User user;
 
-    @CreatedDate
-    @Column(updatable = false)
-    private Instant createdAt;
-
-
     @Builder
     public WishList(User user, Product product) {
         this.user = user;

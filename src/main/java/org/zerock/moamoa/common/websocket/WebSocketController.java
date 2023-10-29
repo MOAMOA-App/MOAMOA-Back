@@ -2,7 +2,9 @@ package org.zerock.moamoa.common.websocket;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +15,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.zerock.moamoa.domain.DTO.chat.ChatMessageRequest;
 import org.zerock.moamoa.domain.DTO.chat.ChatMessageResponse;
+import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.entity.ChatMessage;
 import org.zerock.moamoa.domain.entity.ChatRoom;
+import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.enums.NoticeType;
 import org.zerock.moamoa.repository.ChatMessageRepository;
 import org.zerock.moamoa.repository.ChatRoomRepository;
 import org.zerock.moamoa.repository.UserRepository;
@@ -35,6 +41,7 @@ public class WebSocketController {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     @MessageMapping("")
@@ -62,28 +69,30 @@ public class WebSocketController {
     @MessageMapping("/chat/send")
     public void message(@Payload ChatMessageRequest req) {
         chatService.saveChat(req);
-
     }
 
-    // 채팅방id로 채팅 이력 불러옴
-    @GetMapping("/chat/find/{rid}")
-    public ResponseEntity<List<ChatMessageResponse>> getChats(@PathVariable Long rid
-//                                                              Authentication auth,
-//                                                              Pageable pageable
-    ) {
-//        userRepository.findByEmailOrThrow(auth.getName());
-        ChatRoom chatRoom = chatRoomRepository.findByIdOrThrow(rid);
-
-//        Page<ChatMessageResponse> chatPage = chatService.roomMessageFindAll(chatRoom, pageable)
+//    // 채팅방id로 채팅 이력 불러옴
+//    @GetMapping("/chat/find/{rid}")
+//    public ResponseEntity<List<ChatMessageResponse>> getChats(
+//            @PathVariable Long rid, Authentication auth,
+//            @RequestParam(value = "no", defaultValue = "0") int pageNo,
+//            @RequestParam(value = "size", defaultValue = "20") int pageSize) {
+//
+//        userRepository.findByEmailOrThrow(auth.getPrincipal().toString());
+//        ChatRoom chatRoom = chatRoomRepository.findByIdOrThrow(rid);
+//
+//        Pageable pageable = PageRequest.of(pageNo, pageSize);
+//
+//        Page<ChatMessageResponse> chatPage = chatMessageRepository.findAllChatByChatRoom(chatRoom, pageable)
 //                .map(ChatMessageResponse::toDto);
-
-        List<ChatMessageResponse> chatList= chatMessageRepository.findAllChatByChatRoom(chatRoom)
-                .stream()
-                .map(ChatMessageResponse::toDto)
-                .toList();
-
-        return ResponseEntity.status(HttpStatus.OK).body(chatList);
-    }
+//
+//        List<ChatMessageResponse> chatList= chatMessageRepository.findAllChatByChatRoom(chatRoom)
+//                .stream()
+//                .map(ChatMessageResponse::toDto)
+//                .toList();
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(chatList);
+//    }
 }
 
 //    @MessageMapping 을 통해 WebSocket 으로 들어오는 메세지 발행을 처리한다.

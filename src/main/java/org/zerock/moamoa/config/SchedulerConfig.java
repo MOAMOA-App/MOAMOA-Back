@@ -107,23 +107,4 @@ public class SchedulerConfig {
         factoryBean.setCronExpression("0 0/3 * * * ?"); // 매 3분마다 실행
         return factoryBean;
     }
-
-    /**
-     *
-     */
-    @Bean
-    public JobDetailFactoryBean deleteUserInfoJobDetail() {
-        JobDetailFactoryBean factoryBean = new JobDetailFactoryBean();
-        factoryBean.setJobClass(DeleteViewsUserInfoScheduler.class);
-        factoryBean.setDurability(true);
-        return factoryBean;
-    }
-
-    @Bean
-    public CronTriggerFactoryBean deleteUserInfoTrigger(JobDetail deleteUserInfoJobDetail) {
-        CronTriggerFactoryBean factoryBean = new CronTriggerFactoryBean();
-        factoryBean.setJobDetail(deleteUserInfoJobDetail);
-        factoryBean.setCronExpression("0 0 0 * * ?"); // 매 정각 실행
-        return factoryBean;
-    }
 }

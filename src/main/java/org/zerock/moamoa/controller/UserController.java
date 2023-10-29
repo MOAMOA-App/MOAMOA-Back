@@ -92,10 +92,24 @@ public class UserController {
     @PostMapping("/email/request")
     public CompletableFuture<EmailtoClientResponse> sendVerifyEmail(@RequestBody EmailAddrRequest emailReq)
             throws MessagingException, UnsupportedEncodingException {
-        // User 엔티티에 이메일 있는지 이메일 중복 검사
+
         String email = emailReq.getEmail();
-        if (userService.isEmailExist(email)) {
-            throw new InvalidValueException(ErrorCode.INVALID_EMAIL_EXIST);
+
+        switch (emailReq.type.getCode()) {
+            case 0 -> {
+                // type 0일 경우 회원가입 이메일 인증: User 엔티티에 이메일 있는지 이메일 중복 검사
+                if (userService.isEmailExist(email)) {
+                    throw new InvalidValueException(ErrorCode.INVALID_EMAIL_EXIST);
+                }
+            }
+            case 1 -> {
+                // type 1일 경우 비로그인 비밀번호 찾기: User 엔티티에 이메일 있는지 검사, 있으면 메일 보냄, 없으면 오류
+                if (!userService.isEmailExist(email)) {
+                    throw new InvalidValueException(ErrorCode.INVALID_EMAIL_VALUE);
+                }
+            }
+            // 이외 값일시 오류
+            default -> throw new InvalidValueException(ErrorCode.INVALID_INPUT_VALUE);
         }
         return emailService.sendEmail(emailReq);
     }
@@ -107,21 +121,21 @@ public class UserController {
         return emailService.updateAuth(authReq);
     }
 
-    @PostMapping("/password/request")
-    public CompletableFuture<EmailtoClientResponse> sendPWVerifyEmail(@RequestBody EmailAddrRequest emailReq)
-            throws MessagingException, UnsupportedEncodingException {
-        // User 엔티티에 이메일 있는지 검사, 있으면 메일 보냄, 없으면 오류
-        String email = emailReq.getEmail();
-        if (!userService.isEmailExist(email)) {
-            throw new InvalidValueException(ErrorCode.INVALID_EMAIL_VALUE);
-        }
-        return emailService.sendEmail(emailReq);
-    }
-
-    @PutMapping("/password/response")
-    public ResultResponse updatePWEmail(@RequestBody EmailAuthUpdateRequest authReq) {
-        return emailService.updateAuth(authReq);
-    }
+//    @PostMapping("/password/request")
+//    public CompletableFuture<EmailtoClientResponse> sendPWVerifyEmail(@RequestBody EmailAddrRequest emailReq)
+//            throws MessagingException, UnsupportedEncodingException {
+//        // User 엔티티에 이메일 있는지 검사, 있으면 메일 보냄, 없으면 오류
+//        String email = emailReq.getEmail();
+//        if (!userService.isEmailExist(email)) {
+//            throw new InvalidValueException(ErrorCode.INVALID_EMAIL_VALUE);
+//        }
+//        return emailService.sendEmail(emailReq);
+//    }
+//
+//    @PutMapping("/password/response")
+//    public ResultResponse updatePWEmail(@RequestBody EmailAuthUpdateRequest authReq) {
+//        return emailService.updateAuth(authReq);
+//    }
 
     @PutMapping("/password")
     public ResultResponse updatePwByToken(@RequestBody EmailUserPwRequest req){

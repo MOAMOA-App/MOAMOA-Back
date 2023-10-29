@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.entity.Email;
+import org.zerock.moamoa.domain.enums.EmailType;
+import org.zerock.moamoa.domain.enums.NoticeType;
 
 import java.time.Instant;
 import java.util.List;
@@ -26,6 +28,12 @@ public interface EmailRepository extends JpaRepository<Email, Long> {
 
     Optional<Email> findByEmail(String email);
 
+    default Email finaByTokenAndTypeOrThrow(String token, EmailType type){
+        return findByTokenAndType(token, type)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorCode.INVALID_EMAIL_VALUE));
+    }
+    Optional<Email> findByTokenAndType(String token, EmailType type);
+    
     Boolean existsByEmail(String email);
 
     List<Email> findAllByUpdatedAtBefore(Instant nowDate);

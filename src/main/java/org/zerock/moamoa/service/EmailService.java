@@ -18,7 +18,9 @@ import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.email.EmailAddrRequest;
 import org.zerock.moamoa.domain.DTO.email.*;
 import org.zerock.moamoa.domain.entity.Email;
+import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.EmailRepository;
+import org.zerock.moamoa.repository.UserRepository;
 
 import java.io.UnsupportedEncodingException;
 import java.time.Instant;
@@ -30,9 +32,9 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class EmailService {
     private final EmailRepository emailRepository;
+    private final UserRepository userRepository;
     private final JavaMailSender javaMailSender;    // JavaMail로 이메일 보냄
     private final SpringTemplateEngine templateEngine;
-
     private final String JASYPT_PW = "mypw123!";
     private final String JASYPT_ALGORITHM = "PBEWITHMD5ANDDES";
 
@@ -70,6 +72,13 @@ public class EmailService {
             if (!temp.getCode().equals(req.getCode())) {
                 return ResultResponse.toDto("NOT_CORRECT");
             } else {
+                // 여기서 type1일시 이메일로 유저 찾아서 소셜로그인한 회원인지 검사
+                if (req.getType().getCode() == 1) {
+                    User user = userRepository.findByEmailOrThrow(temp.getEmail());
+                    if (user.getPassword() == null){
+                        return ResultResponse.toDto("소셜로그인한 회원입니다.");
+                    }
+                }
                 temp.updateAuth(req);
                 return ResultResponse.toDto("OK");
             }
@@ -97,7 +106,7 @@ public class EmailService {
             // 메일 보냄, db에 저장
             javaMailSender.send(mimeMessage);
 
-            EmailRequest emailRequest = new EmailRequest(emailMessage.getTo(), authCode);
+            EmailRequest emailRequest = new EmailRequest(emailMessage.getTo(), authCode, emailReq.type);
 
             if (!emailRepository.existsByEmail(emailRequest.getEmail())) {
                 // 이메일 존재하지 않을 시 새로 저장

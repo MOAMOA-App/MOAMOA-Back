@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
+import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
+import org.zerock.moamoa.domain.DTO.user.UserResponse;
 import org.zerock.moamoa.domain.enums.NoticeType;
 
 import java.time.Instant;
@@ -47,4 +49,10 @@ public class Notice extends BaseEntity {
     public void updateRead(Boolean readOrNot) {
         this.readOrNot = readOrNot;
     }
+
+//    public static Notice toEntity(NoticeSaveRequest req) {
+//        Notice notice = new Notice();
+//        notice.senderID = req.getSenderID();
+//
+//    }
 }

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 @Repository
 public class EmitterRepositoryImpl implements EmitterRepository{
+    // 동시성을 고려해 ConcurrentHashMap으로 구현, 이를 저장하거나 꺼내는 방식
     private final Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final Map<String, Object> eventCache = new ConcurrentHashMap<>();
 
@@ -46,6 +47,9 @@ public class EmitterRepositoryImpl implements EmitterRepository{
         // ID 통해 Repository에서 Emitter  제거
         emitters.remove(id);
     }
+
+    // Emitter와 이벤트를 찾을 때 startsWith을 사용하는 이유
+    // : 저장할 때 뒤에 구분자로 회원의 ID를 사용하기 때문에 해당 회원과 관련된 Emitter와 이벤트들을 찾아옴
 
     @Override
     public void deleteAllEmitterStartWithId(Long uid) {

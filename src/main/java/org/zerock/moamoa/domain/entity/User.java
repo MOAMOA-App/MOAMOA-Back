@@ -74,6 +74,7 @@ public class User extends BaseEntity {
         this.deletedAt = deletedAt;
     }
 
+    @Builder
     public User(Long id) {
         this.id = id;
     }
