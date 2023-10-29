@@ -11,10 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
-import org.zerock.moamoa.domain.DTO.notice.NoticeMapper;
-import org.zerock.moamoa.domain.DTO.notice.NoticeReadUpdateRequest;
-import org.zerock.moamoa.domain.DTO.notice.NoticeResponse;
-import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
+import org.zerock.moamoa.domain.DTO.notice.*;
 import org.zerock.moamoa.domain.entity.Notice;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.EmitterRepository;
@@ -41,21 +38,19 @@ public class NoticeService {
 
     @Transactional
     public void saveAndSend(NoticeSaveRequest request) {
-        log.info("start save");
         Notice savedNotice = noticeRepository.save(noticeMapper.toEntity(request));
 
         // receiver에게 알림 발송
         Long receiverId = request.getReceiverID();
         String eventId = receiverId + "_" + System.currentTimeMillis();
-        log.info("Generated eventId: " + eventId);
 
         Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByMemberId(receiverId);
-        sseEmitters.forEach(
-                (key, emitter) -> {
-                    emitterRepository.saveEventCache(key, request);
-                    sendToClient(emitter, eventId, key, noticeMapper.toDto(savedNotice));
-                }
-        );
+        for (Map.Entry<String, SseEmitter> entry : sseEmitters.entrySet()) {
+            String key = entry.getKey();
+            SseEmitter emitter = entry.getValue();
+            emitterRepository.saveEventCache(key, request);
+            sendToClient(emitter, eventId, key, NoticeContentResponse.toDto(savedNotice));
+        }
 //        return noticeMapper.toDto(savedNotice);
     }
 

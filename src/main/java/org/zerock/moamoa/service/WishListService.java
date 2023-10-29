@@ -11,6 +11,7 @@ import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListRequest;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
+import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.WishList;
@@ -18,6 +19,7 @@ import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.repository.WishListRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -92,6 +94,15 @@ public class WishListService {
         Product product = productRepository.findByIdOrThrow(referenceID);
         List<WishList> wishLists = wishListRepository.findByProduct(product);
         return wishLists.stream().map(WishList::getUser).toList();
+    }
+    public  List<Long> findByProductLong(Long referenceID){
+        Product product = productRepository.findByIdOrThrow(referenceID);
+        List<WishList> wishLists = wishListRepository.findByProduct(product);
+        List<Long> wishidList = new ArrayList<>();
+        for (WishList wishList : wishLists) {
+            wishidList.add(wishList.getUser().getId());
+        }
+        return wishidList;
     }
 
 }

@@ -51,14 +51,12 @@ public class NoticeController {
     // @ApiOperation(value = "알림 구독", notes = "알림을 구독한다.")
     // text/event-stream이 SSE통신 위한 표준 MediaType
     // 로그인시 구독할 수 있도록 해야됨 (그래야 알림 받으니까)
-    // 채팅처럼 그냥 지나간 알림은 Get으로 불러오고 새 알림은 일케 받는것도 ㄱㅊ을듯
+    // 이전에 받지 못한 정보가 있다면 Last-Event-ID라는 헤더와 함께 날아온다 (항상오는것X)
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<SseEmitter> subscribe(Authentication auth
-//                                               @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "")
-//                                    String lastEventId
-    ) {
-        SseEmitter emitter = emitterService.subscribe(auth.getPrincipal().toString());
+    public ResponseEntity<SseEmitter> subscribe(Authentication auth,
+                                               @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId) {
+        SseEmitter emitter = emitterService.subscribe(auth.getPrincipal().toString(), lastEventId);
         return ResponseEntity.ok(emitter);
     }
 

@@ -40,6 +40,14 @@ public class ProductService {
         return productMapper.toDto(productRepository.findByIdOrThrow(pid));
     }
 
+    public Boolean findAuth(Long pid, String username){
+        User user = userRepository.findByEmailOrThrow(username);
+        Product product = productRepository.findByIdOrThrow(pid);
+        // user와 product seller 일치하면 return false
+        return !user.equals(product.getUser());
+
+    }
+
     @Transactional
     public ProductResponse saveProduct(ProductSaveRequest request, String username) {
         User user = userRepository.findByEmailOrThrow(username);

@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.message.OkResponse;
 import org.zerock.moamoa.common.message.SuccessMessage;
 import org.zerock.moamoa.domain.DTO.product.*;
+import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.service.ProductService;
 import org.zerock.moamoa.utils.redis.RedisResponse;
 import org.zerock.moamoa.utils.redis.SearchRedisUtils;
@@ -23,6 +25,7 @@ import java.util.List;
 @RequestMapping("/product")
 public class ProductController {
     private final ProductService productService;
+    private final UserRepository userRepository;
 
     /**
      * 게시글 조회
@@ -54,8 +57,14 @@ public class ProductController {
      * 상품 상세 조회
      */
     @GetMapping("{pid}")
-    public ProductResponse getById(@PathVariable Long pid, HttpServletRequest request) {
+    public ProductResponse getById(@PathVariable Long pid, HttpServletRequest request, Authentication auth) {
         String agent = request.getHeader("User-Agent");
+
+        if (auth!=null){
+            if (!productService.findAuth(pid, auth.getPrincipal().toString()))
+                return productService.findOne(pid);
+        }
+
         ViewsRedisUtils.addViewCount(pid, agent);
         return productService.findOne(pid);
     }

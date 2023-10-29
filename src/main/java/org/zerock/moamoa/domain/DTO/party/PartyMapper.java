@@ -12,4 +12,6 @@ public interface PartyMapper {
 
 	PartyResponse toDto(Party party);
 
+	PartyUserInfoResponse toUserDto(Party party);
+
 }

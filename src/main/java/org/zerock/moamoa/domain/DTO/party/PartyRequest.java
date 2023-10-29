@@ -12,6 +12,7 @@ public class PartyRequest {
 	private Integer count;
 	private User buyer;
 	private Product product;
+	private Boolean status;
 
 	@Builder
 	public PartyRequest(String address, Integer count, User buyer, Product product) {
@@ -19,5 +20,6 @@ public class PartyRequest {
 		this.count = count;
 		this.buyer = buyer;
 		this.product = product;
+		this.status = true;
 	}
 }

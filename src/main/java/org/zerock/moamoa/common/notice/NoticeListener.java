@@ -12,7 +12,10 @@ import org.zerock.moamoa.service.NoticeService;
 import org.zerock.moamoa.service.PartyService;
 import org.zerock.moamoa.service.WishListService;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Component
@@ -26,26 +29,28 @@ public class NoticeListener {
     @TransactionalEventListener
     @Async
     public CompletableFuture<Void> handleNotice(NoticeSaveRequest req) {
-        log.info("notice handler");
-
-        // partyService에서 product의 파티 리스트 불러옴, 각각 알림 보내준다
-        List<PartyResponse> partyResponseList = partyService.getByProduct(req.getReferenceID());
-        List<User> wishResponseList = wishListService.findByProduct(req.getReferenceID());
-        log.info("req.getReferenceID() : " + req.getReferenceID());
-        log.info("notice handler : " + partyResponseList + wishResponseList);
-
-        partyResponseList.forEach(partyResponse -> {
-            req.setReceiverID(partyResponse.getBuyer().getId());    // null값이었던 receiverID에 uid값 넣어줌
+        // 채팅알람일시
+        if (req.getType().getCode() == 4) {
             noticeService.saveAndSend(req);
-        });
-        wishResponseList.forEach(wishListResponse -> {
-            req.setReceiverID(wishListResponse.getId());
-            noticeService.saveAndSend(req);
-        });
+        } else {
+//             채팅알람 아닐시 파티랑 위시리스트 목록 다 끌어모아서 알림 보내줌
+//            List<User> userList = partyService.findByProduct(req.getReferenceID());
+//            List<User> wishUserList = wishListService.findByProduct(req.getReferenceID());
 
-        log.info("success");
+            List<Long> userList = new ArrayList<>(partyService.findByProductLong(req.getReferenceID()));
+            List<Long> wishUserList = new ArrayList<>(wishListService.findByProductLong(req.getReferenceID()));
+
+            userList.removeAll(wishUserList);
+            userList.addAll(wishUserList);
+
+            if (!userList.isEmpty()){
+                for (Long uid : userList) {
+                    req.setReceiverID(uid);    // null값이었던 receiverID에 uid값 넣어줌
+                    noticeService.saveAndSend(req);
+                }
+            }
+        }
         return CompletableFuture.completedFuture(null);
     }
-
 
 }
