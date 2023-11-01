@@ -18,7 +18,9 @@ import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.DTO.product.*;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.NoticeType;
+import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
@@ -40,7 +42,7 @@ public class ProductService {
         return productMapper.toDto(productRepository.findByIdOrThrow(pid));
     }
 
-    public Boolean findAuth(Long pid, String username){
+    public Boolean findAuth(Long pid, String username) {
         User user = userRepository.findByEmailOrThrow(username);
         Product product = productRepository.findByIdOrThrow(pid);
         // user와 product seller 일치하면 return false
@@ -102,7 +104,7 @@ public class ProductService {
         return productMapper.toDto(product);
     }
 
-    public Page<ProductListResponse> search(String[] keywords, List<String> categories, List<String> statuses,
+    public Page<ProductListResponse> search(String[] keywords, List<Category> categories, List<ProductStatus> statuses,
                                             String search, String order, int pageNo, int pageSize) {
 
         Specification<Product> spec = (root, query, criteriaBuilder) -> {
@@ -137,10 +139,14 @@ public class ProductService {
             }
             //상태 카테고리 추가
             if (statuses != null) {
-                Predicate[] statusPredicates = new Predicate[statuses.size()];
+                Predicate[] likePredicates = statuses.stream().map(status -> criteriaBuilder.equal(root.get("status"), status)).toArray(Predicate[]::new);
+                Predicate[] statusPredicates = Arrays.stream(likePredicates).map(criteriaBuilder::or).toArray(Predicate[]::new);
+                predicates.add(criteriaBuilder.or(statusPredicates));
             }
             if (categories != null) {
-                Predicate[] categoryPredicates = new Predicate[categories.size()];
+                Predicate[] likePredicates = categories.stream().map(status -> criteriaBuilder.equal(root.get("category"), status.getLabel())).toArray(Predicate[]::new);
+                Predicate[] categoryPredicates = Arrays.stream(likePredicates).map(criteriaBuilder::or).toArray(Predicate[]::new);
+                predicates.add(criteriaBuilder.or(categoryPredicates));
             }
 
             predicates.add(criteriaBuilder.equal(root.get("activate"), true));
