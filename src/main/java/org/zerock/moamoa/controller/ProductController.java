@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.message.OkResponse;
 import org.zerock.moamoa.common.message.SuccessMessage;
 import org.zerock.moamoa.domain.DTO.product.*;
-import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.enums.Category;
+import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.service.ProductService;
 import org.zerock.moamoa.utils.redis.RedisResponse;
@@ -17,6 +18,8 @@ import org.zerock.moamoa.utils.redis.SearchRedisUtils;
 import org.zerock.moamoa.utils.redis.ViewsRedisUtils;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 //RestController -> return 값을 자동으로 json 형식으로 변환해주는 기능 + Controller
 @RequiredArgsConstructor
@@ -30,27 +33,33 @@ public class ProductController {
     /**
      * 게시글 조회
      *
-     * @param keyword    검색어
-     * @param categories 카테고리
-     * @param statuses   거래 상태
-     * @param search     검색 기준 -> sub 제목 |  descript 내용 | subdesc 제목 + 내용
-     * @param order      정렬 기준
-     * @param pageNo     페이지 번호
-     * @param pageSize   페이지 크기
+     * @param keyword  검색어
+     * @param category 카테고리
+     * @param status   거래 상태 -> 거래 준비 | 거래 진행 | 거래 완효
+     * @param search   검색 기준 -> sub 제목 |  descript 내용 | subdesc 제목 + 내용
+     * @param order    정렬 기준
+     * @param pageNo   페이지 번호
+     * @param pageSize 페이지 크기
      */
     @GetMapping("")
     public Page<ProductListResponse> searchProducts(
             @RequestParam(required = false, defaultValue = "") String keyword,
-            @RequestParam(required = false) List<String> categories,
-            @RequestParam(required = false) List<String> statuses,
+            @RequestParam(required = false) List<Integer> category,
+            @RequestParam(required = false) List<Integer> status,
             @RequestParam(defaultValue = "subdesc") String search,
             @RequestParam(defaultValue = "recent") String order,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "20") int pageSize
     ) {
+        List<ProductStatus> productStatuses = status.stream().map(ProductStatus::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
+        log.info(productStatuses.toString());
+        List<Category> categories = status.stream().map(Category::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
+        log.info(categories.toString());
+        // 검색어 Redis 등록
         String[] keywords = keyword.split(" ");
         if (keywords != null && !keywords[0].equals("")) SearchRedisUtils.addSearchKeyword(keywords);
-        return productService.search(keywords, categories, statuses, search, order, pageNo, pageSize);
+        //
+        return productService.search(keywords, categories, productStatuses, search, order, pageNo, pageSize);
     }
 
     /**
@@ -60,7 +69,7 @@ public class ProductController {
     public ProductResponse getById(@PathVariable Long pid, HttpServletRequest request, Authentication auth) {
         String agent = request.getHeader("User-Agent");
 
-        if (auth!=null){
+        if (auth != null) {
             if (!productService.findAuth(pid, auth.getPrincipal().toString()))
                 return productService.findOne(pid);
         }
