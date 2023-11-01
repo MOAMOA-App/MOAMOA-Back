@@ -69,12 +69,6 @@ public class Product extends BaseEntity {
     @Column(name = "activate")
     private Boolean activate = true;
 
-    @Column
-    private double longtitue;
-
-    @Column
-    private double lattitue;
-
     @Column(name = "finished_at", nullable = false)
     private Instant finishedAt;
 
@@ -105,14 +99,12 @@ public class Product extends BaseEntity {
         this.finishedAt = product.getFinishedAt();
         this.maxCount = product.getMaxCount();
         this.choiceSend = product.getChoiceSend();
-        this.longtitue = product.getLongtitue();
-        this.lattitue = product.getLattitue();
     }
 
     @Builder
     public Product(User user, String category, String sellingArea, String detailArea, String title,
                    ProductStatus status, Integer sellPrice, Integer viewCount, String description, Integer sellCount,
-                   Integer maxCount, String choiceSend, Boolean activate, String finishedAt, double longtitue, double lattitue) {
+                   Integer maxCount, String choiceSend, Boolean activate, String finishedAt) {
         this.user = user;
         this.category = category;
         this.sellingArea = sellingArea;
@@ -126,8 +118,6 @@ public class Product extends BaseEntity {
         this.maxCount = maxCount;
         this.choiceSend = choiceSend;
         this.activate = activate;
-        this.longtitue = longtitue;
-        this.lattitue = lattitue;
         this.finishedAt = TimeUtils.toInstant(finishedAt);
     }
 

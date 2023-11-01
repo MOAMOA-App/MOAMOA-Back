@@ -11,6 +11,7 @@ import org.zerock.moamoa.utils.TimeUtils;
 import org.zerock.moamoa.utils.file.dto.FileResponse;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,17 +31,15 @@ public class ProductResponse {
     private Integer sellCount;
     private Integer maxCount;
     private String choiceSend;
-    private double longtitue;
-    private double lattitue;
-    private String createdAt;
-    private String finishedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime finishedAt;
     private List<FileResponse> productImages;
 
 
     @Builder
     public ProductResponse(Long id, UserProductResponse user, String category, String sellingArea, String detailArea,
                            String title, String description, ProductStatus status, Integer sellPrice, Integer viewCount, Integer sellCount,
-                           Integer maxCount, String choiceSend, Instant createdAt, Instant finishedAt, double longtitue, double lattitue,
+                           Integer maxCount, String choiceSend, Instant createdAt, Instant finishedAt,
                            List<ProductImages> productImages) {
         this.id = id;
         this.user = user;
@@ -57,8 +56,6 @@ public class ProductResponse {
         this.choiceSend = choiceSend;
         this.createdAt = TimeUtils.toLocalTime(createdAt);
         this.finishedAt = TimeUtils.toLocalTime(finishedAt);
-        this.longtitue = longtitue;
-        this.lattitue = lattitue;
         this.productImages = productImages != null ? productImages.stream().map(ImageMapper.INSTANCE::toDto).toList() : new ArrayList<>();
     }
 

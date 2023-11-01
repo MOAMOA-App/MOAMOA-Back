@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.zerock.moamoa.utils.TimeUtils;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -13,8 +14,8 @@ public class AnnounceResponse {
     private Long id;
     private Boolean lock;
     private String contents;
-    private String createdAt;
-    private String updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @Builder
     public AnnounceResponse(Long id, Boolean lock, String contents, Instant createdAt, Instant updatedAt) {

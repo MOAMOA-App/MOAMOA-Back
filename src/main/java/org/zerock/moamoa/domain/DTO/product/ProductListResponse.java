@@ -8,6 +8,7 @@ import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.utils.TimeUtils;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -23,8 +24,8 @@ public class ProductListResponse {
     private Integer sellCount;
     private Integer maxCount;
     private String choiceSend;
-    private String createdAt;
-    private String finishedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime finishedAt;
     private String mainImage;
 
 
@@ -46,6 +47,6 @@ public class ProductListResponse {
         this.choiceSend = choiceSend;
         this.createdAt = TimeUtils.toLocalTime(createdAt);
         this.finishedAt = TimeUtils.toLocalTime(finishedAt);
-        this.mainImage = productImages.size() > 0 ? productImages.get(0).getFileName() : null;
+        this.mainImage = !productImages.isEmpty() ? productImages.get(0).getFileName() : null;
     }
 }

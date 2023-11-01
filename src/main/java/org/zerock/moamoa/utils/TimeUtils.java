@@ -16,8 +16,8 @@ public class TimeUtils {
     public final static ZoneId koreaZoneId = ZoneId.of("Asia/Seoul");
 
     // Instant -> LocalDataTime 변환
-    public static String toLocalTime(Instant instant) {
-        return instant.atZone(koreaZoneId).toLocalDateTime().format(formatter);
+    public static LocalDateTime toLocalTime(Instant instant) {
+        return instant.atZone(koreaZoneId).toLocalDateTime();
     }
 
     public static Instant toInstant(String dateString) {

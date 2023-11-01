@@ -69,9 +69,7 @@ public class PartyService {
         User user = userRepository.findByEmailOrThrow(username);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Party> parties = partyRepository.findByBuyer(user, itemPage);
-        if (parties.isEmpty()) {
-            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
+
         return parties.map(partyMapper::toDto);
     }
 
