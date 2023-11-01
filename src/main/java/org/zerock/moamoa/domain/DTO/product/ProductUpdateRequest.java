@@ -22,13 +22,11 @@ public class ProductUpdateRequest {
     private Integer countImage;
     private Instant finishedAt;
     private ProductStatus status;
-    private double longtitue;
-    private double lattitue;
 
     @Builder
     public ProductUpdateRequest(Long productId, String title, String description, String category, String sellingArea,
                                 String detailArea, Integer sellPrice, Integer viewCount, Integer maxCount, String choiceSend,
-                                Integer countImage, String finishedAt, ProductStatus status, double longtitue, double lattitue) {
+                                Integer countImage, String finishedAt, ProductStatus status) {
         this.productId = productId;
         this.title = title;
         this.description = description;
@@ -42,7 +40,5 @@ public class ProductUpdateRequest {
         this.countImage = countImage;
         this.finishedAt = TimeUtils.toInstant(finishedAt);
         this.status = status;
-        this.lattitue = lattitue;
-        this.longtitue = longtitue;
     }
 }

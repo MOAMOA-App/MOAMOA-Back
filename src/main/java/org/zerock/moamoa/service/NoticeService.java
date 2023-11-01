@@ -93,6 +93,7 @@ public class NoticeService {
         return ResultResponse.toDto("OK");
     }
 
+    @Transactional
     public ResultResponse updateReadAll(String username) {
         User user = userRepository.findByEmailOrThrow(username);
         List<Notice> notices = noticeRepository.findByReceiverID(user);
