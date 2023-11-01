@@ -44,7 +44,7 @@ public class ProductController {
     @GetMapping("")
     public Page<ProductListResponse> searchProducts(
             @RequestParam(required = false, defaultValue = "") String keyword,
-            @RequestParam(required = false) List<Integer> category,
+            @RequestParam(required = false) List<Integer> catetory,
             @RequestParam(required = false) List<Integer> status,
             @RequestParam(defaultValue = "subdesc") String search,
             @RequestParam(defaultValue = "recent") String order,
@@ -53,7 +53,7 @@ public class ProductController {
     ) {
         List<ProductStatus> productStatuses = status.stream().map(ProductStatus::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
         log.info(productStatuses.toString());
-        List<Category> categories = status.stream().map(Category::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
+        List<Category> categories = catetory.stream().map(Category::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
         log.info(categories.toString());
         // 검색어 Redis 등록
         String[] keywords = keyword.split(" ");

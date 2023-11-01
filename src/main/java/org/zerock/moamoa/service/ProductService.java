@@ -144,11 +144,9 @@ public class ProductService {
                 predicates.add(criteriaBuilder.or(statusPredicates));
             }
             if (categories != null) {
-                Predicate[] categoryPredicates = new Predicate[categories.size()];
-                for (Category temp : categories) {
-
-                }
-                //predicates.add(criteriaBuilder.or(categoryPredicates));
+                Predicate[] likePredicates = categories.stream().map(status -> criteriaBuilder.equal(root.get("category"), status.getLabel())).toArray(Predicate[]::new);
+                Predicate[] categoryPredicates = Arrays.stream(likePredicates).map(criteriaBuilder::or).toArray(Predicate[]::new);
+                predicates.add(criteriaBuilder.or(categoryPredicates));
             }
 
             predicates.add(criteriaBuilder.equal(root.get("activate"), true));
