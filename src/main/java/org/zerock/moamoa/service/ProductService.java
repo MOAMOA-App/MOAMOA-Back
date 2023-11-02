@@ -54,7 +54,6 @@ public class ProductService {
     public ProductResponse saveProduct(ProductSaveRequest request, String username) {
         User user = userRepository.findByEmailOrThrow(username);
         request.setUser(user);
-
         Product product = productRepository.save(productMapper.toEntity(request));
 
         return productMapper.toDto(product);
@@ -138,12 +137,12 @@ public class ProductService {
 
             }
             //상태 카테고리 추가
-            if (statuses != null) {
+            if (statuses.size() > 0) {
                 Predicate[] likePredicates = statuses.stream().map(status -> criteriaBuilder.equal(root.get("status"), status)).toArray(Predicate[]::new);
                 Predicate[] statusPredicates = Arrays.stream(likePredicates).map(criteriaBuilder::or).toArray(Predicate[]::new);
                 predicates.add(criteriaBuilder.or(statusPredicates));
             }
-            if (categories != null) {
+            if (categories.size() > 0) {
                 Predicate[] likePredicates = categories.stream().map(status -> criteriaBuilder.equal(root.get("category"), status.getLabel())).toArray(Predicate[]::new);
                 Predicate[] categoryPredicates = Arrays.stream(likePredicates).map(criteriaBuilder::or).toArray(Predicate[]::new);
                 predicates.add(criteriaBuilder.or(categoryPredicates));

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.zerock.moamoa.domain.DTO.productImage.ImageMapper;
 import org.zerock.moamoa.domain.DTO.user.UserProductResponse;
 import org.zerock.moamoa.domain.entity.ProductImages;
+import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.utils.TimeUtils;
 import org.zerock.moamoa.utils.file.dto.FileResponse;
@@ -37,13 +38,13 @@ public class ProductResponse {
 
 
     @Builder
-    public ProductResponse(Long id, UserProductResponse user, String category, String sellingArea, String detailArea,
+    public ProductResponse(Long id, UserProductResponse user, Category category, String sellingArea, String detailArea,
                            String title, String description, ProductStatus status, Integer sellPrice, Integer viewCount, Integer sellCount,
                            Integer maxCount, String choiceSend, Instant createdAt, Instant finishedAt,
                            List<ProductImages> productImages) {
         this.id = id;
         this.user = user;
-        this.category = category;
+        this.category = category.getLabel();
         this.sellingArea = sellingArea;
         this.detailArea = detailArea;
         this.title = title;
