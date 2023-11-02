@@ -5,8 +5,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 import org.zerock.moamoa.domain.DTO.product.ProductUpdateRequest;
+import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.utils.TimeUtils;
 
@@ -15,6 +17,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Slf4j
 @NoArgsConstructor
 @Table(name = "products")
 public class Product extends BaseEntity {
@@ -27,7 +30,7 @@ public class Product extends BaseEntity {
     private User user; // DB는 오브젝트를 저장할 수 없다. FK, 자바는 오브젝트를 저장할 수 있다. //참조 할 테이블
 
     @Column(name = "category", nullable = false)
-    private String category;
+    private Category category;
 
     @Column(name = "selling_area", nullable = false, length = 254)
     private String sellingArea;
@@ -90,7 +93,7 @@ public class Product extends BaseEntity {
 
 
     public void updateInfo(ProductUpdateRequest product) {
-        this.category = product.getCategory();
+        this.category = Category.fromLabel(product.getCategory());
         this.sellingArea = product.getSellingArea();
         this.detailArea = product.getDetailArea();
         this.title = product.getTitle();
@@ -106,7 +109,7 @@ public class Product extends BaseEntity {
                    ProductStatus status, Integer sellPrice, Integer viewCount, String description, Integer sellCount,
                    Integer maxCount, String choiceSend, Boolean activate, String finishedAt) {
         this.user = user;
-        this.category = category;
+        this.category = Category.fromLabel(category);
         this.sellingArea = sellingArea;
         this.detailArea = detailArea;
         this.title = title;

@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 public enum Category {
     LIFE(1, "생활"),
     CLOTH(2, "의류"),
-    FOOD(3, "음식"),
+    FOOD(3, "식품"),
     HOUSEHOLD(4, "가전"),
     HOBBY(5, "취미"),
     SPORT(6, "운동"),

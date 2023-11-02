@@ -17,6 +17,7 @@ import org.zerock.moamoa.utils.redis.RedisResponse;
 import org.zerock.moamoa.utils.redis.SearchRedisUtils;
 import org.zerock.moamoa.utils.redis.ViewsRedisUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -51,10 +52,13 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "20") int pageSize
     ) {
-        List<ProductStatus> productStatuses = status.stream().map(ProductStatus::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
-        log.info(productStatuses.toString());
-        List<Category> categories = catetory.stream().map(Category::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
-        log.info(categories.toString());
+        if (status != null) {
+
+        }
+        List<ProductStatus> productStatuses = (status == null) ? new ArrayList<>()
+                : status.stream().map(ProductStatus::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
+        List<Category> categories = (catetory == null) ? new ArrayList<>()
+                : catetory.stream().map(Category::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
         // 검색어 Redis 등록
         String[] keywords = keyword.split(" ");
         if (keywords != null && !keywords[0].equals("")) SearchRedisUtils.addSearchKeyword(keywords);

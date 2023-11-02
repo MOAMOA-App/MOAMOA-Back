@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.zerock.moamoa.domain.DTO.user.UserProductResponse;
 import org.zerock.moamoa.domain.entity.ProductImages;
+import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.utils.TimeUtils;
 
@@ -30,13 +31,13 @@ public class ProductListResponse {
 
 
     @Builder
-    public ProductListResponse(Long id, UserProductResponse user, String category, String sellingArea,
+    public ProductListResponse(Long id, UserProductResponse user, Category category, String sellingArea,
                                String title, ProductStatus status, Integer sellPrice, Integer viewCount, Integer sellCount,
                                Integer maxCount, String choiceSend, Instant createdAt, Instant finishedAt,
                                List<ProductImages> productImages) {
         this.id = id;
         this.user = user;
-        this.category = category;
+        this.category = category.getLabel();
         this.sellingArea = sellingArea;
         this.title = title;
         this.status = status;
