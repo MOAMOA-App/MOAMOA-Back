@@ -10,14 +10,14 @@ import java.time.Instant;
 
 @Data
 public class NoticeSaveRequest {
-    private Long senderID;
-    private Long receiverID;
+    private User senderID;
+    private User receiverID;
     private Boolean readOrNot = false;
     private NoticeType type;
-    private Long referenceID;
+    private Product referenceID;
 
     @Builder
-    public NoticeSaveRequest(Long senderID, Long receiverID, NoticeType type, Long referenceID) {
+    public NoticeSaveRequest(User senderID, User receiverID, NoticeType type, Product referenceID) {
         this.senderID = senderID;
         this.receiverID = receiverID;
         this.type = type;

@@ -115,16 +115,16 @@ public class ChatService {
         ChatMessage chatMessage = new ChatMessage(chatRoom, sender, req.getMessage(), false);
         chatMessageRepository.save(chatMessage);
 
-        Long receiver;
+        User receiver;
         if (sender.getId().equals(chatRoom.getSellerId().getId())){
             // seller가 sender일 시 receiver는 user가 됨
-            receiver = chatRoom.getUserId().getId();
+            receiver = chatRoom.getUserId();
         } else {
             // user가 sender일 시 receiver는 seller가 됨
-            receiver = chatRoom.getSellerId().getId();
+            receiver = chatRoom.getSellerId();
         }
-        eventPublisher.publishEvent(new NoticeSaveRequest(req.getSender(), receiver,
-                NoticeType.NEW_CHAT, chatRoom.getProductId().getId()));
+        eventPublisher.publishEvent(new NoticeSaveRequest(sender, receiver,
+                NoticeType.NEW_CHAT, chatRoom.getProductId()));
     }
 
     public ChatRoomResponse findRoomById(Long id) {

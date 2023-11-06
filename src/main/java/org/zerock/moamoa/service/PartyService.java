@@ -8,13 +8,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.AuthException;
-import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.party.*;
+import org.zerock.moamoa.domain.DTO.product.ProductListResponse;
+import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.repository.PartyRepository;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
@@ -29,6 +31,7 @@ public class PartyService {
     private final PartyRepository partyRepository;
     private final ProductRepository productRepository;
     private final PartyMapper partyMapper;
+    private final ProductMapper productMapper;
     private final UserRepository userRepository;
 
 
@@ -36,7 +39,7 @@ public class PartyService {
         return this.partyRepository.findAll();
     }
 
-    public List<PartyUserInfoResponse> findByProduct(String username, Long pid) {
+    public List<PartyUserInfoResponse> findUserByProduct(String username, Long pid) {
         User user = userRepository.findByEmailOrThrow(username);
         Product product = productRepository.findByIdOrThrow(pid);
 
@@ -49,28 +52,12 @@ public class PartyService {
         return parties.stream().map(partyMapper::toUserDto).toList();
     }
 
-    public List<User> findByProduct(Long pid) {
-        Product product = productRepository.findByIdOrThrow(pid);
-        List<Party> parties = partyRepository.findByProduct(product);
-        return parties.stream().map(Party::getBuyer).toList();
-    }
-
-    public  List<Long> findByProductLong(Long pid){
-        Product product = productRepository.findByIdOrThrow(pid);
-        List<Party> parties = partyRepository.findByProduct(product);
-        List<Long> partyidList = new ArrayList<>();
-        for (Party party : parties) {
-            partyidList.add(party.getBuyer().getId());
-        }
-        return partyidList;
-    }
-
-    public Page<PartyResponse> findPageByBuyer(String username, int pageNo, int pageSize) {
+    public Page<ProductListResponse> findPageByBuyer(String username, int pageNo, int pageSize) {
         User user = userRepository.findByEmailOrThrow(username);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Party> parties = partyRepository.findByBuyer(user, itemPage);
 
-        return parties.map(partyMapper::toDto);
+        return parties.map(Party::getProduct).map(productMapper::toListDto);
     }
 
     public PartytoClientResponse saveParty(String username, PartyRequest request, Long pid) {
