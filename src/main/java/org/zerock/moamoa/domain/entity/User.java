@@ -5,8 +5,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
+import org.zerock.moamoa.common.user.RandomNick;
 import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
 
 import java.time.Instant;
@@ -23,7 +25,7 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", length = 32, nullable = false)
+    @Column(name = "name", length = 32)
     private String name;
 
     @Column(name = "naver", length = 254)
@@ -107,6 +109,10 @@ public class User extends BaseEntity {
         profImg = file;
     }
 
+    public void updateNick(String nick){
+        this.nick = nick;
+    }
+
     /**
      * 비밀번호 암호화
      *
@@ -117,20 +123,9 @@ public class User extends BaseEntity {
     }
 
     /**
-     * 닉네임 설정
+     * 닉네임 랜덤설정
      */
     public void randomNick() {
-        ArrayList<String> nickarr1 = new ArrayList<>(
-                Arrays.asList("무지개", "분홍", "오렌지", "개나리", "연두", "해변의", "퍼렁", "보라", "갈색", "하얀"));
-        ArrayList<String> nickarr2 = new ArrayList<>(
-                Arrays.asList("웨옹", "곰돌이", "귀긴곰", "꽥", "고양이", "냥이", "곰", "토끼", "오리"));
-
-        Random rnd = new Random();
-        int rnum1 = rnd.nextInt(nickarr1.size());
-        int rnum2 = rnd.nextInt(nickarr2.size());
-
-        this.nick = nickarr1.get(rnum1) + nickarr2.get(rnum2);
+        this.nick = RandomNick.printRandNick();
     }
-
-
 }

@@ -1,4 +1,4 @@
-package org.zerock.moamoa.common.email;
+package org.zerock.moamoa.common.user;
 
 import lombok.*;
 

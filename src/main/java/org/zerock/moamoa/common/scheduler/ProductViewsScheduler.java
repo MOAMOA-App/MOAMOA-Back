@@ -32,7 +32,7 @@ public class ProductViewsScheduler implements Job {
                 Product product = productRepository.findByIdOrThrow(key);
                 product.updateViewCount(count);
 
-                ViewsRedisUtils.deleteViewCount(product.getId());
+//                ViewsRedisUtils.deleteViewCount(product.getId());
             }
         });
     }

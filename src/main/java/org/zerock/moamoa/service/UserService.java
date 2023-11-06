@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.common.user.RandomNick;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.email.EmailUserPwRequest;
 import org.zerock.moamoa.domain.DTO.user.*;
@@ -14,7 +15,10 @@ import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.EmailRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Random;
 
 @Service
 @Slf4j
@@ -51,7 +55,6 @@ public class UserService {
             user = userMapper.toEntity(request);
             user.updatePw(request.getPassword());
             user.hashPassword(passwordEncoder);     // 비밀번호 암호화
-            user.randomNick();  // 닉네임 랜덤설정
             return userMapper.toDto(userRepository.save(user));
         }
     }
@@ -72,7 +75,13 @@ public class UserService {
         } else {
 
             user = userMapper.toEntity(request);
-            user.randomNick();  // 닉네임 랜덤설정
+
+            // 아니 봐봐 만약에 랜덤을 돌려 그래서 ok인지 검사를 해... 그러면 update해주면 되는거아님?
+            String rNick = RandomNick.printRandNick();
+            while (!Objects.equals(nickVerify(rNick), "OK")){
+                rNick = RandomNick.printRandNick();
+            }
+            user.updateNick(rNick);  // 닉네임 랜덤설정
             userRepository.save(user);
             return userMapper.toDto(userRepository.save(user));
         }
@@ -161,5 +170,19 @@ public class UserService {
             return ResultResponse.toDto("SAME_PASSWORD");
 
         return ResultResponse.toDto("OK");
+    }
+
+    public ResultResponse printRandNick() {
+        String rNick = RandomNick.printRandNick();
+        return ResultResponse.toDto("nick: " + rNick);
+    }
+
+    public String nickVerify(String usernick) {
+        Boolean nickcheck = userRepository.existsByNick(usernick);
+        if (!nickcheck){
+            return "OK";
+        } else {
+            return "이미 존재하는 닉네임입니다.";
+        }
     }
 }
