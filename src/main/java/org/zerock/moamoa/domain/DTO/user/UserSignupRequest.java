@@ -8,8 +8,9 @@ import java.time.Instant;
 
 @Data
 public class UserSignupRequest {
-    @NotEmpty(message = "이름을 입력해주세요.")
     private String name;
+    @NotEmpty(message = "이름을 입력해주세요.")
+    private String nick;
     private String naver;
     private String kakao;
     @NotEmpty(message = "이메일을 입력해주세요.")
@@ -21,8 +22,17 @@ public class UserSignupRequest {
 
 
     @Builder
-    public UserSignupRequest(String name, String email, String password) {
-        this.name = name;
+    public UserSignupRequest(String email, String password) {
+//        this.name = name;
+        this.email = email;
+        if (password != null) this.password = password;
+        this.activate = true;
+
+    }
+
+    @Builder
+    public UserSignupRequest(String nick, String email, String password) {
+        this.nick = nick;
         this.email = email;
         if (password != null) this.password = password;
         this.activate = true;

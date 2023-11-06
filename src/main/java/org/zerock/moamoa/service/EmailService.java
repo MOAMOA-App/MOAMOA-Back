@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
-import org.zerock.moamoa.common.email.EmailMessage;
+import org.zerock.moamoa.common.user.EmailMessage;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.email.EmailAddrRequest;
 import org.zerock.moamoa.domain.DTO.email.*;

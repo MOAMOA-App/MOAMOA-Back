@@ -69,8 +69,8 @@ public class AnnounceService {
         Announce announce = announceRepository.save(announceMapper.toEntity(request));
 
         // 알림 발송
-        eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
-                NoticeType.NEW_ANNOUNCE, product.getId()));
+        eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser(), null,
+                NoticeType.NEW_ANNOUNCE, product));
 
         return AnnounceResultResponse.toDto("OK", announceMapper.toDto(announce));
     }

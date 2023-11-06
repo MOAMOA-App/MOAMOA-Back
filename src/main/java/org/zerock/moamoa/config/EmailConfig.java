@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.zerock.moamoa.common.email.EmailMessage;
+import org.zerock.moamoa.common.user.EmailMessage;
 
 import java.util.Properties;
 

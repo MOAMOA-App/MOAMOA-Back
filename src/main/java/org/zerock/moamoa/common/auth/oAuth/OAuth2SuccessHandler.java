@@ -48,13 +48,13 @@ public class OAuth2SuccessHandler
                                         Authentication authentication
     ) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String name = oAuth2User.getAttribute("name");
+//        String name = oAuth2User.getAttribute("name");
         String username = oAuth2User.getAttribute("email");
         String loginType = oAuth2User.getAttribute("loginType");
         String token = oAuth2User.getAttribute("id").toString();
         log.info(username + "님이 " + loginType + "로 회원가입 하셨습니다.");
         // 처음으로 소셜 로그인한 사용자를 데이터베이스에 등록
-        UserSignupRequest saveRequest = new UserSignupRequest(name, username, null);
+        UserSignupRequest saveRequest = new UserSignupRequest(username, null);
         switch (loginType) {
             case "kakao" -> saveRequest.setKakao(token);
             case "naver" -> saveRequest.setNaver(token);

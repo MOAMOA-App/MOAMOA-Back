@@ -41,6 +41,9 @@ public class ViewsRedisUtils {
             viewsRedisTemplate.opsForList().rightPushAll(pid.toString(), useragent);
         }
 
+        // 조회수 리스트는 3분마다 삭제
+        viewsRedisTemplate.expire(key, 3, TimeUnit.MINUTES);
+
         // pid 기준 유저 조회 리스트는 하루 지날 시 삭제
         viewsRedisTemplate.expire(pid.toString(), 1, TimeUnit.DAYS);
     }

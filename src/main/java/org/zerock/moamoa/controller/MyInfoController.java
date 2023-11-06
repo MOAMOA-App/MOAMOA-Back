@@ -60,7 +60,7 @@ public class MyInfoController {
      * 내가 작성한 게시글 불러옴
      */
     @GetMapping("post")
-    public Page<ProductResponse> getMyPosts(
+    public Page<ProductListResponse> getMyPosts(
             Authentication auth,
             @RequestParam(defaultValue = "0") int pageNo,
             @RequestParam(defaultValue = "8") int pageSize
@@ -72,7 +72,7 @@ public class MyInfoController {
      * 내가 참여한 리스트 불러옴
      */
     @GetMapping("party")
-    public Page<PartyResponse> getJoinParty(Authentication auth,
+    public Page<ProductListResponse> getJoinParty(Authentication auth,
                                             @RequestParam(defaultValue = "0") int pageNo,
                                             @RequestParam(defaultValue = "8") int pageSize) {
         return partyService.findPageByBuyer(auth.getPrincipal().toString(), pageNo, pageSize);

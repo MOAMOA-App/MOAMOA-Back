@@ -31,4 +31,6 @@ public interface PartyRepository extends JpaRepository<Party, Long> {
     Page<Party> findByBuyer(User buyer, Pageable pageable);
 
     List<Party> findByProduct(Product product);
+
+    List<Party> findByProductAndStatus(Product product, Boolean status);
 }

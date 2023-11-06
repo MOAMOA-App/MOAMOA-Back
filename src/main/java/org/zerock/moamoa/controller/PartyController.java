@@ -27,7 +27,7 @@ public class PartyController {
     @GetMapping("/{pid}/party")
     public List<PartyUserInfoResponse> readByProductList(@PathVariable Long pid, Authentication auth) {
         // product 기준으로 참여한 유저들 보는 건 seller가 할 수 있음
-        return partyService.findByProduct(auth.getPrincipal().toString(), pid);
+        return partyService.findUserByProduct(auth.getPrincipal().toString(), pid);
     }
 
     @PostMapping("/{pid}/party")
