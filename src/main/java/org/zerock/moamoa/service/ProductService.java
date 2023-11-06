@@ -23,6 +23,7 @@ import org.zerock.moamoa.domain.enums.NoticeType;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
+import org.zerock.moamoa.repository.WishListRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,11 +36,22 @@ import java.util.stream.Stream;
 public class ProductService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final WishListRepository wishListRepository;
     private final ProductMapper productMapper;
     private final ApplicationEventPublisher eventPublisher;
 
-    public ProductResponse findOne(Long pid) {
-        return productMapper.toDto(productRepository.findByIdOrThrow(pid));
+    public ProductResponse findOne(Long pid, String username) {
+        Product product = productRepository.findByIdOrThrow(pid);
+        ProductResponse response = productMapper.toDto(product);
+
+        // 비회원
+        if (username == null) return response;
+
+        // 회원 : 찜하기 조회
+        User user = userRepository.findByEmailOrThrow(username);
+        if (wishListRepository.existsByUserAndProduct(user, product)) response.setHeart(true);
+
+        return response;
     }
 
     public Boolean findAuth(Long pid, String username) {
@@ -104,7 +116,7 @@ public class ProductService {
     }
 
     public Page<ProductListResponse> search(String[] keywords, List<Category> categories, List<ProductStatus> statuses,
-                                            String search, String order, int pageNo, int pageSize) {
+                                            String search, String order, int pageNo, int pageSize, String username) {
 
         Specification<Product> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -163,8 +175,22 @@ public class ProductService {
             pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.ASC, sortData[0]));
         }
 
-        Page<Product> tourCourses = productRepository.findAll(spec, pageable);
-        return tourCourses.map(productMapper::toListDto);
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
+
+
+        // 비회원
+        if (username == null) return productPage.map(productMapper::toListDto);
+
+        // 회원 : 찜하기 조회
+        User user = userRepository.findByEmailOrThrow(username);
+
+        return productPage.map(product -> mapProductToListResponse(user, product));
+    }
+
+    private ProductListResponse mapProductToListResponse(User user, Product product) {
+        ProductListResponse response = productMapper.toListDto(product);
+        if (wishListRepository.existsByUserAndProduct(user, product)) response.setHeart(true);
+        return response;
     }
 
     private String[] findSortField(String order) {

@@ -28,6 +28,7 @@ public class ProductListResponse {
     private LocalDateTime createdAt;
     private LocalDateTime finishedAt;
     private String mainImage;
+    private boolean heart;
 
 
     @Builder

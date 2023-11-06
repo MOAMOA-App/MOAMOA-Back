@@ -11,7 +11,6 @@ import org.zerock.moamoa.common.message.SuccessMessage;
 import org.zerock.moamoa.domain.DTO.product.*;
 import org.zerock.moamoa.domain.enums.Category;
 import org.zerock.moamoa.domain.enums.ProductStatus;
-import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.service.ProductService;
 import org.zerock.moamoa.utils.redis.RedisResponse;
 import org.zerock.moamoa.utils.redis.SearchRedisUtils;
@@ -29,7 +28,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/product")
 public class ProductController {
     private final ProductService productService;
-    private final UserRepository userRepository;
 
     /**
      * 게시글 조회
@@ -44,8 +42,9 @@ public class ProductController {
      */
     @GetMapping("")
     public Page<ProductListResponse> searchProducts(
+            Authentication authentication,
             @RequestParam(required = false, defaultValue = "") String keyword,
-            @RequestParam(required = false) List<Integer> catetory,
+            @RequestParam(required = false) List<Integer> category,
             @RequestParam(required = false) List<Integer> status,
             @RequestParam(defaultValue = "subdesc") String search,
             @RequestParam(defaultValue = "recent") String order,
@@ -57,13 +56,17 @@ public class ProductController {
         }
         List<ProductStatus> productStatuses = (status == null) ? new ArrayList<>()
                 : status.stream().map(ProductStatus::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
-        List<Category> categories = (catetory == null) ? new ArrayList<>()
-                : catetory.stream().map(Category::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
+        List<Category> categories = (category == null) ? new ArrayList<>()
+                : category.stream().map(Category::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
+
+        String username = authentication == null ? null : authentication.getPrincipal().toString();
+
         // 검색어 Redis 등록
         String[] keywords = keyword.split(" ");
         if (keywords != null && !keywords[0].equals("")) SearchRedisUtils.addSearchKeyword(keywords);
         //
-        return productService.search(keywords, categories, productStatuses, search, order, pageNo, pageSize);
+
+        return productService.search(keywords, categories, productStatuses, search, order, pageNo, pageSize, username);
     }
 
     /**
@@ -72,14 +75,14 @@ public class ProductController {
     @GetMapping("{pid}")
     public ProductResponse getById(@PathVariable Long pid, HttpServletRequest request, Authentication auth) {
         String agent = request.getHeader("User-Agent");
-
+        String username = auth == null ? null : auth.getPrincipal().toString();
         if (auth != null) {
-            if (!productService.findAuth(pid, auth.getPrincipal().toString()))
-                return productService.findOne(pid);
+            if (!productService.findAuth(pid, username))
+                return productService.findOne(pid, username);
         }
 
         ViewsRedisUtils.addViewCount(pid, agent);
-        return productService.findOne(pid);
+        return productService.findOne(pid, username);
     }
 
     /**
