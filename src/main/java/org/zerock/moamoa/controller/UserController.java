@@ -87,7 +87,7 @@ public class UserController {
     }
 
     /**
-     * 회원가입 이메일 인증번호
+     * 이메일 인증번호 전송
      */
     @PostMapping("/email/request")
     public CompletableFuture<EmailtoClientResponse> sendVerifyEmail(@RequestBody EmailAddrRequest emailReq)
@@ -114,32 +114,27 @@ public class UserController {
         return emailService.sendEmail(emailReq);
     }
 
-    // updateauth 인증번호 확인
-    // 이쪽에서 유저가 입력한 인증코드 받아서 이메일이랑 인증코드 같은지 확인하고 같을시 ㅇㅋ맞음, 다를시 ㄴㄴ틀림 보내줘야
+    /**
+     * 이메일 인증번호 확인
+     * 유저가 입력한 인증코드 받아서 이메일이랑 인증코드 같은지 확인하고 같을시 OK, 다를시 틀렸다고 알려줘야
+     */
     @PutMapping("/email/response")
     public ResultResponse updateEmailAuth(@RequestBody EmailAuthUpdateRequest authReq) {
         return emailService.updateAuth(authReq);
     }
-
-//    @PostMapping("/password/request")
-//    public CompletableFuture<EmailtoClientResponse> sendPWVerifyEmail(@RequestBody EmailAddrRequest emailReq)
-//            throws MessagingException, UnsupportedEncodingException {
-//        // User 엔티티에 이메일 있는지 검사, 있으면 메일 보냄, 없으면 오류
-//        String email = emailReq.getEmail();
-//        if (!userService.isEmailExist(email)) {
-//            throw new InvalidValueException(ErrorCode.INVALID_EMAIL_VALUE);
-//        }
-//        return emailService.sendEmail(emailReq);
-//    }
-//
-//    @PutMapping("/password/response")
-//    public ResultResponse updatePWEmail(@RequestBody EmailAuthUpdateRequest authReq) {
-//        return emailService.updateAuth(authReq);
-//    }
 
     @PutMapping("/password")
     public ResultResponse updatePwByToken(@RequestBody EmailUserPwRequest req){
         return userService.updatePwEmail(req);
     }
 
+    @GetMapping("/nick")
+    public ResultResponse printRandomNick(){
+        return userService.printRandNick();
+    }
+
+    @GetMapping("/nick/check")
+    public ResultResponse checkNick(@RequestParam String usernick){
+        return ResultResponse.toDto(userService.nickVerify(usernick));
+    }
 }

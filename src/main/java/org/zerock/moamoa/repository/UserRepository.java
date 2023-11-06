@@ -25,5 +25,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Boolean existsByEmail(String email);
 
+    Boolean existsByNick(String nick);
+
     // ist<User> getMyUserParty(@Param(value = "id") Long id);    // id와 연관된 파티 (parties)에 참여하는 사용자를 조회
 }
