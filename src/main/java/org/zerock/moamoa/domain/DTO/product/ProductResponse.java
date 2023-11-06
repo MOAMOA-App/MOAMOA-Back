@@ -35,6 +35,7 @@ public class ProductResponse {
     private LocalDateTime createdAt;
     private LocalDateTime finishedAt;
     private List<FileResponse> productImages;
+    private boolean heart;
 
 
     @Builder
@@ -59,5 +60,6 @@ public class ProductResponse {
         this.finishedAt = TimeUtils.toLocalTime(finishedAt);
         this.productImages = productImages != null ? productImages.stream().map(ImageMapper.INSTANCE::toDto).toList() : new ArrayList<>();
     }
+
 
 }

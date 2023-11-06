@@ -11,7 +11,6 @@ import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListRequest;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
-import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.WishList;
@@ -42,7 +41,10 @@ public class WishListService {
         request.setUser(user);
         request.setProduct(product);
 
-        if (isSameUser(request)) return wishListMapper.toDto(request, "CANT WISH OWN PRODUCT");
+        if (isSameUser(request)) {
+            request.setStatus(false);
+            return wishListMapper.toDto(request, "CANT WISH OWN PRODUCT");
+        }
 
 
         // true : 찜하기
@@ -95,7 +97,8 @@ public class WishListService {
         List<WishList> wishLists = wishListRepository.findByProduct(product);
         return wishLists.stream().map(WishList::getUser).toList();
     }
-    public  List<Long> findByProductLong(Long referenceID){
+
+    public List<Long> findByProductLong(Long referenceID) {
         Product product = productRepository.findByIdOrThrow(referenceID);
         List<WishList> wishLists = wishListRepository.findByProduct(product);
         List<Long> wishidList = new ArrayList<>();
