@@ -83,8 +83,8 @@ public class ProductService {
         // NoticeListener로 불러주면 될듯 makeNotice에서 이렇게 받아서 noticeRequest로 만들어줌
         // null인 receiverID는 Listener에서 pid로 partyList를 불러와서 채워줌 근데이거 일케해도 되나...
         // 알림 발송
-        eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
-                NoticeType.POST_CHANGED, product.getId()));
+        eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser(), null,
+                NoticeType.POST_CHANGED, product));
 
         return productMapper.toDto(product);
     }
@@ -97,8 +97,8 @@ public class ProductService {
         product.updateStatus(request.getStatus());
 
         // 알림 발송
-        eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser().getId(), null,
-                NoticeType.STATUS_CHANGED, product.getId()));
+        eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser(), null,
+                NoticeType.STATUS_CHANGED, product));
 
         return productMapper.toDto(product);
     }
@@ -192,7 +192,7 @@ public class ProductService {
 
 
     // 만든공구 리스트
-    public Page<ProductResponse> findPageByUser(String username, int pageNo, int pageSize) {
+    public Page<ProductListResponse> findPageByUser(String username, int pageNo, int pageSize) {
         User user = userRepository.findByEmailOrThrow(username);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Product> productPage = productRepository.findByUser(user, itemPage);
@@ -201,7 +201,7 @@ public class ProductService {
             throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
-        return productPage.map(productMapper::toDto);
+        return productPage.map(productMapper::toListDto);
     }
 
     public void checkAuth(Product product, User user) {

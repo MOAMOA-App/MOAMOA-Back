@@ -12,7 +12,13 @@ import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.notice.*;
+import org.zerock.moamoa.domain.DTO.product.ProductMapper;
+import org.zerock.moamoa.domain.DTO.product.ProductTitleResponse;
+import org.zerock.moamoa.domain.DTO.user.UserMapper;
+import org.zerock.moamoa.domain.DTO.user.UserNickResponse;
+import org.zerock.moamoa.domain.DTO.user.UserProductResponse;
 import org.zerock.moamoa.domain.entity.Notice;
+import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.EmitterRepository;
 import org.zerock.moamoa.repository.NoticeRepository;
@@ -39,9 +45,11 @@ public class NoticeService {
     @Transactional
     public void saveAndSend(NoticeSaveRequest request) {
         Notice savedNotice = noticeRepository.save(noticeMapper.toEntity(request));
+        User senderID = savedNotice.getSenderID();
+        Product referenceID = savedNotice.getReferenceID();
 
         // receiver에게 알림 발송
-        Long receiverId = request.getReceiverID();
+        Long receiverId = request.getReceiverID().getId();
         String eventId = receiverId + "_" + System.currentTimeMillis();
 
         Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByMemberId(receiverId);
@@ -49,7 +57,11 @@ public class NoticeService {
             String key = entry.getKey();
             SseEmitter emitter = entry.getValue();
             emitterRepository.saveEventCache(key, request);
-            sendToClient(emitter, eventId, key, NoticeContentResponse.toDto(savedNotice));
+            NoticeContentResponse res = new NoticeContentResponse(savedNotice.getId(),
+                    userToDto(senderID), receiverId, savedNotice.getReadOrNot(), savedNotice.getType(),
+                    productToDto(referenceID), savedNotice.getCreatedAt());
+            sendToClient(emitter, eventId, key, res);
+
         }
 //        return noticeMapper.toDto(savedNotice);
     }
@@ -101,6 +113,23 @@ public class NoticeService {
             return ResultResponse.toDto(ErrorCode.NOTICE_NOT_FOUND.getMessage());
         notices.forEach(notice -> notice.updateRead(true));
         return ResultResponse.toDto("OK");
+    }
+
+    @Transactional
+    public UserNickResponse userToDto(User user) {
+        return UserNickResponse.builder()
+                .id(user.getId())
+                .nick(user.getNick())
+                .build();
+    }
+
+    @Transactional
+    public ProductTitleResponse productToDto(Product product){
+        return ProductTitleResponse.builder()
+                .id(product.getId())
+                .title(product.getTitle())
+                .productImages(product.getProductImages())
+                .build();
     }
 
 }

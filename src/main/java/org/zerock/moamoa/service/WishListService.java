@@ -6,12 +6,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.domain.DTO.product.ProductListResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListMapper;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListRequest;
 import org.zerock.moamoa.domain.DTO.wishlist.WishListResponse;
-import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.entity.WishList;
@@ -86,23 +86,4 @@ public class WishListService {
 
         return wishListPage.map(WishList::getProduct).map(productMapper::toListDto);
     }
-
-    /**
-     * 해당 상품을 찜한 사용자 리스트 출력
-     */
-    public List<User> findByProduct(Long referenceID) {
-        Product product = productRepository.findByIdOrThrow(referenceID);
-        List<WishList> wishLists = wishListRepository.findByProduct(product);
-        return wishLists.stream().map(WishList::getUser).toList();
-    }
-    public  List<Long> findByProductLong(Long referenceID){
-        Product product = productRepository.findByIdOrThrow(referenceID);
-        List<WishList> wishLists = wishListRepository.findByProduct(product);
-        List<Long> wishidList = new ArrayList<>();
-        for (WishList wishList : wishLists) {
-            wishidList.add(wishList.getUser().getId());
-        }
-        return wishidList;
-    }
-
 }
