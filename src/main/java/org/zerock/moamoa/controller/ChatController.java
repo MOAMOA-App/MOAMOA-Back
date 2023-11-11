@@ -54,8 +54,8 @@ public class ChatController {
     }
 
     @GetMapping("/{id}/name")
-    public ChatRoomResponse getRoomName(@PathVariable("id") Long roomId) {
-        return chatService.findRoomById(roomId);
+    public ChatRoomResponse getRoomName(@PathVariable("id") Long roomId, Authentication auth) {
+        return chatService.findRoomById(auth.getPrincipal().toString(), roomId);
     }
 
     @PostMapping("/create")

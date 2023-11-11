@@ -90,19 +90,25 @@ public class NoticeService {
     }
 
     public ResultResponse removeNotice(String username, Long id) {
-        userRepository.findByEmailOrThrow(username);
+        User user = userRepository.findByEmailOrThrow(username);
         Notice notice = noticeRepository.findByIdOrThrow(id);
-        noticeRepository.delete(notice);
-        return ResultResponse.toDto("OK");
+        if (notice.getReceiverID().getId().equals(user.getId())){
+            noticeRepository.delete(notice);
+            return ResultResponse.toDto("OK");
+        }
+        return ResultResponse.toDto("권한이 없습니다.");
     }
 
     // 읽을 시 상태 변경
     @Transactional
     public ResultResponse updateRead(String username, Long nid) {
-        userRepository.findByEmailOrThrow(username);
+        User user = userRepository.findByEmailOrThrow(username);
         Notice temp = noticeRepository.findByIdOrThrow(nid);
-        temp.updateRead(true);
-        return ResultResponse.toDto("OK");
+        if (temp.getReceiverID().getId().equals(user.getId())){
+            temp.updateRead(true);
+            return ResultResponse.toDto("OK");
+        }
+        return ResultResponse.toDto("권한이 없습니다.");
     }
 
     @Transactional
