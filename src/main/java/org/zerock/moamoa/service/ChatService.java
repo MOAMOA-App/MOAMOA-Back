@@ -127,8 +127,12 @@ public class ChatService {
                 NoticeType.NEW_CHAT, chatRoom.getProductId()));
     }
 
-    public ChatRoomResponse findRoomById(Long id) {
+    public ChatRoomResponse findRoomById(String username, Long id) {
+        User user = userRepository.findByEmailOrThrow(username);
         ChatRoom room = findByRoomId(id);
+        if (!room.getSellerId().equals(user) && !room.getUserId().equals(user)) {
+            return ChatRoomResponse.toClient("권한이 없습니다.");
+        }
         ChatRoomResponse res = ChatRoomResponse.fromEntity(room);
         res.setMessages(findAllRoomMsg(room));
         return res;

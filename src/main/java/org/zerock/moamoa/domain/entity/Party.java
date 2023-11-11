@@ -59,5 +59,6 @@ public class Party extends BaseEntity {
     public void updateParty(PartyUpdateRequest req) {
         this.count = req.getCount();
         this.address = req.getAddress();
+        this.status = req.getStatus();
     }
 }

@@ -142,4 +142,14 @@ public class Product extends BaseEntity {
     public void updateViewCount(Integer count) {
         this.viewCount += count;
     }
+
+    public void addSellCount(Integer count){
+        this.sellCount += count;
+    }
+
+    // count 수정-> 원래 party의 Count만큼 빼고 새 count를 더해줌
+
+    public void subSellCount(Integer count){
+        this.sellCount -= count;
+    }
 }

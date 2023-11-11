@@ -42,7 +42,7 @@ public class MyInfoController {
      * 프로필 수정
      */
     @PutMapping("profile")
-    public UserResponse updateProfile(Authentication authentication,
+    public ResultResponse updateProfile(Authentication authentication,
                                       @ModelAttribute("profile") UserProfileUpdateRequest profileUpdateRequest) {
         return userService.updateProfile(profileUpdateRequest, authentication.getPrincipal().toString());
     }

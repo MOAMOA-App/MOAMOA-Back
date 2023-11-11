@@ -76,7 +76,6 @@ public class UserService {
 
             user = userMapper.toEntity(request);
 
-            // 아니 봐봐 만약에 랜덤을 돌려 그래서 ok인지 검사를 해... 그러면 update해주면 되는거아님?
             String rNick = RandomNick.printRandNick();
             while (!Objects.equals(nickVerify(rNick), "OK")){
                 rNick = RandomNick.printRandNick();
@@ -96,11 +95,11 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updateProfile(UserProfileUpdateRequest request, String username) {
+    public ResultResponse updateProfile(UserProfileUpdateRequest request, String username) {
         User user = userRepository.findByEmailOrThrow(username);
 
         user.updateProfile(request);
-        return userMapper.toDto(user);
+        return ResultResponse.toDto("OK");
     }
 
     /**

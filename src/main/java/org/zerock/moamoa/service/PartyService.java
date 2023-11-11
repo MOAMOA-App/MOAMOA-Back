@@ -8,11 +8,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.AuthException;
+import org.springframework.transaction.annotation.Transactional;
+import org.zerock.moamoa.common.exception.AuthException;
+import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.party.*;
 import org.zerock.moamoa.domain.DTO.product.ProductListResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductMapper;
+import org.zerock.moamoa.domain.DTO.ResultResponse;
+import org.zerock.moamoa.domain.DTO.party.*;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
@@ -23,6 +28,7 @@ import org.zerock.moamoa.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -60,20 +66,35 @@ public class PartyService {
         return parties.map(Party::getProduct).map(productMapper::toListDto);
     }
 
+    @Transactional
     public PartytoClientResponse saveParty(String username, PartyRequest request, Long pid) {
         User user = userRepository.findByEmailOrThrow(username);
 
         Party party = partyMapper.toEntity(request);
         Product product = productRepository.findByIdOrThrow(pid);
 
-        if (partyRepository.existsByBuyerAndProduct(user, product)) // 이미 참여했습니다
-            return PartytoClientResponse.toDto(pid, party.getStatus(), "이미 참여했습니다.");;
+        Optional<Party> ifpartyexist = partyRepository.findByBuyerAndProduct(user, product);
+
+        if (ifpartyexist.isPresent()) {
+            if (ifpartyexist.get().getStatus().equals(true)){
+                // 이미 있는 party의 status 값 T라면 이미 참여했습니다 메시지
+                return PartytoClientResponse.toDto(pid, party.getStatus(), "이미 참여했습니다.");
+            } else {
+                // F라면 status 값 T로 바꿔주고 주소랑 count 값 변경해줌
+                Party temp = ifpartyexist.get();
+                PartyUpdateRequest req = new PartyUpdateRequest(request.getAddress(), request.getCount());
+                temp.updateParty(req);
+                product.addSellCount(party.getCount());
+                return PartytoClientResponse.toDto(pid, party.getStatus(), "OK");
+            }
+        }
         if (product.getUser().equals(user)) // 본인일시 참여불가
             return PartytoClientResponse.toDto(pid, party.getStatus(), "자신의 게시글은 참여할 수 없습니다.");;
 
         // Party 엔티티에 있음!! Product 엔티티에 해당 party가 없을시 추가
         partyRepository.save(party);
         party.setProduct(product);
+        product.addSellCount(party.getCount());
         return PartytoClientResponse.toDto(pid, party.getStatus(), "OK");
     }
 
@@ -92,6 +113,7 @@ public class PartyService {
         }
 
         party.removeProduct(product);
+        product.subSellCount(party.getCount());
 
         return ResultResponse.toDto("OK");
     }
@@ -101,7 +123,9 @@ public class PartyService {
         User user = userRepository.findByEmailOrThrow(username);
         Product product = productRepository.findByIdOrThrow(pid);
         Party temp = partyRepository.findByBuyerAndProductOrThrow(user, product);
+        product.subSellCount(temp.getCount());
         temp.updateParty(req);
+        product.addSellCount(temp.getCount());
         return ResultResponse.toDto("OK");
     }
 
