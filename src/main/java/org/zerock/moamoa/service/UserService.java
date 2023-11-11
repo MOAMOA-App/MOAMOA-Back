@@ -49,12 +49,14 @@ public class UserService {
             if (user.getPassword() == null) {
                 user.updatePw(request.getPassword());
                 user.hashPassword(passwordEncoder);     // 비밀번호 암호화
+                user.updateNick(request.getNick());
                 return userMapper.toDto(user);
             } else throw new AuthException(ErrorCode.USER_EMAIL_USED);
         } else {
             user = userMapper.toEntity(request);
             user.updatePw(request.getPassword());
             user.hashPassword(passwordEncoder);     // 비밀번호 암호화
+            user.updateNick(request.getNick());
             return userMapper.toDto(userRepository.save(user));
         }
     }

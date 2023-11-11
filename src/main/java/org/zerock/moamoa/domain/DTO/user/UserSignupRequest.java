@@ -29,13 +29,4 @@ public class UserSignupRequest {
         this.activate = true;
 
     }
-
-    @Builder
-    public UserSignupRequest(String nick, String email, String password) {
-        this.nick = nick;
-        this.email = email;
-        if (password != null) this.password = password;
-        this.activate = true;
-
-    }
 }
