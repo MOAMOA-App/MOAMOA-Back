@@ -26,7 +26,7 @@ public class StompHandler implements ChannelInterceptor {
         if (accessor.getCommand() == StompCommand.CONNECT) { // CONNECT 메시지인지 확인
 
             // preSend 메소드에서 클라이언트가 CONNECT할 때 헤더로 보낸 Authorization에 담긴 jwt token 검증
-            if (!jwtTokenProvider.validate(accessor.getFirstNativeHeader("Authorization")))
+            if (!jwtTokenProvider.validate(accessor.getFirstNativeHeader("Authorization")).isValid())
                 throw new AccessDeniedException("");
         }
         return message;

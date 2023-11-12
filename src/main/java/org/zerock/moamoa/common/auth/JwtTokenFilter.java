@@ -1,5 +1,6 @@
 package org.zerock.moamoa.common.auth;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,8 +32,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             (HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String token = getTokenFromRequest(request);
+        ValidResponse validResponse = jwtTokenProvider.validate(token);
         //인증된 토큰인 경우
-        if (jwtTokenProvider.validate(token)) {
+        if (validResponse.isValid) {
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             // JWT에서 사용자 이름을 가져오기
             // 이메일
@@ -54,9 +56,18 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
         //인증된 토큰을 받지 못한 경우
         else {
-            log.warn("JWT 인증 실패");
+            // 만료된 토큰에 대한 응답 처리
+            handleExpiredTokenResponse(response, validResponse.exception);
+            return;
         }
         filterChain.doFilter(request, response);
+    }
+
+    private void handleExpiredTokenResponse(HttpServletResponse response, Exception exception) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        if (exception instanceof ExpiredJwtException) {
+            response.getWriter().write("JWT Token Expired");
+        } else response.getWriter().write("Invalid JWT token");
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
