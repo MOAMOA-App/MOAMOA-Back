@@ -94,7 +94,7 @@ public class AuthService {
      */
     @Transactional
     public UserRefreshResponse refreshToken(String refreshToken) {
-        if (this.jwtTokenProvider.validate(refreshToken)) {
+        if (this.jwtTokenProvider.validate(refreshToken).isValid()) {
             Auth auth = getByRefreshToken(refreshToken);
 
             User user = auth.getUser();
