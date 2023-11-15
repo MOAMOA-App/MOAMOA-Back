@@ -54,7 +54,8 @@ public class OAuth2SuccessHandler
         String token = oAuth2User.getAttribute("id").toString();
         log.info(username + "님이 " + loginType + "로 회원가입 하셨습니다.");
         // 처음으로 소셜 로그인한 사용자를 데이터베이스에 등록
-        UserSignupRequest saveRequest = new UserSignupRequest(username, null);
+        String nick = userService.repeatRandNick(); // 닉네임 랜덤설정
+        UserSignupRequest saveRequest = new UserSignupRequest(nick, username, null);
         switch (loginType) {
             case "kakao" -> saveRequest.setKakao(token);
             case "naver" -> saveRequest.setNaver(token);

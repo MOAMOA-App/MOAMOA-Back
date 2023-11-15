@@ -72,8 +72,8 @@ public class ProductService {
     }
 
     @Transactional
-    public boolean remove(ProductStatusUpdateRequest request, String username) {
-        Product product = productRepository.findByIdOrThrow(request.getProductId());
+    public boolean remove(Long pid, String username) {
+        Product product = productRepository.findByIdOrThrow(pid);
         User user = userRepository.findByEmailOrThrow(username);
         checkAuth(product, user);
         product.delete();

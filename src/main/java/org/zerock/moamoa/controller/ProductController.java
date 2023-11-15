@@ -120,9 +120,9 @@ public class ProductController {
     /**
      * 게시글 삭제하기 : 게시글 진짜 삭제하는게 아니라 Product 활성화 비활성화 처리
      */
-    @DeleteMapping("")
-    public Object deleteContents(Authentication authentication, @RequestBody ProductStatusUpdateRequest request) {
-        productService.remove(request, authentication.getPrincipal().toString());
+    @DeleteMapping("/{pid}")
+    public Object deleteContents(Authentication authentication, @PathVariable Long pid) {
+        productService.remove(pid, authentication.getPrincipal().toString());
         return new OkResponse(SuccessMessage.PRODUCT_DELETE).makeAnswer();
     }
 

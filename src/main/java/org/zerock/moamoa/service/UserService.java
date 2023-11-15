@@ -50,14 +50,14 @@ public class UserService {
                 user.updatePw(request.getPassword());
                 user.hashPassword(passwordEncoder);     // 비밀번호 암호화
                 user.updateNick(request.getNick());
-                return userMapper.toDto(user);
+                return UserMapper.INSTANCE.toDto(user);
             } else throw new AuthException(ErrorCode.USER_EMAIL_USED);
         } else {
-            user = userMapper.toEntity(request);
+            user = UserMapper.INSTANCE.toEntity(request);
             user.updatePw(request.getPassword());
             user.hashPassword(passwordEncoder);     // 비밀번호 암호화
             user.updateNick(request.getNick());
-            return userMapper.toDto(userRepository.save(user));
+            return UserMapper.INSTANCE.toDto(userRepository.save(user));
         }
     }
 
@@ -75,14 +75,8 @@ public class UserService {
 
             return userMapper.toDto(user);
         } else {
-
             user = userMapper.toEntity(request);
-
-            String rNick = RandomNick.printRandNick();
-            while (!Objects.equals(nickVerify(rNick), "OK")){
-                rNick = RandomNick.printRandNick();
-            }
-            user.updateNick(rNick);  // 닉네임 랜덤설정
+            user.updateNick(request.getNick());
             userRepository.save(user);
             return userMapper.toDto(userRepository.save(user));
         }
@@ -171,6 +165,13 @@ public class UserService {
             return ResultResponse.toDto("SAME_PASSWORD");
 
         return ResultResponse.toDto("OK");
+    }
+    public String repeatRandNick(){
+        String rNick = RandomNick.printRandNick();
+        while (!Objects.equals(nickVerify(rNick), "OK")){
+            rNick = RandomNick.printRandNick();
+        }
+        return rNick;
     }
 
     public ResultResponse printRandNick() {
