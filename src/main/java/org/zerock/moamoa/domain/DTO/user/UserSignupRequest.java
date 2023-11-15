@@ -22,11 +22,11 @@ public class UserSignupRequest {
 
 
     @Builder
-    public UserSignupRequest(String email, String password) {
+    public UserSignupRequest(String nick, String email, String password) {
+        this.nick = nick;
 //        this.name = name;
         this.email = email;
         if (password != null) this.password = password;
         this.activate = true;
-
     }
 }
