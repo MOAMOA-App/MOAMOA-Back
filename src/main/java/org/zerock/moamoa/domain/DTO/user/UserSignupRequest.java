@@ -9,7 +9,6 @@ import java.time.Instant;
 @Data
 public class UserSignupRequest {
     private String name;
-    @NotEmpty(message = "이름을 입력해주세요.")
     private String nick;
     private String naver;
     private String kakao;

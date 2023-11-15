@@ -49,14 +49,20 @@ public class UserService {
             if (user.getPassword() == null) {
                 user.updatePw(request.getPassword());
                 user.hashPassword(passwordEncoder);     // 비밀번호 암호화
-                user.updateNick(request.getNick());
+                if (request.getNick().isEmpty()){
+                    String rnick = repeatRandNick();
+                    user.updateNick(rnick);
+                } else user.updateNick(request.getNick());
                 return UserMapper.INSTANCE.toDto(user);
             } else throw new AuthException(ErrorCode.USER_EMAIL_USED);
         } else {
             user = UserMapper.INSTANCE.toEntity(request);
             user.updatePw(request.getPassword());
             user.hashPassword(passwordEncoder);     // 비밀번호 암호화
-            user.updateNick(request.getNick());
+            if (request.getNick().isEmpty()){
+                String rnick = repeatRandNick();
+                user.updateNick(rnick);
+            } else user.updateNick(request.getNick());
             return UserMapper.INSTANCE.toDto(userRepository.save(user));
         }
     }
@@ -109,6 +115,9 @@ public class UserService {
         if (user.getPassword() == null){
             return ResultResponse.toDto("소셜로그인한 회원입니다.");
         }
+        // 비밀번호 중복 확인
+        if (passwordEncoder.matches(req.getPassword(), user.getPassword()))
+            return ResultResponse.toDto("SAME_PASSWORD");
         user.updatePw(req.getPassword());
         user.hashPassword(passwordEncoder);
 
@@ -154,18 +163,6 @@ public class UserService {
         return ResultResponse.toDto("OK");
     }
 
-
-    public ResultResponse passwordVerify(UserLoginRequest verifyRequest) {
-        if (!userRepository.existsByEmail(verifyRequest.getEmail()))
-            return ResultResponse.toDto("NOT_SIGNED_EMAIL");
-
-        User user = userRepository.findByEmailOrThrow(verifyRequest.getEmail());
-
-        if (passwordEncoder.matches(verifyRequest.getPassword(), user.getPassword()))
-            return ResultResponse.toDto("SAME_PASSWORD");
-
-        return ResultResponse.toDto("OK");
-    }
     public String repeatRandNick(){
         String rNick = RandomNick.printRandNick();
         while (!Objects.equals(nickVerify(rNick), "OK")){
