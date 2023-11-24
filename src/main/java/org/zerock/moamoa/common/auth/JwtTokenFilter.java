@@ -53,21 +53,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             SecurityContextHolder.setContext(context);
             log.info("JWT 를 위한 security context 를 설정했습니다.");
 
-        }
-        //인증된 토큰을 받지 못한 경우
-        else {
-            // 만료된 토큰에 대한 응답 처리
-            handleExpiredTokenResponse(response, validResponse.exception);
+        } else if (validResponse.getException() instanceof ExpiredJwtException) {
+            response.getWriter().write("JWT Token Expired");
             return;
         }
         filterChain.doFilter(request, response);
-    }
-
-    private void handleExpiredTokenResponse(HttpServletResponse response, Exception exception) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        if (exception instanceof ExpiredJwtException) {
-            response.getWriter().write("JWT Token Expired");
-        } else response.getWriter().write("Invalid JWT token");
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
