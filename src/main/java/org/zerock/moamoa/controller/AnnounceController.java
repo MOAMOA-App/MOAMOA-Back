@@ -57,12 +57,12 @@ public class AnnounceController {
     /**
      * 공지 삭제
      */
-    @DeleteMapping("{pid}/announce")
+    @DeleteMapping("{pid}/announce/{aid}")
     public AnnounceResultResponse removeAnnounce(Authentication authentication,
                                                  @PathVariable Long pid,
-                                                 @RequestBody AnnounceRequest announce) {
+                                                 @PathVariable Long aid) {
 
-        return announceService.remove(announce, pid, authentication.getPrincipal().toString());
+        return announceService.remove(aid, pid, authentication.getPrincipal().toString());
     }
 
 

@@ -76,9 +76,9 @@ public class AnnounceService {
     }
 
     @Transactional
-    public AnnounceResultResponse remove(AnnounceRequest request, long pid, String username) {
+    public AnnounceResultResponse remove(long aid, long pid, String username) {
         User user = userRepository.findByEmailOrThrow(username);
-        Announce announce = announceRepository.findByIdOrThrow(request.getId());
+        Announce announce = announceRepository.findByIdOrThrow(aid);
 
         if (!isRightAuth(pid, user)) return AnnounceResultResponse.toMessage("AUTH_FAIL");
 
