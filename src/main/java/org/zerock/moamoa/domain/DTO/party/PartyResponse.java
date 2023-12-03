@@ -18,15 +18,17 @@ public class PartyResponse {
 	private LocalDateTime createdAt;
 	private UserProfileResponse buyer;
 	private ProductResponse product;
+	private Boolean status;
 
 	@Builder
 	public PartyResponse(Long id, String address, Integer count, Instant createdAt,
-						 UserProfileResponse buyer, ProductResponse product) {
+						 UserProfileResponse buyer, ProductResponse product, Boolean status) {
 		this.id = id;
 		this.address = address;
 		this.count = count;
 		this.createdAt = TimeUtils.toLocalTime(createdAt);
 		this.buyer = buyer;
 		this.product = product;
+		this.status = status;
 	}
 }

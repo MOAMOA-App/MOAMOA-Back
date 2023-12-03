@@ -1,10 +1,7 @@
 package org.zerock.moamoa.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Fetch;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
@@ -61,25 +58,27 @@ public class User extends BaseEntity {
     private Instant deletedAt;
 
     @Builder
-    public User(String naver, String kakao, String name, String email,
-                String password, String nick, String profImg, String address, String detailAddress, Boolean activate, Instant deletedAt) {
-        this.naver = naver;
-        this.kakao = kakao;
-        this.name = name;
+    public User(String email, String nick, String password) {
         this.email = email;
         this.password = password;
         this.nick = nick;
-        this.profImg = profImg;
-        this.address = address;
-        this.detailAddress = detailAddress;
-        this.activate = activate;
-        this.deletedAt = deletedAt;
     }
 
-    @Builder
-    public User(Long id) {
-        this.id = id;
-    }
+//    @Builder
+//    public User(String naver, String kakao, String name, String email,
+//                String password, String nick, String profImg, String address, String detailAddress, Boolean activate, Instant deletedAt) {
+//        this.naver = naver;
+//        this.kakao = kakao;
+//        this.name = name;
+//        this.email = email;
+//        this.password = password;
+//        this.nick = nick;
+//        this.profImg = profImg;
+//        this.address = address;
+//        this.detailAddress = detailAddress;
+//        this.activate = activate;
+//        this.deletedAt = deletedAt;
+//    }
 
     public User(Long id, String name, String email, String password, String nick) {
         this.id = id;

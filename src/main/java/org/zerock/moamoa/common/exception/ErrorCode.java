@@ -7,9 +7,11 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "US_001", "회원을 찾을 수 없습니다."),
     USER_EMAIL_USED(HttpStatus.BAD_REQUEST, "US_002", "이미 사용중인 이메일 입니다."),
+    USER_ACCESS_REJECTED(HttpStatus.FORBIDDEN, "US_003", "접근 권한이 없습니다."),
     AUTH_NOT_FOUND(HttpStatus.NOT_FOUND, "AT_001", "인증을 찾을 수 없습니다."),
     AUTH_PASSWORD_UNEQUAL(HttpStatus.NOT_FOUND, "AT_002", "비밀번호가 일치하지 않습니다."),
     AUTH_REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "AT_003", "리프레쉬 토큰을 찾을 수 없습니다."),
+
 
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "PD_001", "상품을 찾을 수 없습니다."),
     PRODUCT_AUTH_FAIL(HttpStatus.BAD_REQUEST, "PD_002", "상품 인증에 실패했습니다."),
