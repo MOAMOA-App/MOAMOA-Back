@@ -8,25 +8,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.AuthException;
-import org.springframework.transaction.annotation.Transactional;
-import org.zerock.moamoa.common.exception.AuthException;
-import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.party.*;
 import org.zerock.moamoa.domain.DTO.product.ProductListResponse;
-import org.zerock.moamoa.domain.DTO.product.ProductMapper;
-import org.zerock.moamoa.domain.DTO.ResultResponse;
-import org.zerock.moamoa.domain.DTO.party.*;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
-import org.zerock.moamoa.domain.entity.WishList;
 import org.zerock.moamoa.repository.PartyRepository;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,13 +29,9 @@ public class PartyService {
     private final PartyRepository partyRepository;
     private final ProductRepository productRepository;
     private final PartyMapper partyMapper;
-    private final ProductMapper productMapper;
+    private final ProductService productService;
     private final UserRepository userRepository;
 
-
-    public List<Party> findAll() {
-        return this.partyRepository.findAll();
-    }
 
     public List<PartyUserInfoResponse> findUserByProduct(String username, Long pid) {
         User user = userRepository.findByEmailOrThrow(username);
@@ -63,7 +51,7 @@ public class PartyService {
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Party> parties = partyRepository.findByBuyer(user, itemPage);
 
-        return parties.map(Party::getProduct).map(productMapper::toListDto);
+        return parties.map(Party::getProduct).map(product -> productService.mapProductToListResponse(user, product));
     }
 
     @Transactional
@@ -76,7 +64,7 @@ public class PartyService {
         Optional<Party> ifpartyexist = partyRepository.findByBuyerAndProduct(user, product);
 
         if (ifpartyexist.isPresent()) {
-            if (ifpartyexist.get().getStatus().equals(true)){
+            if (ifpartyexist.get().getStatus().equals(true)) {
                 // 이미 있는 party의 status 값 T라면 이미 참여했습니다 메시지
                 return PartytoClientResponse.toDto(pid, party.getStatus(), "이미 참여했습니다.");
             } else {
@@ -89,7 +77,8 @@ public class PartyService {
             }
         }
         if (product.getUser().equals(user)) // 본인일시 참여불가
-            return PartytoClientResponse.toDto(pid, party.getStatus(), "자신의 게시글은 참여할 수 없습니다.");;
+            return PartytoClientResponse.toDto(pid, party.getStatus(), "자신의 게시글은 참여할 수 없습니다.");
+        ;
 
         // Party 엔티티에 있음!! Product 엔티티에 해당 party가 없을시 추가
         partyRepository.save(party);
@@ -129,28 +118,4 @@ public class PartyService {
         return ResultResponse.toDto("OK");
     }
 
-//    public ResultResponse removePartyRep(String username, Long pid) {
-//        User user = userRepository.findByEmailOrThrow(username);
-//        Product product = productRepository.findByIdOrThrow(pid);
-//        Party party = partyRepository.findByBuyerAndProductOrThrow(user, product);
-//
-//        // 본인이 seller나 buyer가 아닐 시 삭제 불가
-//        if (!user.equals(party.getBuyer()) || !user.equals(product.getUser())){
-//            throw new AuthException(ErrorCode.AUTH_NOT_FOUND);
-//        }
-//
-//        partyRepository.delete(party);
-//        return ResultResponse.toDto("OK");
-//    }
 }
-
-
-//
-// @Transactional
-// public Party updateParty(Party party) {
-//     Party temp = findById(party.getId());
-//     temp.setAddress(party.getAddress());
-//     temp.setCount(party.getCount());
-//     return this.partyRepository.save(temp);
-// }
-

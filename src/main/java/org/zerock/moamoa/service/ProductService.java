@@ -23,7 +23,6 @@ import org.zerock.moamoa.domain.enums.NoticeType;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
-import org.zerock.moamoa.repository.WishListRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +35,7 @@ import java.util.stream.Stream;
 public class ProductService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    private final WishListRepository wishListRepository;
+    private final WishListService wishListService;
     private final ProductMapper productMapper;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -49,7 +48,7 @@ public class ProductService {
 
         // 회원 : 찜하기 조회
         User user = userRepository.findByEmailOrThrow(username);
-        if (wishListRepository.existsByUserAndProduct(user, product)) response.setHeart(true);
+        if (wishListService.isExist(user, product)) response.setHeart(true);
 
         return response;
     }
@@ -187,9 +186,9 @@ public class ProductService {
         return productPage.map(product -> mapProductToListResponse(user, product));
     }
 
-    private ProductListResponse mapProductToListResponse(User user, Product product) {
+    public ProductListResponse mapProductToListResponse(User user, Product product) {
         ProductListResponse response = productMapper.toListDto(product);
-        if (wishListRepository.existsByUserAndProduct(user, product)) response.setHeart(true);
+        if (wishListService.isExist(user, product)) response.setHeart(true);
         return response;
     }
 

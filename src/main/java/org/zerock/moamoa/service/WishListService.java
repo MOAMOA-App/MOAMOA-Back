@@ -70,8 +70,12 @@ public class WishListService {
         return wishListMapper.toDto(request, "OK");
     }
 
-    private boolean isExist(WishListRequest request) {
+    public boolean isExist(WishListRequest request) {
         return wishListRepository.existsByUserAndProduct(request.getUser(), request.getProduct());
+    }
+
+    public boolean isExist(User user, Product product) {
+        return wishListRepository.existsByUserAndProduct(user, product);
     }
 
     private boolean isSameUser(WishListRequest request) {
@@ -86,7 +90,12 @@ public class WishListService {
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<WishList> wishListPage = wishListRepository.findByUser(user, itemPage);
 
-        return wishListPage.map(WishList::getProduct).map(productMapper::toListDto);
+        return wishListPage.map(wishList -> {
+            Product product = wishList.getProduct();
+            ProductListResponse productListResponse = productMapper.toListDto(product);
+            productListResponse.setHeart(true);
+            return productListResponse;
+        });
     }
 
     /**

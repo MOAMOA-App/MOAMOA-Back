@@ -124,17 +124,6 @@ public class Product extends BaseEntity {
         this.finishedAt = TimeUtils.toInstant(finishedAt);
     }
 
-
-    public void addAnnounce(Announce announce) {
-        announces.add(announce);
-        announce.setProduct(this);
-    }
-
-    public void removeAnnounce(Announce announce) {
-        announces.remove(announce);
-    }
-
-
     public Product(Long id) {
         this.id = id;
     }
@@ -143,13 +132,11 @@ public class Product extends BaseEntity {
         this.viewCount += count;
     }
 
-    public void addSellCount(Integer count){
+    public void addSellCount(Integer count) {
         this.sellCount += count;
     }
 
-    // count 수정-> 원래 party의 Count만큼 빼고 새 count를 더해줌
-
-    public void subSellCount(Integer count){
+    public void subSellCount(Integer count) {
         this.sellCount -= count;
     }
 }
