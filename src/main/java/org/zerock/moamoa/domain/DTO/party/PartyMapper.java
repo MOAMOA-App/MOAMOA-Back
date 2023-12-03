@@ -1,8 +1,6 @@
 package org.zerock.moamoa.domain.DTO.party;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 import org.zerock.moamoa.domain.entity.Party;
 

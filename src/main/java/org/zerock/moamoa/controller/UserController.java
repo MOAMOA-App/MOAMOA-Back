@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.common.auth.JwtTokenProvider;
 import org.zerock.moamoa.domain.DTO.email.EmailAddrRequest;
@@ -31,9 +32,6 @@ public class UserController {
     private final AuthService authService;
     private final EmailService emailService;
 
-    // 일단 만들어놓음 (나중에 백엔드에서 인증코드 비교하게 되면 사용)
-    private final Map<String, String> verificationCodes = new HashMap<>();
-    private final Map<String, LocalDateTime> verificationCodeExpiration = new HashMap<>(); // 유효 기간을 저장하는 맵
     private final JwtTokenProvider jwtTokenProvider;
 
     /**
@@ -81,6 +79,7 @@ public class UserController {
     /**
      * 이메일 인증번호 전송
      */
+    @Async
     @PostMapping("/email/request")
     public CompletableFuture<EmailtoClientResponse> sendVerifyEmail(@RequestBody EmailAddrRequest emailReq)
             throws MessagingException, UnsupportedEncodingException {

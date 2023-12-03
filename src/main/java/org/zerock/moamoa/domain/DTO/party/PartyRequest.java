@@ -20,6 +20,6 @@ public class PartyRequest {
 		this.count = count;
 		this.buyer = buyer;
 		this.product = product;
-		this.status = true;
+		this.status = false;
 	}
 }

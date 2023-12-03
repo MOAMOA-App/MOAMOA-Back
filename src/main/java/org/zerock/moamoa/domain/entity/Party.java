@@ -50,15 +50,12 @@ public class Party extends BaseEntity {
         }
     }
 
-    public void removeProduct(Product product){
-        this.product = product;
-        this.status = false;
-        product.getParties().remove(this);
-    }
-
     public void updateParty(PartyUpdateRequest req) {
         this.count = req.getCount();
         this.address = req.getAddress();
-        this.status = req.getStatus();
+    }
+
+    public void updatePartyStatus(Boolean status){
+        this.status = status;
     }
 }

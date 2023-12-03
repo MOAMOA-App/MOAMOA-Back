@@ -222,10 +222,6 @@ public class ProductService {
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
         Page<Product> productPage = productRepository.findByUser(user, itemPage);
 
-        if (productPage.isEmpty()) {
-            throw new EntityNotFoundException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
-
         return productPage.map(productMapper::toListDto);
     }
 

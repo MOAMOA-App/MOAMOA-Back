@@ -45,25 +45,31 @@ public class UserService {
         //이미 계정이 있는 경우
         if (isEmailExist(request.getEmail())) {
             user = userRepository.findByEmailOrThrow(request.getEmail());
+
             //일반 회원가입이 아닌 경우
             if (user.getPassword() == null) {
                 user.updatePw(request.getPassword());
                 user.hashPassword(passwordEncoder);     // 비밀번호 암호화
-                if (request.getNick().isEmpty()){
+
+                if (request.getNick() == null || request.getNick().isEmpty()){
                     String rnick = repeatRandNick();
                     user.updateNick(rnick);
                 } else user.updateNick(request.getNick());
+
                 return UserMapper.INSTANCE.toDto(user);
             } else throw new AuthException(ErrorCode.USER_EMAIL_USED);
         } else {
             user = UserMapper.INSTANCE.toEntity(request);
             user.updatePw(request.getPassword());
             user.hashPassword(passwordEncoder);     // 비밀번호 암호화
-            if (request.getNick().isEmpty()){
+
+            if (request.getNick() == null || request.getNick().isEmpty()){
                 String rnick = repeatRandNick();
                 user.updateNick(rnick);
             } else user.updateNick(request.getNick());
-            return UserMapper.INSTANCE.toDto(userRepository.save(user));
+
+            User savedUser = userRepository.save(user);
+            return UserMapper.INSTANCE.toDto(savedUser);
         }
     }
 

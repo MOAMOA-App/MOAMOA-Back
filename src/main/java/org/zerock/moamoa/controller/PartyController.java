@@ -5,7 +5,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.party.*;
-import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.service.PartyService;
 
 import java.util.List;
@@ -15,14 +14,6 @@ import java.util.List;
 @RequestMapping("/product")
 public class PartyController {
     private final PartyService partyService;
-    private final UserRepository userRepository;
-
-    /* 있어야되는거
-        1. 파티 유저추가
-        2. 파티 유저리스트 불러오기
-        3. 파티 유저삭제
-        4. 파티 정보 업데이트 (주소, count)
-     */
 
     @GetMapping("/{pid}/party")
     public List<PartyUserInfoResponse> readByProductList(@PathVariable Long pid, Authentication auth) {
@@ -42,6 +33,13 @@ public class PartyController {
                                           Authentication auth,
                                           @RequestBody PartyUpdateRequest partyUpdateRequest) {
         return partyService.updateParty(auth.getPrincipal().toString(), pid, partyUpdateRequest);
+    }
+
+    @PutMapping("/{pid}/party/{partyid}")
+    public ResultResponse updatePartyStatus(@PathVariable Long pid,
+                                            @PathVariable Long partyid,
+                                          Authentication auth) {
+        return partyService.updatePartyStatus(auth.getPrincipal().toString(), pid, partyid);
     }
 
     @DeleteMapping("/{pid}/party")

@@ -39,13 +39,16 @@ public class PartyService {
 
         // 접근자와 seller가 같지 않으면 오류 발생
         if (!user.equals(product.getUser())) {
-            throw new AuthException(ErrorCode.INVALID_INPUT_VALUE);
+            throw new AuthException(ErrorCode.USER_ACCESS_REJECTED);
         }
 
         List<Party> parties = partyRepository.findByProduct(product);
         return parties.stream().map(partyMapper::toUserDto).toList();
     }
 
+    /**
+     * 참여자 기준 참여한 party 조회
+     */
     public Page<ProductListResponse> findPageByBuyer(String username, int pageNo, int pageSize) {
         User user = userRepository.findByEmailOrThrow(username);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
@@ -57,39 +60,30 @@ public class PartyService {
     @Transactional
     public PartytoClientResponse saveParty(String username, PartyRequest request, Long pid) {
         User user = userRepository.findByEmailOrThrow(username);
-
-        Party party = partyMapper.toEntity(request);
         Product product = productRepository.findByIdOrThrow(pid);
 
+        // 파티가 존재하면 이미 참여했다는 알림
         Optional<Party> ifpartyexist = partyRepository.findByBuyerAndProduct(user, product);
-
         if (ifpartyexist.isPresent()) {
-            if (ifpartyexist.get().getStatus().equals(true)) {
-                // 이미 있는 party의 status 값 T라면 이미 참여했습니다 메시지
-                return PartytoClientResponse.toDto(pid, party.getStatus(), "이미 참여했습니다.");
-            } else {
-                // F라면 status 값 T로 바꿔주고 주소랑 count 값 변경해줌
-                Party temp = ifpartyexist.get();
-                PartyUpdateRequest req = new PartyUpdateRequest(request.getAddress(), request.getCount());
-                temp.updateParty(req);
-                product.addSellCount(party.getCount());
-                return PartytoClientResponse.toDto(pid, party.getStatus(), "OK");
-            }
+            return PartytoClientResponse.toDto(pid, "이미 참여했습니다.");
         }
-        if (product.getUser().equals(user)) // 본인일시 참여불가
-            return PartytoClientResponse.toDto(pid, party.getStatus(), "자신의 게시글은 참여할 수 없습니다.");
-        ;
 
-        // Party 엔티티에 있음!! Product 엔티티에 해당 party가 없을시 추가
+        request.setBuyer(user);
+        request.setProduct(product);
+        Party party = PartyMapper.INSTANCE.toEntity(request);
+
+        // 본인의 글은 참여 불가
+        if (product.getUser().equals(user))
+            return PartytoClientResponse.toDto(pid, "자신의 게시글은 참여할 수 없습니다.");;
+
         partyRepository.save(party);
+
+        // Product 엔티티에 해당 party가 없을시 추가
         party.setProduct(product);
         product.addSellCount(party.getCount());
-        return PartytoClientResponse.toDto(pid, party.getStatus(), "OK");
+        return PartytoClientResponse.toDto(pid, "OK");
     }
 
-    // 참여취소하는것도 해줘야됨. 아니 근데 그러면... 알림보내는것도 리스트에서 보내줘야되나 흑흑 우울해요
-    // 굳이 리스트를 만들어야되나... 솔직히 ㅂㄹ 필요없을거같은데
-    // 일단 리스트삭제 + status true로 하는거랑 완전 삭제 두개 만들기
     @Transactional
     public ResultResponse removeParty(String username, Long pid) {
         User user = userRepository.findByEmailOrThrow(username);
@@ -101,7 +95,7 @@ public class PartyService {
             throw new AuthException(ErrorCode.AUTH_NOT_FOUND);
         }
 
-        party.removeProduct(product);
+        partyRepository.delete(party);
         product.subSellCount(party.getCount());
 
         return ResultResponse.toDto("OK");
@@ -118,4 +112,22 @@ public class PartyService {
         return ResultResponse.toDto("OK");
     }
 
+    /**
+     * 입금 상태 변경
+     */
+    @Transactional
+    public ResultResponse updatePartyStatus(String username, Long pid, Long partyid){
+        User user = userRepository.findByEmailOrThrow(username);
+        Product product = productRepository.findByIdOrThrow(pid);
+        if (!product.getUser().equals(user)){
+            throw new AuthException(ErrorCode.USER_ACCESS_REJECTED);
+        }
+
+        // 현 입금상태에 따라 true면 false로, false면 true로
+        Party temp = partyRepository.findByIdOrThrow(partyid);
+        temp.updatePartyStatus(temp.getStatus().equals(false));
+
+        return ResultResponse.toDto("OK");
+    }
 }
+
