@@ -17,5 +17,4 @@ public class RandomNick {
 
         return nickarr1.get(rnum1) + nickarr2.get(rnum2) + rnd.nextInt(99999999);
     }
-
 }

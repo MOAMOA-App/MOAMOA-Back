@@ -4,11 +4,15 @@ import lombok.*;
 
 @Getter
 @Setter
-@Builder
 public class EmailMessage {
     private String to;
     private String subject;
-    private String message;
-    @Builder.Default
-    private String from = "moamoa-mail@naver.com";
+    private String from;
+
+    @Builder
+    public EmailMessage(String to) {
+        this.to = to;
+        this.subject = "모아모아에서 발급된 이메일 인증 코드입니다.";
+        this.from = "moamoa-mail@naver.com";
+    }
 }

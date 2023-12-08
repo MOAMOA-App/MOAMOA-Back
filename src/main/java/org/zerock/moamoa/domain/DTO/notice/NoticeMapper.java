@@ -1,10 +1,9 @@
 package org.zerock.moamoa.domain.DTO.notice;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.zerock.moamoa.domain.entity.Notice;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface NoticeMapper {
@@ -12,7 +11,6 @@ public interface NoticeMapper {
 
     Notice toEntity(NoticeSaveRequest noticeSaveRequest);
 
+    @Mapping(source = "receiverID.id", target = "receiverID")
     NoticeResponse toDto(Notice notice);
-
-    List<NoticeResponse> toDtoList(List<Notice> notices);
 }

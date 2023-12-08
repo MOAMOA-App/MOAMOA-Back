@@ -80,14 +80,6 @@ public class User extends BaseEntity {
 //        this.deletedAt = deletedAt;
 //    }
 
-    public User(Long id, String name, String email, String password, String nick) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.nick = nick;
-    }
-
     public void delete() {
         this.activate = false;
         this.deletedAt = Instant.now();
@@ -100,8 +92,8 @@ public class User extends BaseEntity {
         this.detailAddress = UP.getDetailAddress();
     }
 
-    public void updatePw(String password) {
-        this.password = password;
+    public void updatePw(String password, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
     }
 
     public void updateImage(String file) {
@@ -110,21 +102,5 @@ public class User extends BaseEntity {
 
     public void updateNick(String nick){
         this.nick = nick;
-    }
-
-    /**
-     * 비밀번호 암호화
-     *
-     * @param passwordEncoder 암호화 할 인코더 클래스
-     */
-    public void hashPassword(PasswordEncoder passwordEncoder) {
-        this.password = passwordEncoder.encode(this.password);
-    }
-
-    /**
-     * 닉네임 랜덤설정
-     */
-    public void randomNick() {
-        this.nick = RandomNick.printRandNick();
     }
 }

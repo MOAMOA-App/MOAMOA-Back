@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.zerock.moamoa.common.auth.CustomUserDetails;
 import org.zerock.moamoa.common.auth.JwtTokenProvider;
 import org.zerock.moamoa.domain.DTO.user.UserLoginResponse;
-import org.zerock.moamoa.domain.DTO.user.UserResponse;
 import org.zerock.moamoa.domain.DTO.user.UserSignupRequest;
 import org.zerock.moamoa.service.AuthService;
 import org.zerock.moamoa.service.UserService;
@@ -54,13 +53,13 @@ public class OAuth2SuccessHandler
         String token = oAuth2User.getAttribute("id").toString();
         log.info(username + "님이 " + loginType + "로 회원가입 하셨습니다.");
         // 처음으로 소셜 로그인한 사용자를 데이터베이스에 등록
-        String nick = userService.repeatRandNick(); // 닉네임 랜덤설정
+        String nick = userService.getRandNick(); // 닉네임 랜덤설정
         UserSignupRequest saveRequest = new UserSignupRequest(nick, username, null);
         switch (loginType) {
             case "kakao" -> saveRequest.setKakao(token);
             case "naver" -> saveRequest.setNaver(token);
         }
-        UserResponse res = userService.oAuthSaveUser(saveRequest);
+        userService.oAuthSaveUser(saveRequest);
 
         // 데이터베이스에서 사용자 회수
         CustomUserDetails details

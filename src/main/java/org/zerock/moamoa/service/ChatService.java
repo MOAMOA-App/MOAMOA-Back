@@ -91,19 +91,13 @@ public class ChatService {
                 .toList();
     }
 
-    public Page<ChatMessage> findAllRoomMsg(ChatRoom chatRoom, Pageable pageable){
-        return chatMessageRepository.findAllChatByChatRoom(chatRoom, pageable);
-    }
-
     @Transactional
     public void saveChatRoom(ChatRoomRequest request) {
         Product product = productRepository.findByIdOrThrow(request.getProductId());
         User seller = product.getUser();
         User buyer = userRepository.findByIdOrThrow(request.getUserId());
-        ChatRoom chatRoom = new ChatRoom();
-        chatRoom.build(product, seller, buyer);
 
-        chatRoomRepository.save(chatRoom);
+        chatRoomRepository.save(new ChatRoom(product, seller, buyer));
     }
 
     public void saveChat(ChatMessageRequest req) {

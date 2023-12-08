@@ -8,6 +8,4 @@ public class ChatRoomRequest {
 
     private Long userId;
 
-    private Long sellerId;
-
 }

@@ -67,19 +67,16 @@ public class PartyService {
         if (ifpartyexist.isPresent()) {
             return PartytoClientResponse.toDto(pid, "이미 참여했습니다.");
         }
-
-        request.setBuyer(user);
-        request.setProduct(product);
-        Party party = PartyMapper.INSTANCE.toEntity(request);
-
         // 본인의 글은 참여 불가
         if (product.getUser().equals(user))
             return PartytoClientResponse.toDto(pid, "자신의 게시글은 참여할 수 없습니다.");;
 
+        request.setBuyer(user);
+        request.setProduct(product);
+        Party party = partyMapper.INSTANCE.toEntity(request);
         partyRepository.save(party);
 
         // Product 엔티티에 해당 party가 없을시 추가
-        party.setProduct(product);
         product.addSellCount(party.getCount());
         return PartytoClientResponse.toDto(pid, "OK");
     }

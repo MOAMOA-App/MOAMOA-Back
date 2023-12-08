@@ -62,13 +62,10 @@ public class ChatController {
     public ResultResponse createRoom(@RequestBody ChatRoomRequest req) {
         // 채팅방 만들어지는 시점: 참여자 목록에서 채팅 메시지 보낼때 -> pid/sellerid/uid 중복있는지 검사 (3가지 동시에),
         // 중복 없으면 방 만들기: 채팅방 초대(ChatRoom에 추가) + 메시지 보내기(WebSocketController)
-        if (chatRoomRepository.existsByProductIdAndSellerIdAndUserId(
+        if (chatRoomRepository.existsByProductIdAndUserId(
                 productRepository.findById(req.getProductId()),
-                userRepository.findById(req.getSellerId()),
                 userRepository.findById(req.getUserId()))
-        ){
-            return ResultResponse.toDto("ALREADY_EXIST");
-        }
+        ) return ResultResponse.toDto("ALREADY_EXIST");
         chatService.saveChatRoom(req);
         return ResultResponse.toDto("OK");
     }

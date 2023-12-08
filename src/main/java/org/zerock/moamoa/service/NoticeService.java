@@ -12,11 +12,8 @@ import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.notice.*;
-import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.DTO.product.ProductTitleResponse;
-import org.zerock.moamoa.domain.DTO.user.UserMapper;
 import org.zerock.moamoa.domain.DTO.user.UserNickResponse;
-import org.zerock.moamoa.domain.DTO.user.UserProductResponse;
 import org.zerock.moamoa.domain.entity.Notice;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
@@ -27,7 +24,6 @@ import org.zerock.moamoa.repository.UserRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -57,7 +53,7 @@ public class NoticeService {
             String key = entry.getKey();
             SseEmitter emitter = entry.getValue();
             emitterRepository.saveEventCache(key, request);
-            NoticeContentResponse res = new NoticeContentResponse(savedNotice.getId(),
+            NoticeResponse res = new NoticeResponse(savedNotice.getId(),
                     userToDto(senderID), receiverId, savedNotice.getReadOrNot(), savedNotice.getType(),
                     productToDto(referenceID), savedNotice.getCreatedAt());
             sendToClient(emitter, eventId, key, res);

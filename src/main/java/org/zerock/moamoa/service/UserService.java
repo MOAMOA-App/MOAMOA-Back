@@ -15,10 +15,7 @@ import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.EmailRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.Random;
 
 @Service
 @Slf4j
@@ -29,18 +26,16 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailRepository emailRepository;
 
-
     public UserProfileResponse getMyProfile(String email) {
         User user = userRepository.findByEmailOrThrow(email);
         return UserProfileResponse.builder(user);
     }
 
-
     /**
      * 회원가입
      */
     @Transactional
-    public UserResponse saveUser(UserSignupRequest request) {
+    public UserProfileResponse saveUser(UserSignupRequest request) {
         User user;
         //이미 계정이 있는 경우
         if (isEmailExist(request.getEmail())) {
@@ -48,34 +43,24 @@ public class UserService {
 
             //일반 회원가입이 아닌 경우
             if (user.getPassword() == null) {
-                user.updatePw(request.getPassword());
-                user.hashPassword(passwordEncoder);     // 비밀번호 암호화
+                user.updatePw(request.getPassword(), passwordEncoder);
+                user.updateNick(verifyEmptyNick(request.getNick()));
 
-                if (request.getNick() == null || request.getNick().isEmpty()){
-                    String rnick = repeatRandNick();
-                    user.updateNick(rnick);
-                } else user.updateNick(request.getNick());
-
-                return UserMapper.INSTANCE.toDto(user);
+                return userMapper.INSTANCE.toDto(user);
             } else throw new AuthException(ErrorCode.USER_EMAIL_USED);
         } else {
-            user = UserMapper.INSTANCE.toEntity(request);
-            user.updatePw(request.getPassword());
-            user.hashPassword(passwordEncoder);     // 비밀번호 암호화
-
-            if (request.getNick() == null || request.getNick().isEmpty()){
-                String rnick = repeatRandNick();
-                user.updateNick(rnick);
-            } else user.updateNick(request.getNick());
+            user = userMapper.INSTANCE.toEntity(request);
+            user.updatePw(request.getPassword(), passwordEncoder);
+            user.updateNick(verifyEmptyNick(request.getNick()));
 
             User savedUser = userRepository.save(user);
-            return UserMapper.INSTANCE.toDto(savedUser);
+            return userMapper.INSTANCE.toDto(savedUser);
         }
     }
 
 
     @Transactional
-    public UserResponse oAuthSaveUser(UserSignupRequest request) {
+    public UserProfileResponse oAuthSaveUser(UserSignupRequest request) {
         User user;
         log.info("oAuth 회원가입");
         //이미 계정이 있는 경우
@@ -88,7 +73,7 @@ public class UserService {
             return userMapper.toDto(user);
         } else {
             user = userMapper.toEntity(request);
-            user.updateNick(request.getNick());
+            user.updateNick(verifyEmptyNick(request.getNick()));
             userRepository.save(user);
             return userMapper.toDto(userRepository.save(user));
         }
@@ -124,8 +109,7 @@ public class UserService {
         // 비밀번호 중복 확인
         if (passwordEncoder.matches(req.getPassword(), user.getPassword()))
             return ResultResponse.toDto("SAME_PASSWORD");
-        user.updatePw(req.getPassword());
-        user.hashPassword(passwordEncoder);
+        user.updatePw(req.getPassword(), passwordEncoder);
 
         return ResultResponse.toDto("OK");
     }
@@ -137,7 +121,7 @@ public class UserService {
     public ResultResponse updatePwLogin(UserPwChangeRequest req, String username) {
         // 1. Authentication이랑 req 이메일 같은지 비교
         if (!Objects.equals(req.getEmail(), username)){
-            throw new RuntimeException();
+            throw new AuthException(ErrorCode.USER_ACCESS_REJECTED);
         }
         User user = userRepository.findByEmailOrThrow(username);
 
@@ -149,8 +133,7 @@ public class UserService {
         if (!Objects.equals(req.getOldPassword(), req.getNewPassword())){
             return ResultResponse.toDto("SAME_PW");
         }
-        user.updatePw(req.getNewPassword());
-        user.hashPassword(passwordEncoder);
+        user.updatePw(req.getNewPassword(), passwordEncoder);
 
         return ResultResponse.toDto("OK");
     }
@@ -162,27 +145,28 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    public ResultResponse emailVerify(VerifyRequest verifyRequest) {
-        if (userRepository.existsByEmail(verifyRequest.getEmail()))
+    public ResultResponse emailVerify(UserCheckRequest userCheckRequest) {
+        if (userRepository.existsByEmail(userCheckRequest.getEmail()))
             return ResultResponse.toDto("ALREADY_USED_EMAIL");
 
         return ResultResponse.toDto("OK");
     }
 
-    public String repeatRandNick(){
+    public String verifyEmptyNick(String nick){
+        if (nick == null || nick.isEmpty()){
+            return getRandNick();
+        } else return nick;
+    }
+
+    public String getRandNick(){
         String rNick = RandomNick.printRandNick();
-        while (!Objects.equals(nickVerify(rNick), "OK")){
+        while (!Objects.equals(verifyRepeatedNick(rNick), "OK")){
             rNick = RandomNick.printRandNick();
         }
         return rNick;
     }
 
-    public ResultResponse printRandNick() {
-        String rNick = RandomNick.printRandNick();
-        return ResultResponse.toDto("nick: " + rNick);
-    }
-
-    public String nickVerify(String usernick) {
+    public String verifyRepeatedNick(String usernick) {
         Boolean nickcheck = userRepository.existsByNick(usernick);
         if (!nickcheck){
             return "OK";

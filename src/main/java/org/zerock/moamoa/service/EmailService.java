@@ -19,6 +19,7 @@ import org.zerock.moamoa.domain.DTO.email.EmailAddrRequest;
 import org.zerock.moamoa.domain.DTO.email.*;
 import org.zerock.moamoa.domain.entity.Email;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.enums.EmailType;
 import org.zerock.moamoa.repository.EmailRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
@@ -38,65 +39,13 @@ public class EmailService {
     private final String JASYPT_PW = "mypw123!";
     private final String JASYPT_ALGORITHM = "PBEWITHMD5ANDDES";
 
-    // save
-    public CompletableFuture<EmailtoClientResponse> saveEmail(EmailRequest request) {
-        Email email = Email.toEntity(request);  // 여기서 토큰 저장
-        emailRepository.save(email);
-        return CompletableFuture.completedFuture(
-                EmailtoClientResponse.toDto(tokenEncoder(email.getToken()), "OK"));
-    }
-
-    // updatecode
-    @Transactional
-    public CompletableFuture<EmailtoClientResponse> updateCode(EmailRequest req) {
-        Email temp = emailRepository.findByEmailOrThrow(req.getEmail());
-        temp.updateCode(req);   // 여기서 토큰 저장
-        EmailResponse.toDto(temp);
-        return CompletableFuture.completedFuture(
-                EmailtoClientResponse.toDto(tokenEncoder(temp.getToken()), "OK"));
-    }
-
-    // updateauth
-    @Transactional
-    public ResultResponse updateAuth(EmailAuthUpdateRequest req) {
-        // 1. 이메일로 JoinEmail 찾음 (존재하지 않을시 ElseThrow)
-        // 2. 코드가 같을 시 authenticate를 true, 다를시 false로 설정
-        Email temp = emailRepository.findByTokenOrThrow(tokenDecoder(req.getToken()));
-        Instant expiredTime = temp.getUpdatedAt().plusSeconds(600);
-
-        // req 들어온 시간이 10분보다 길 경우 EXPIRED
-        if (req.getSubmissionTime().isAfter(expiredTime)){
-            return ResultResponse.toDto("EXPIRED");
-        } else {
-            // code 틀릴 시 NOT_CORRECT
-            if (!temp.getCode().equals(req.getCode())) {
-                return ResultResponse.toDto("NOT_CORRECT");
-            } else {
-                // 여기서 type1일시 이메일로 유저 찾아서 소셜로그인한 회원인지 검사
-                if (req.getType().getCode() == 1) {
-                    User user = userRepository.findByEmailOrThrow(temp.getEmail());
-                    if (user.getPassword() == null){
-                        return ResultResponse.toDto("소셜로그인한 회원입니다.");
-                    }
-                }
-                temp.updateAuth(req);
-                return ResultResponse.toDto("OK");
-            }
-        }
-    }
-
     @Async
     @Transactional
-    public CompletableFuture<EmailtoClientResponse> sendEmail(EmailAddrRequest emailReq) throws UnsupportedEncodingException, MessagingException {
-        EmailMessage emailMessage = EmailMessage.builder()
-                .to(emailReq.getEmail())
-                .subject("모아모아에서 발급된 이메일 인증 코드입니다.")
-                .build();
-
-        String authCode = createCode();
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-
+    public CompletableFuture<EmailtoClientResponse> sendEmail(EmailAddrRequest emailAddrReq) throws UnsupportedEncodingException, MessagingException {
         try {
+            EmailMessage emailMessage = EmailMessage.builder().to(emailAddrReq.getEmail()).build();
+            String authCode = createCode();
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
             mimeMessageHelper.setTo(emailMessage.getTo());               // 메일 수신자
             mimeMessageHelper.setSubject(emailMessage.getSubject());     // 메일 제목
@@ -105,21 +54,50 @@ public class EmailService {
 
             // 메일 보냄, db에 저장
             javaMailSender.send(mimeMessage);
+            return saveEmail(new EmailRequest(emailMessage.getTo(), authCode, emailAddrReq.type));
 
-            EmailRequest emailRequest = new EmailRequest(emailMessage.getTo(), authCode, emailReq.type);
-
-            if (!emailRepository.existsByEmail(emailRequest.getEmail())) {
-                // 이메일 존재하지 않을 시 새로 저장
-                return saveEmail(emailRequest);
-            } else {
-                // 이메일 존재할 시 재전송
-                return updateCode(emailRequest);
-            }
-//            return CompletableFuture.completedFuture(JoinEmailtoClientResponse.toDto(token, "OK"));
         } catch (MessagingException e){
             throw new RuntimeException(e);
         }
     }
+
+    public CompletableFuture<EmailtoClientResponse> saveEmail(EmailRequest emailReq) {
+        Email email;
+        if (!emailRepository.existsByEmail(emailReq.getEmail())) {
+            // 이메일 존재하지 않을 시 새로 저장
+            email = Email.toEntity(emailReq);
+            emailRepository.save(email);
+        } else {
+            // 이메일 존재할 시 재전송
+            email = emailRepository.findByEmailOrThrow(emailReq.getEmail());
+            email.updateCode(emailReq);
+        }
+        return CompletableFuture.completedFuture(
+                EmailtoClientResponse.toDto(tokenEncoder(email.getToken()), "OK"));
+    }
+
+    @Transactional
+    public ResultResponse updateAuth(EmailAuthUpdateRequest req) {
+        // 1. 이메일로 JoinEmail 찾음 (존재하지 않을시 ElseThrow)
+        // 2. 코드가 같을 시 authenticate를 true, 다를시 false로 설정
+        Email temp = emailRepository.findByTokenOrThrow(tokenDecoder(req.getToken()));
+        Instant expiredTime = temp.getUpdatedAt().plusSeconds(600);
+
+        // req 들어온 시간이 10분보다 길 경우 EXPIRED
+        if (req.getSubmissionTime().isAfter(expiredTime)) return ResultResponse.toDto("EXPIRED");
+
+        // code 틀릴 시 NOT_CORRECT
+        if (!temp.getCode().equals(req.getCode())) return ResultResponse.toDto("NOT_CORRECT");
+
+        // 여기서 회원인 경우 이메일로 유저 찾아서 소셜로그인한 회원인지 검사
+        if (req.getType() == EmailType.EMAIL_PW) {
+            User user = userRepository.findByEmailOrThrow(temp.getEmail());
+            if (user.getPassword() == null) return ResultResponse.toDto("소셜로그인한 회원입니다.");
+        }
+        temp.updateAuth(req);
+        return ResultResponse.toDto("OK");
+    }
+
     private String tokenEncoder(String token){
         StandardPBEStringEncryptor jasypt = new StandardPBEStringEncryptor();
         jasypt.setPassword(JASYPT_PW);
@@ -140,7 +118,6 @@ public class EmailService {
     public static String createCode() {
         Random rand = new Random();
         StringBuilder key = new StringBuilder();
-
         for (int i = 0; i < 6; i++) {
             key.append(rand.nextInt(10));
         }

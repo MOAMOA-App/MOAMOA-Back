@@ -27,7 +27,7 @@ public class NoticeListener {
     @Async
     public CompletableFuture<Void> handleNotice(NoticeSaveRequest req) {
         // 채팅알람일시
-        if (req.getType().getCode() == 3) {
+        if (req.getType().getCode() == 0) {
             noticeService.saveAndSend(req);
         } else {
             List<Party> partyList = partyRepository.findByProductAndStatus(req.getReferenceID(), true);
@@ -39,10 +39,10 @@ public class NoticeListener {
             }
             List<WishList> wishList =  wishListRepository.findByProduct(req.getReferenceID());
             if (!wishList.isEmpty()){
-                for (WishList wish : wishList) {
+                wishList.forEach(wish -> {
                     req.setReceiverID(wish.getUser());    // null값이었던 receiverID에 uid값 넣어줌
                     noticeService.saveAndSend(req);
-                }
+                });
             }
         }
         return CompletableFuture.completedFuture(null);
