@@ -20,8 +20,6 @@ public interface PartyRepository extends JpaRepository<Party, Long> {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PARTY_NOT_FOUND));
     }
 
-    boolean existsByBuyerAndProduct(User buyer, Product product);
-
     default Party findByBuyerAndProductOrThrow(User buyer, Product product){
         return findByBuyerAndProduct(buyer, product)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.PARTY_NOT_FOUND));

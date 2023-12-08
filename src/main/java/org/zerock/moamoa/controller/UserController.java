@@ -18,9 +18,6 @@ import org.zerock.moamoa.service.EmailService;
 import org.zerock.moamoa.service.UserService;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -38,7 +35,7 @@ public class UserController {
      * 로그인
      */
     @PostMapping("/login")
-    public UserLoginResponse login(@RequestBody UserLoginRequest request) {
+    public UserLoginResponse login(@RequestBody UserCheckRequest request) {
         return authService.login(request);
     }
 
@@ -63,7 +60,7 @@ public class UserController {
      * 회원가입
      */
     @PostMapping("/signup")
-    public UserResponse signUp(@RequestBody UserSignupRequest userSignupRequest) throws Exception {
+    public UserProfileResponse signUp(@RequestBody UserSignupRequest userSignupRequest) throws Exception {
         // @RequestBody 어노테이션은 요청의 본문에 포함된 데이터를 AnnounceRequest 객체로 변환하여 announce 변수에 할당
         return userService.saveUser(userSignupRequest);
     }
@@ -72,8 +69,8 @@ public class UserController {
      * 이메일 중복 확인
      */
     @PostMapping("/email/verify")
-    public ResultResponse emailVerify(@RequestBody VerifyRequest verifyRequest) throws Exception {
-        return userService.emailVerify(verifyRequest);
+    public ResultResponse emailVerify(@RequestBody UserCheckRequest userCheckRequest) throws Exception {
+        return userService.emailVerify(userCheckRequest);
     }
 
     /**
@@ -121,6 +118,6 @@ public class UserController {
 
     @GetMapping("/nick/check")
     public ResultResponse checkNick(@RequestParam String usernick){
-        return ResultResponse.toDto(userService.nickVerify(usernick));
+        return ResultResponse.toDto(userService.verifyRepeatedNick(usernick));
     }
 }

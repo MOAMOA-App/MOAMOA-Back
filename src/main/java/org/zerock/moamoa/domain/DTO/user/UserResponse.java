@@ -12,10 +12,6 @@ public class UserResponse {
     private String profImg;
     private String address;
     private String detailAddress;
-    //	private List<Party> parties;
-//	private List<Party> myParties;
-//	private List<Notice> notices;
-//	private List<WishList> wishLists;
 
     @Builder
     public UserResponse(Long id, String name, String email, String nick, String profImg, String address, String detailAddress) {

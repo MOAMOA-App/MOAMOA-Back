@@ -10,7 +10,7 @@ import org.zerock.moamoa.common.auth.JwtTokenProvider;
 import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.domain.DTO.user.UserLoginRequest;
+import org.zerock.moamoa.domain.DTO.user.UserCheckRequest;
 import org.zerock.moamoa.domain.DTO.user.UserLoginResponse;
 import org.zerock.moamoa.domain.DTO.user.UserRefreshResponse;
 import org.zerock.moamoa.domain.entity.Auth;
@@ -41,7 +41,7 @@ public class AuthService {
      * 로그인
      */
     @Transactional
-    public UserLoginResponse login(UserLoginRequest request) {
+    public UserLoginResponse login(UserCheckRequest request) {
         User user = userRepository.findByEmailOrThrow(request.getEmail());
 
         //탈퇴 계정 확인

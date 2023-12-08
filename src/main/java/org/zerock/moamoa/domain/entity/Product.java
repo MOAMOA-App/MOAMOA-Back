@@ -65,7 +65,6 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Announce> announces;
 
-    @Setter
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Party> parties;
 

@@ -1,6 +1,7 @@
 package org.zerock.moamoa.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
@@ -31,6 +32,12 @@ public class ChatRoom extends BaseEntity {
 
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY)
     private List<ChatMessage> messages;
+
+    public ChatRoom(Product productId, User sellerId, User userId) {
+        this.productId = productId;
+        this.sellerId = sellerId;
+        this.userId = userId;
+    }
 
     public void build(Product product, User seller, User user) {
         this.productId = product;
