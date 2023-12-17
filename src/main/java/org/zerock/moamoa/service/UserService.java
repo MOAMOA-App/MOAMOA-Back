@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.common.user.RandomNick;
+import org.zerock.moamoa.common.user.RandomString;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.email.EmailUserPwRequest;
 import org.zerock.moamoa.domain.DTO.user.*;
@@ -26,16 +26,16 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailRepository emailRepository;
 
-    public UserProfileResponse getMyProfile(String email) {
+    public UserResponse getMyProfile(String email) {
         User user = userRepository.findByEmailOrThrow(email);
-        return UserProfileResponse.builder(user);
+        return UserResponse.builder(user);
     }
 
     /**
      * 회원가입
      */
     @Transactional
-    public UserProfileResponse saveUser(UserSignupRequest request) {
+    public UserResponse saveUser(UserSignupRequest request) {
         User user;
         //이미 계정이 있는 경우
         if (isEmailExist(request.getEmail())) {
@@ -60,7 +60,7 @@ public class UserService {
 
 
     @Transactional
-    public UserProfileResponse oAuthSaveUser(UserSignupRequest request) {
+    public UserResponse oAuthSaveUser(UserSignupRequest request) {
         User user;
         log.info("oAuth 회원가입");
         //이미 계정이 있는 경우
@@ -89,8 +89,10 @@ public class UserService {
 
     @Transactional
     public ResultResponse updateProfile(UserProfileUpdateRequest request, String username) {
-        User user = userRepository.findByEmailOrThrow(username);
+        if (!Objects.equals(request.getEmail(), username))
+            throw new AuthException(ErrorCode.USER_ACCESS_REJECTED);
 
+        User user = userRepository.findByEmailOrThrow(username);
         user.updateProfile(request);
         return ResultResponse.toDto("OK");
     }
@@ -100,13 +102,11 @@ public class UserService {
      */
     @Transactional
     public ResultResponse updatePwEmail(EmailUserPwRequest req) {
-        // req의 토큰으로 이메일 찾아서 유저 비밀번호 바꿈
         String email = emailRepository.findByTokenOrThrow(req.getToken()).getEmail();
         User user = userRepository.findByEmailOrThrow(email);
         if (user.getPassword() == null){
             return ResultResponse.toDto("소셜로그인한 회원입니다.");
         }
-        // 비밀번호 중복 확인
         if (passwordEncoder.matches(req.getPassword(), user.getPassword()))
             return ResultResponse.toDto("SAME_PASSWORD");
         user.updatePw(req.getPassword(), passwordEncoder);
@@ -119,18 +119,13 @@ public class UserService {
      */
     @Transactional
     public ResultResponse updatePwLogin(UserPwChangeRequest req, String username) {
-        // 1. Authentication이랑 req 이메일 같은지 비교
-        if (!Objects.equals(req.getEmail(), username)){
+        if (!Objects.equals(req.getEmail(), username))
             throw new AuthException(ErrorCode.USER_ACCESS_REJECTED);
-        }
-        User user = userRepository.findByEmailOrThrow(username);
 
-        // 2. 기존 암호 복호화해서 같은지 비교 -> 다를 시 비밀번호가 틀립니다
+        User user = userRepository.findByEmailOrThrow(username);
         if (!passwordEncoder.matches(req.getOldPassword(), user.getPassword()))
             return ResultResponse.toDto("INCORRECT_PW");
-
-        // 3. 새 비밀번호랑 기존 비밀번호랑 같은지 확인 후 받은 newPw 암호화해서 저장
-        if (!Objects.equals(req.getOldPassword(), req.getNewPassword())){
+        if (Objects.equals(req.getOldPassword(), req.getNewPassword())){
             return ResultResponse.toDto("SAME_PW");
         }
         user.updatePw(req.getNewPassword(), passwordEncoder);
@@ -148,7 +143,6 @@ public class UserService {
     public ResultResponse emailVerify(UserCheckRequest userCheckRequest) {
         if (userRepository.existsByEmail(userCheckRequest.getEmail()))
             return ResultResponse.toDto("ALREADY_USED_EMAIL");
-
         return ResultResponse.toDto("OK");
     }
 
@@ -159,10 +153,11 @@ public class UserService {
     }
 
     public String getRandNick(){
-        String rNick = RandomNick.printRandNick();
-        while (!Objects.equals(verifyRepeatedNick(rNick), "OK")){
-            rNick = RandomNick.printRandNick();
+        String rNick;
+        do {
+            rNick = RandomString.printRandNick();
         }
+        while (!Objects.equals(verifyRepeatedNick(rNick), "OK"));
         return rNick;
     }
 

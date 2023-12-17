@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.chat.ChatMessageRequest;
 import org.zerock.moamoa.domain.DTO.chat.ChatMessageResponse;
 import org.zerock.moamoa.domain.DTO.chat.ChatRoomRequest;
@@ -92,33 +93,35 @@ public class ChatService {
     }
 
     @Transactional
-    public void saveChatRoom(ChatRoomRequest request) {
+    public ResultResponse saveChatRoom(ChatRoomRequest request) {
+        if (checkChatRoomExists(request)) ResultResponse.toDto("ALREADY_EXIST");
+
         Product product = productRepository.findByIdOrThrow(request.getProductId());
         User seller = product.getUser();
         User buyer = userRepository.findByIdOrThrow(request.getUserId());
 
         chatRoomRepository.save(new ChatRoom(product, seller, buyer));
+        return ResultResponse.toDto("OK");
     }
+    boolean checkChatRoomExists(ChatRoomRequest request){
+        return (chatRoomRepository.existsByProductIdAndUserId(
+                productRepository.findById(request.getProductId()),
+                userRepository.findById(request.getUserId())));
+    }
+
 
     public void saveChat(ChatMessageRequest req) {
         template.convertAndSend("/topic/chat/" + req.getId(), req);
+
         User sender = userRepository.findByIdOrThrow(req.getSender());
-
         ChatRoom chatRoom = findByRoomId(req.getId());
-
         ChatMessage chatMessage = new ChatMessage(chatRoom, sender, req.getMessage(), false);
         chatMessageRepository.save(chatMessage);
 
-        User receiver;
-        if (sender.getId().equals(chatRoom.getSellerId().getId())){
-            // seller가 sender일 시 receiver는 user가 됨
-            receiver = chatRoom.getUserId();
-        } else {
-            // user가 sender일 시 receiver는 seller가 됨
-            receiver = chatRoom.getSellerId();
-        }
-        eventPublisher.publishEvent(new NoticeSaveRequest(sender, receiver,
-                NoticeType.NEW_CHAT, chatRoom.getProductId()));
+        User receiver = sender.getId().equals(chatRoom.getSellerId().getId()) ?
+                chatRoom.getUserId() : chatRoom.getSellerId();
+        eventPublisher.publishEvent(
+                new NoticeSaveRequest(sender, receiver, NoticeType.NEW_CHAT, chatRoom.getProductId()));
     }
 
     public ChatRoomResponse findRoomById(String username, Long id) {

@@ -43,12 +43,6 @@ public class Party extends BaseEntity {
         this.status = status;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
-        if (!product.getParties().contains(this)) {
-            product.getParties().add(this);
-        }
-    }
 
     public void updateParty(PartyUpdateRequest req) {
         this.count = req.getCount();

@@ -11,7 +11,6 @@ import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.utils.redis.ViewsRedisUtils;
 
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -31,8 +30,6 @@ public class ProductViewsScheduler implements Job {
             if (count != 0) {
                 Product product = productRepository.findByIdOrThrow(key);
                 product.updateViewCount(count);
-
-//                ViewsRedisUtils.deleteViewCount(product.getId());
             }
         });
     }

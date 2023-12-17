@@ -20,6 +20,9 @@ import org.zerock.moamoa.service.UserService;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.CompletableFuture;
 
+import static org.zerock.moamoa.domain.enums.EmailType.EMAIL_JOIN;
+import static org.zerock.moamoa.domain.enums.EmailType.EMAIL_PW;
+
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -43,8 +46,8 @@ public class UserController {
      * oAuth 로그인
      */
     @GetMapping("/oauth")
-    public Claims val(@RequestParam("accessToken") String accessToken,
-                      @RequestParam("refreshToken") String refreshToken) {
+    public Claims val(@RequestParam("accessToken") String accessToken
+                      /*, @RequestParam("refreshToken") String refreshToken*/) {
         return jwtTokenProvider.parseClaims(accessToken);
     }
 
@@ -60,7 +63,7 @@ public class UserController {
      * 회원가입
      */
     @PostMapping("/signup")
-    public UserProfileResponse signUp(@RequestBody UserSignupRequest userSignupRequest) throws Exception {
+    public UserResponse signUp(@RequestBody UserSignupRequest userSignupRequest) {
         // @RequestBody 어노테이션은 요청의 본문에 포함된 데이터를 AnnounceRequest 객체로 변환하여 announce 변수에 할당
         return userService.saveUser(userSignupRequest);
     }
@@ -69,7 +72,7 @@ public class UserController {
      * 이메일 중복 확인
      */
     @PostMapping("/email/verify")
-    public ResultResponse emailVerify(@RequestBody UserCheckRequest userCheckRequest) throws Exception {
+    public ResultResponse emailVerify(@RequestBody UserCheckRequest userCheckRequest) {
         return userService.emailVerify(userCheckRequest);
     }
 
@@ -80,25 +83,7 @@ public class UserController {
     @PostMapping("/email/request")
     public CompletableFuture<EmailtoClientResponse> sendVerifyEmail(@RequestBody EmailAddrRequest emailReq)
             throws MessagingException, UnsupportedEncodingException {
-
-        String email = emailReq.getEmail();
-
-        switch (emailReq.type.getCode()) {
-            case 0 -> {
-                // type 0일 경우 회원가입 이메일 인증: User 엔티티에 이메일 있는지 이메일 중복 검사
-                if (userService.isEmailExist(email)) {
-                    throw new InvalidValueException(ErrorCode.INVALID_EMAIL_EXIST);
-                }
-            }
-            case 1 -> {
-                // type 1일 경우 비로그인 비밀번호 찾기: User 엔티티에 이메일 있는지 검사, 있으면 메일 보냄, 없으면 오류
-                if (!userService.isEmailExist(email)) {
-                    throw new InvalidValueException(ErrorCode.INVALID_EMAIL_VALUE);
-                }
-            }
-            // 이외 값일시 오류
-            default -> throw new InvalidValueException(ErrorCode.INVALID_INPUT_VALUE);
-        }
+        emailCheck(emailReq);
         return emailService.sendEmail(emailReq);
     }
 
@@ -119,5 +104,17 @@ public class UserController {
     @GetMapping("/nick/check")
     public ResultResponse checkNick(@RequestParam String usernick){
         return ResultResponse.toDto(userService.verifyRepeatedNick(usernick));
+    }
+
+    void emailCheck(EmailAddrRequest req) throws InvalidValueException {
+        if (req.type.equals(EMAIL_JOIN)) {
+            if (userService.isEmailExist(req.getEmail()))
+                throw new AssertionError(ErrorCode.INVALID_EMAIL_EXIST);
+        } else if (req.type.equals(EMAIL_PW)) {
+            if (!userService.isEmailExist(req.getEmail()))
+                throw new AssertionError(ErrorCode.INVALID_EMAIL_VALUE);
+        } else {
+            throw new InvalidValueException(ErrorCode.INVALID_INPUT_VALUE);
+        }
     }
 }
