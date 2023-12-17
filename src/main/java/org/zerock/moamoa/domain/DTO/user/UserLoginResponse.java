@@ -11,7 +11,7 @@ public class UserLoginResponse {
     private String tokenType;
     private String accessToken;
     private String refreshToken;
-    private UserProfileResponse user;
+    private UserResponse user;
 
     @Builder
     public UserLoginResponse(String message, Auth entity, User user) {
@@ -19,7 +19,7 @@ public class UserLoginResponse {
         this.tokenType = entity.getTokenType();
         this.accessToken = entity.getAccessToken();
         this.refreshToken = entity.getRefreshToken();
-        this.user = UserProfileResponse.builder(user);
+        this.user = UserResponse.builder(user);
     }
 
     @Builder

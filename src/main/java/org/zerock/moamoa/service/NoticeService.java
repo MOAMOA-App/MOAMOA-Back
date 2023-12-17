@@ -46,7 +46,7 @@ public class NoticeService {
 
         // receiver에게 알림 발송
         Long receiverId = request.getReceiverID().getId();
-        String eventId = receiverId + "_" + System.currentTimeMillis();
+        String eventId = request.getReceiverID().getId() + "_" + System.currentTimeMillis();
 
         Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByMemberId(receiverId);
         for (Map.Entry<String, SseEmitter> entry : sseEmitters.entrySet()) {
@@ -59,7 +59,6 @@ public class NoticeService {
             sendToClient(emitter, eventId, key, res);
 
         }
-//        return noticeMapper.toDto(savedNotice);
     }
 
     private void sendToClient(SseEmitter emitter, String eventId, String emitterId, Object data) {

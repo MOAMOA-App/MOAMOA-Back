@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import lombok.Builder;
 import org.zerock.moamoa.domain.DTO.product.ProductResponse;
-import org.zerock.moamoa.domain.DTO.user.UserProfileResponse;
+import org.zerock.moamoa.domain.DTO.user.UserResponse;
 
 import lombok.Data;
 import org.zerock.moamoa.utils.TimeUtils;
@@ -16,13 +16,13 @@ public class PartyResponse {
 	private String address;
 	private Integer count;
 	private LocalDateTime createdAt;
-	private UserProfileResponse buyer;
+	private UserResponse buyer;
 	private ProductResponse product;
 	private Boolean status;
 
 	@Builder
 	public PartyResponse(Long id, String address, Integer count, Instant createdAt,
-						 UserProfileResponse buyer, ProductResponse product, Boolean status) {
+                         UserResponse buyer, ProductResponse product, Boolean status) {
 		this.id = id;
 		this.address = address;
 		this.count = count;

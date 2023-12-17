@@ -5,6 +5,9 @@ import org.springframework.stereotype.Repository;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.entity.Announce;
+import org.zerock.moamoa.domain.entity.Product;
+
+import java.util.List;
 
 @Repository
 public interface AnnounceRepository extends JpaRepository<Announce, Long> {
@@ -13,4 +16,6 @@ public interface AnnounceRepository extends JpaRepository<Announce, Long> {
         return findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.ANNOUNCE_NOT_FOUND));
     }
+
+    List<Announce> findByProduct(Product product);
 }

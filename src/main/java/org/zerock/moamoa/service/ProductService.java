@@ -12,7 +12,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.AuthException;
-import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.DTO.product.*;
@@ -88,12 +87,6 @@ public class ProductService {
 
         product.updateInfo(request);
 
-        // 알림 보내는 부분: NoticeRequest 작성하기?
-        // 보낼 때 필요한 정보: 발신자(senderID), 수신자(receiverID), 알림타입noticeType(update), 게시글ID(referenceID)
-        // 게시글ID로 파티 불러오면 될듯. 근데 이쪽에서 직접 불러오면 너무좀그렇지않나...
-        // NoticeListener로 불러주면 될듯 makeNotice에서 이렇게 받아서 noticeRequest로 만들어줌
-        // null인 receiverID는 Listener에서 pid로 partyList를 불러와서 채워줌 근데이거 일케해도 되나...
-        // 알림 발송
         eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser(), null,
                 NoticeType.POST_CHANGED, product));
 
@@ -107,7 +100,6 @@ public class ProductService {
         checkAuth(product, user);
         product.updateStatus(request.getStatus());
 
-        // 알림 발송
         eventPublisher.publishEvent(new NoticeSaveRequest(product.getUser(), null,
                 NoticeType.STATUS_CHANGED, product));
 
@@ -215,7 +207,6 @@ public class ProductService {
         }
     }
 
-
     // 만든공구 리스트
     public Page<ProductListResponse> findPageByUser(String username, int pageNo, int pageSize) {
         User user = userRepository.findByEmailOrThrow(username);
@@ -228,6 +219,4 @@ public class ProductService {
     public void checkAuth(Product product, User user) {
         if (!product.getUser().equals(user)) throw new AuthException(ErrorCode.PRODUCT_AUTH_FAIL);
     }
-
-
 }

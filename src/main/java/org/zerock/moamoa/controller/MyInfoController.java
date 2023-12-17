@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.product.ProductListResponse;
-import org.zerock.moamoa.domain.DTO.user.UserProfileResponse;
+import org.zerock.moamoa.domain.DTO.user.UserResponse;
 import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
 import org.zerock.moamoa.domain.DTO.user.UserPwChangeRequest;
 import org.zerock.moamoa.service.PartyService;
@@ -30,7 +30,7 @@ public class MyInfoController {
      * 본인 프로필 불러오기
      */
     @GetMapping("profile")
-    private UserProfileResponse getMyProfile(Authentication authentication) {
+    private UserResponse getMyProfile(Authentication authentication) {
         String email = authentication.getName();
         return userService.getMyProfile(email);
     }
@@ -40,16 +40,16 @@ public class MyInfoController {
      */
     @PutMapping("profile")
     public ResultResponse updateProfile(Authentication authentication,
-                                      @ModelAttribute("profile") UserProfileUpdateRequest profileUpdateRequest) {
+                                        @RequestBody UserProfileUpdateRequest profileUpdateRequest) {
         return userService.updateProfile(profileUpdateRequest, authentication.getPrincipal().toString());
     }
 
     /**
-     * 로그인한 상태에서 비밀번호 찾기
+     * 로그인한 상태에서 비밀번호 변경
      */
     @PostMapping("password")
     public ResultResponse updatePW(Authentication authentication,
-                                   @ModelAttribute("userpw") UserPwChangeRequest request) {
+                                   @RequestBody UserPwChangeRequest request) {
         return userService.updatePwLogin(request, authentication.getPrincipal().toString());
     }
 
@@ -85,9 +85,7 @@ public class MyInfoController {
         return wishListService.findPageByUser(auth.getPrincipal().toString(), pageNo, pageSize);
     }
 
-    /**
-     * 회원탈퇴
-     */
+    /** 회원탈퇴 */
     @DeleteMapping("")
     public ResultResponse deleteUser(Authentication authentication) {
         return userService.removeUser(authentication.getPrincipal().toString());

@@ -65,9 +65,6 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<Announce> announces;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Party> parties;
-
     @Column(name = "activate")
     private Boolean activate = true;
 

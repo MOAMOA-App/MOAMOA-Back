@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.zerock.moamoa.repository.EmitterRepository;
-import org.zerock.moamoa.repository.EmitterRepositoryImpl;
 import org.zerock.moamoa.repository.UserRepository;
 
 import java.io.IOException;
@@ -25,9 +24,8 @@ public class EmitterService {
         Long memberId = userRepository.findByEmailOrThrow(username).getId();
 
         // 누가 사용하고 있는 SSE emitter인지 구분
-        String emitterId = makeTimeIncludeId(memberId);
-
         // 시간을 emitterId에 붙여두면 데이터가 유실된 시점을 알 수 있음
+        String emitterId = makeTimeIncludeId(memberId);
         SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
 
         // 시간이 만료된 경우 자동으로 레포지토리에서 삭제해줄 수 있는 콜백을 등록
