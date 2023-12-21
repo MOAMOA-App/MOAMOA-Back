@@ -55,7 +55,6 @@ public class AnnounceService {
 
     public List<AnnounceResponse> getByProduct(Long pid) {
         Product product = productRepository.findByIdOrThrow(pid);
-//        List<Announce> announceList = product.getAnnounces();
         List<Announce> announceList = announceRepository.findByProduct(product);
         return announceList.stream().filter(Announce::getActivate).map(announceMapper::toDto).toList();
     }

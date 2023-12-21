@@ -1,5 +1,6 @@
 package org.zerock.moamoa.service;
 
+import com.google.common.primitives.Bytes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,7 +16,9 @@ import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.EmailRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -28,7 +31,12 @@ public class UserService {
 
     public UserResponse getMyProfile(String email) {
         User user = userRepository.findByEmailOrThrow(email);
-        return UserResponse.builder(user);
+        UserResponse res = userMapper.INSTANCE.toDto(user);
+
+        byte[] result = Bytes.concat(user.getNick().getBytes(), String.valueOf(user.getCreatedAt()).getBytes());
+        res.setUuid(String.valueOf(UUID.nameUUIDFromBytes(result)));
+        return res;
+//        return getUserResponse(user);
     }
 
     /**
@@ -169,4 +177,16 @@ public class UserService {
             return "이미 존재하는 닉네임입니다.";
         }
     }
+
+//    UserResponse getUserResponse(User user){
+//        return UserResponse.builder()
+//                .id(user.getId())
+//                .nick(user.getNick())
+//                .email(user.getEmail())
+//                .address(user.getAddress())
+//                .detailAddress(user.getDetailAddress())
+//                .profImg(user.getProfImg())
+//                .uuid(String.valueOf(UUID.nameUUIDFromBytes(user.getNick().getBytes())))
+//                .build();
+//    }
 }

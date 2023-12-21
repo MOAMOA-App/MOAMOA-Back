@@ -38,14 +38,6 @@ public class Announce extends BaseEntity {
         this.activate = false;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
-        if (!product.getAnnounces().contains(this)) {
-            product.getAnnounces().add(this);
-        }
-    }
-
-
     @Builder
     public Announce(Long id, Boolean lock, String contents, Product product) {
         this.id = id;
