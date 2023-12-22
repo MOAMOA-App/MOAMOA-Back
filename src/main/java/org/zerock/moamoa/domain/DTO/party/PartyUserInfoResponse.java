@@ -19,8 +19,7 @@ public class PartyUserInfoResponse {
     private UserResponse buyer;
 
     @Builder
-    public PartyUserInfoResponse(Long id, String address, Integer count,
-                                 Instant createdAt, UserResponse buyer) {
+    public PartyUserInfoResponse(Long id, String address, Integer count, Instant createdAt, UserResponse buyer) {
         this.id = id;
         this.address = address;
         this.count = count;

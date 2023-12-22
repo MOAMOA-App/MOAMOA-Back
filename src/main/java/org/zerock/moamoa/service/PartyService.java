@@ -12,6 +12,7 @@ import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.party.*;
 import org.zerock.moamoa.domain.DTO.product.ProductListResponse;
+import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
@@ -28,18 +29,19 @@ public class PartyService {
     private final PartyRepository partyRepository;
     private final ProductRepository productRepository;
     private final PartyMapper partyMapper;
+    private final ProductMapper productMapper;
     private final ProductService productService;
     private final UserRepository userRepository;
 
 
-    public List<PartyUserInfoResponse> findUserByProduct(String username, Long pid) {
+    public PartyResponse findUserByProduct(String username, Long pid) {
         User user = userRepository.findByEmailOrThrow(username);
         Product product = productRepository.findByIdOrThrow(pid);
         if (!product.getUser().equals(user)) {
             throw new AuthException(ErrorCode.USER_ACCESS_REJECTED);
         }
-        List<Party> parties = partyRepository.findByProduct(product);
-        return parties.stream().map(partyMapper::toUserDto).toList();
+        List<PartyUserInfoResponse> parties = partyRepository.findByProduct(product).stream().map(partyMapper::toUserDto).toList();
+        return new PartyResponse(parties, productMapper.toDto(product));
     }
 
     /**
@@ -57,11 +59,13 @@ public class PartyService {
     public PartytoClientResponse saveParty(String username, PartyRequest request, Long pid) {
         User user = userRepository.findByEmailOrThrow(username);
         Product product = productRepository.findByIdOrThrow(pid);
+
         if (partyRepository.findByBuyerAndProduct(user, product).isPresent()) {
             return PartytoClientResponse.toDto(pid, "이미 참여했습니다.");
         }
         if (product.getUser().equals(user))
             return PartytoClientResponse.toDto(pid, "자신의 게시글은 참여할 수 없습니다.");
+
         request.setBuyer(user);
         request.setProduct(product);
         Party party = partyMapper.INSTANCE.toEntity(request);
@@ -101,10 +105,10 @@ public class PartyService {
      * 입금 상태 변경
      */
     @Transactional
-    public ResultResponse updatePartyStatus(String username, Long pid, Long partyid){
+    public ResultResponse updatePartyStatus(String username, Long pid, Long partyid) {
         User user = userRepository.findByEmailOrThrow(username);
         Product product = productRepository.findByIdOrThrow(pid);
-        if (!product.getUser().equals(user)){
+        if (!product.getUser().equals(user)) {
             throw new AuthException(ErrorCode.USER_ACCESS_REJECTED);
         }
 
