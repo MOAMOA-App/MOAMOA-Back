@@ -6,12 +6,11 @@ import org.zerock.moamoa.domain.entity.Party;
 
 @Mapper(componentModel = "spring")
 public interface PartyMapper {
-	PartyMapper INSTANCE = Mappers.getMapper(PartyMapper.class);
+    PartyMapper INSTANCE = Mappers.getMapper(PartyMapper.class);
 
-	Party toEntity(PartyRequest partyRequest);
+    Party toEntity(PartyRequest partyRequest);
 
-	PartyResponse toDto(Party party);
 
-	PartyUserInfoResponse toUserDto(Party party);
+    PartyUserInfoResponse toUserDto(Party party);
 
 }

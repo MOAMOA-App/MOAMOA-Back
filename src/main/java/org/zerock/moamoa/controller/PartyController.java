@@ -4,10 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
-import org.zerock.moamoa.domain.DTO.party.*;
+import org.zerock.moamoa.domain.DTO.party.PartyRequest;
+import org.zerock.moamoa.domain.DTO.party.PartyResponse;
+import org.zerock.moamoa.domain.DTO.party.PartyUpdateRequest;
+import org.zerock.moamoa.domain.DTO.party.PartytoClientResponse;
 import org.zerock.moamoa.service.PartyService;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -16,7 +17,7 @@ public class PartyController {
     private final PartyService partyService;
 
     @GetMapping("/{pid}/party")
-    public List<PartyUserInfoResponse> readByProductList(@PathVariable Long pid, Authentication auth) {
+    public PartyResponse readByProductList(@PathVariable Long pid, Authentication auth) {
         return partyService.findUserByProduct(auth.getPrincipal().toString(), pid);
     }
 
@@ -37,7 +38,7 @@ public class PartyController {
     @PutMapping("/{pid}/party/{partyid}")
     public ResultResponse updatePartyStatus(@PathVariable Long pid,
                                             @PathVariable Long partyid,
-                                          Authentication auth) {
+                                            Authentication auth) {
         return partyService.updatePartyStatus(auth.getPrincipal().toString(), pid, partyid);
     }
 
