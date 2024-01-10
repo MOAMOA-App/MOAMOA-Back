@@ -77,9 +77,6 @@ public class NoticeService {
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
 
         Page<Notice> noticePage = noticeRepository.findByReceiverID(receiver, itemPage);
-        if (noticePage.isEmpty()) {
-            throw new EntityNotFoundException(ErrorCode.NOTICE_NOT_FOUND);
-        }
 
         return noticePage.map(noticeMapper::toDto);
     }
@@ -87,11 +84,11 @@ public class NoticeService {
     public ResultResponse removeNotice(String username, Long id) {
         User user = userRepository.findByEmailOrThrow(username);
         Notice notice = noticeRepository.findByIdOrThrow(id);
-        if (notice.getReceiverID().getId().equals(user.getId())){
-            noticeRepository.delete(notice);
-            return ResultResponse.toDto("OK");
+        if (!notice.getReceiverID().getId().equals(user.getId())) {
+            return ResultResponse.toDto("권한이 없습니다.");
         }
-        return ResultResponse.toDto("권한이 없습니다.");
+        noticeRepository.delete(notice);
+        return ResultResponse.toDto("OK");
     }
 
     // 읽을 시 상태 변경
@@ -110,16 +107,15 @@ public class NoticeService {
     public ResultResponse updateReadAll(String username) {
         User user = userRepository.findByEmailOrThrow(username);
         List<Notice> notices = noticeRepository.findByReceiverID(user);
-        if (notices == null)
-            return ResultResponse.toDto(ErrorCode.NOTICE_NOT_FOUND.getMessage());
-        notices.forEach(notice -> notice.updateRead(true));
+        if (notices != null)
+            notices.forEach(notice -> notice.updateRead(true));
         return ResultResponse.toDto("OK");
     }
 
     @Transactional
     public UserNickResponse userToDto(User user) {
         return UserNickResponse.builder()
-                .id(user.getId())
+                .code(user.getCode())
                 .nick(user.getNick())
                 .build();
     }

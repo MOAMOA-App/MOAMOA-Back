@@ -10,6 +10,7 @@ import org.zerock.moamoa.common.auth.JwtTokenProvider;
 import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.EntityNotFoundException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.common.user.StringMaker;
 import org.zerock.moamoa.domain.DTO.user.UserCheckRequest;
 import org.zerock.moamoa.domain.DTO.user.UserLoginResponse;
 import org.zerock.moamoa.domain.DTO.user.UserRefreshResponse;
@@ -50,6 +51,11 @@ public class AuthService {
         //비밀번호 확인
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new AuthException(ErrorCode.AUTH_PASSWORD_UNEQUAL);
+        }
+
+        // YJ_TODO: 코드 없으면 이때 발급 (임시코드)
+        if (user.getCode() == null || user.getCode().isEmpty()){
+            user.updateCode(StringMaker.idto62Code(user.getId()));
         }
 
         CustomUserDetails userDetails = CustomUserDetails.fromEntity(user);

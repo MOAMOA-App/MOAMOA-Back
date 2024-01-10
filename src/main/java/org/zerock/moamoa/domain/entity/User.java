@@ -20,6 +20,9 @@ public class User extends BaseEntity {
     @Column(name = "name", length = 32)
     private String name;
 
+    @Column(name = "code")
+    private String code;
+
     @Column(name = "naver", length = 254)
     @Setter
     private String naver;
@@ -53,10 +56,11 @@ public class User extends BaseEntity {
     private Instant deletedAt;
 
     @Builder
-    public User(String email, String nick, String password) {
+    public User(String email, String password, String nick, String code) {
         this.email = email;
         this.password = password;
         this.nick = nick;
+        this.code = code;
     }
 
     public void delete() {
@@ -80,5 +84,9 @@ public class User extends BaseEntity {
 
     public void updateNick(String nick){
         this.nick = nick;
+    }
+
+    public void updateCode(String code){
+        this.code = code;
     }
 }

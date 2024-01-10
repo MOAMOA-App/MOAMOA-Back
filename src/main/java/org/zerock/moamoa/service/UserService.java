@@ -1,6 +1,5 @@
 package org.zerock.moamoa.service;
 
-import com.google.common.primitives.Bytes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -8,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.common.user.RandomString;
+import org.zerock.moamoa.common.user.StringMaker;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.email.EmailUserPwRequest;
 import org.zerock.moamoa.domain.DTO.user.*;
@@ -16,9 +15,7 @@ import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.repository.EmailRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -31,12 +28,7 @@ public class UserService {
 
     public UserResponse getMyProfile(String email) {
         User user = userRepository.findByEmailOrThrow(email);
-        UserResponse res = userMapper.INSTANCE.toDto(user);
-
-        byte[] result = Bytes.concat(user.getNick().getBytes(), String.valueOf(user.getCreatedAt()).getBytes());
-        res.setUuid(String.valueOf(UUID.nameUUIDFromBytes(result)));
-        return res;
-//        return getUserResponse(user);
+        return userMapper.INSTANCE.toDto(user);
     }
 
     /**
@@ -52,16 +44,19 @@ public class UserService {
             //일반 회원가입이 아닌 경우
             if (user.getPassword() == null) {
                 user.updatePw(request.getPassword(), passwordEncoder);
-                user.updateNick(verifyEmptyNick(request.getNick()));
+                user.updateNick(StringMaker.verifyEmptyNick(request.getNick()));
+                user.updateCode(StringMaker.idto62Code(user.getId()));
 
                 return userMapper.INSTANCE.toDto(user);
             } else throw new AuthException(ErrorCode.USER_EMAIL_USED);
         } else {
             user = userMapper.INSTANCE.toEntity(request);
             user.updatePw(request.getPassword(), passwordEncoder);
-            user.updateNick(verifyEmptyNick(request.getNick()));
+            user.updateNick(StringMaker.verifyEmptyNick(request.getNick()));
 
             User savedUser = userRepository.save(user);
+            savedUser.updateCode(StringMaker.idto62Code(user.getId()));
+
             return userMapper.INSTANCE.toDto(savedUser);
         }
     }
@@ -78,12 +73,15 @@ public class UserService {
             if (request.getKakao() != null) user.setKakao(request.getKakao());
             else if (request.getNaver() != null) user.setNaver(request.getNaver());
 
-            return userMapper.toDto(user);
+            return userMapper.INSTANCE.toDto(user);
         } else {
             user = userMapper.toEntity(request);
-            user.updateNick(verifyEmptyNick(request.getNick()));
-            userRepository.save(user);
-            return userMapper.toDto(userRepository.save(user));
+            user.updateNick(StringMaker.verifyEmptyNick(request.getNick()));
+
+            User savedUser = userRepository.save(user);
+            savedUser.updateCode(StringMaker.idto62Code(user.getId()));
+
+            return userMapper.INSTANCE.toDto(savedUser);
         }
     }
 
@@ -154,21 +152,7 @@ public class UserService {
         return ResultResponse.toDto("OK");
     }
 
-    public String verifyEmptyNick(String nick){
-        if (nick == null || nick.isEmpty()){
-            return getRandNick();
-        } else return nick;
-    }
-
-    public String getRandNick(){
-        String rNick;
-        do {
-            rNick = RandomString.printRandNick();
-        }
-        while (!Objects.equals(verifyRepeatedNick(rNick), "OK"));
-        return rNick;
-    }
-
+    // 아이디 중복검사로 바꿔야됨
     public String verifyRepeatedNick(String usernick) {
         Boolean nickcheck = userRepository.existsByNick(usernick);
         if (!nickcheck){

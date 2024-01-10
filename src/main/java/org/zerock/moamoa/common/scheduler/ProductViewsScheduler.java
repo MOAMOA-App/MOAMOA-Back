@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.repository.ProductRepository;
@@ -22,15 +21,18 @@ public class ProductViewsScheduler implements Job {
 
     @Override
     @Transactional
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
         Map<Long, Integer> viewCounts = ViewsRedisUtils.getAllViewCounts();
 
-        viewCounts.forEach((key, value) -> {
-            int count = value;
-            if (count != 0) {
-                Product product = productRepository.findByIdOrThrow(key);
-                product.updateViewCount(count);
-            }
-        });
+        if (viewCounts != null) {
+            viewCounts.forEach((key, value) -> {
+                int count = value;
+                if (count != 0) {
+                    Product product = productRepository.findByIdOrThrow(key);
+                    product.updateViewCount(count);
+                }
+            });
+        }
+
     }
 }

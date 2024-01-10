@@ -102,7 +102,7 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 
     // Guava
-    implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
+    implementation group: 'com.google.guava', name: 'guava', version: '32.0.0-android'
 }
 
 tasks.named('test') {

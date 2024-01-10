@@ -16,6 +16,7 @@ import org.zerock.moamoa.domain.DTO.product.ProductMapper;
 import org.zerock.moamoa.domain.entity.Party;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
+import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.repository.PartyRepository;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
@@ -56,15 +57,30 @@ public class PartyService {
     }
 
     @Transactional
-    public PartytoClientResponse saveParty(String username, PartyRequest request, Long pid) {
+    public PartyIdResponse saveParty(String username, PartyRequest request, Long pid) {
         User user = userRepository.findByEmailOrThrow(username);
         Product product = productRepository.findByIdOrThrow(pid);
 
-        if (partyRepository.findByBuyerAndProduct(user, product).isPresent()) {
-            return PartytoClientResponse.toDto(pid, "이미 참여했습니다.");
+        if (product.getActivate().equals(false)){
+            return PartyIdResponse.toDto(pid, "삭제된 게시글입니다.");
         }
-        if (product.getUser().equals(user))
-            return PartytoClientResponse.toDto(pid, "자신의 게시글은 참여할 수 없습니다.");
+        if (!product.getStatus().equals(ProductStatus.READY)){
+            return PartyIdResponse.toDto(pid,
+                    "참여할 수 없는 게시글입니다. (게시글 상태: " + product.getStatus().getMessage() + ")");
+        }
+        if (partyRepository.findByBuyerAndProduct(user, product).isPresent()) {
+            return PartyIdResponse.toDto(pid, "이미 참여했습니다.");
+        }
+        if (product.getUser().equals(user)) {
+            return PartyIdResponse.toDto(pid, "자신의 게시글은 참여할 수 없습니다.");
+        }
+
+        int ableToGet = product.getMaxCount() - product.getSellCount();
+        int currentCount = product.getMaxCount() - (product.getSellCount() + request.getCount());
+        if (currentCount < 0){
+            return PartyIdResponse.toDto(pid,
+                    "참여할 수 없는 게시글입니다. (참여 가능한 갯수: "+ ableToGet +"개)");
+        }
 
         request.setBuyer(user);
         request.setProduct(product);
@@ -73,7 +89,7 @@ public class PartyService {
 
         // Product 엔티티에 해당 party가 없을시 추가
         product.addSellCount(party.getCount());
-        return PartytoClientResponse.toDto(pid, "OK");
+        return PartyIdResponse.toDto(pid, "OK");
     }
 
     @Transactional

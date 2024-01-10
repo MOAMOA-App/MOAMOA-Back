@@ -110,10 +110,14 @@ public class ChatService {
     }
 
 
-    public void saveChat(ChatMessageRequest req) {
+    public void saveChat(/*String username, */ChatMessageRequest req) {
+//        User sender = userRepository.findByEmailOrThrow(username);
+        User sender = userRepository.findByIdOrThrow(req.getSender());
+//        req.setSender(sender.getId());
+
+        log.info("연결테스트");
         template.convertAndSend("/topic/chat/" + req.getId(), req);
 
-        User sender = userRepository.findByIdOrThrow(req.getSender());
         ChatRoom chatRoom = findByRoomId(req.getId());
         ChatMessage chatMessage = new ChatMessage(chatRoom, sender, req.getMessage(), false);
         chatMessageRepository.save(chatMessage);
