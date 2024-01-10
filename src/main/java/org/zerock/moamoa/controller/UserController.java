@@ -81,7 +81,7 @@ public class UserController {
      */
     @Async
     @PostMapping("/email/request")
-    public CompletableFuture<EmailtoClientResponse> sendVerifyEmail(@RequestBody EmailAddrRequest emailReq)
+    public CompletableFuture<EmailTokenResponse> sendVerifyEmail(@RequestBody EmailAddrRequest emailReq)
             throws MessagingException, UnsupportedEncodingException {
         emailCheck(emailReq);
         return emailService.sendEmail(emailReq);

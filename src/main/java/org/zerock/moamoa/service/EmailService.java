@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -14,12 +15,12 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.zerock.moamoa.common.user.EmailMessage;
-import org.zerock.moamoa.common.user.RandomString;
+import org.zerock.moamoa.common.user.StringMaker;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.email.EmailAddrRequest;
 import org.zerock.moamoa.domain.DTO.email.EmailAuthUpdateRequest;
 import org.zerock.moamoa.domain.DTO.email.EmailRequest;
-import org.zerock.moamoa.domain.DTO.email.EmailtoClientResponse;
+import org.zerock.moamoa.domain.DTO.email.EmailTokenResponse;
 import org.zerock.moamoa.domain.entity.Email;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.enums.EmailType;
@@ -28,6 +29,7 @@ import org.zerock.moamoa.repository.UserRepository;
 
 import java.io.UnsupportedEncodingException;
 import java.time.Instant;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -43,10 +45,10 @@ public class EmailService {
 
     @Async
     @Transactional
-    public CompletableFuture<EmailtoClientResponse> sendEmail(EmailAddrRequest emailAddrReq) throws UnsupportedEncodingException, MessagingException {
+    public CompletableFuture<EmailTokenResponse> sendEmail(EmailAddrRequest emailAddrReq){
         try {
             EmailMessage emailMessage = EmailMessage.builder().to(emailAddrReq.getEmail()).build();
-            String authCode = RandomString.createCode(6);
+            String authCode = createCode(6);
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
             mimeMessageHelper.setTo(emailMessage.getTo());               // 메일 수신자
@@ -57,12 +59,12 @@ public class EmailService {
             javaMailSender.send(mimeMessage);
             return saveEmail(new EmailRequest(emailMessage.getTo(), authCode, emailAddrReq.type));
 
-        } catch (MessagingException e){
+        } catch (MessagingException | UnsupportedEncodingException | MailException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public CompletableFuture<EmailtoClientResponse> saveEmail(EmailRequest emailReq) {
+    public CompletableFuture<EmailTokenResponse> saveEmail(EmailRequest emailReq) {
         Email email;
         if (!emailRepository.existsByEmail(emailReq.getEmail())) {
             email = Email.toEntity(emailReq);
@@ -72,7 +74,7 @@ public class EmailService {
             email.updateCode(emailReq);
         }
         return CompletableFuture.completedFuture(
-                EmailtoClientResponse.toDto(tokenEncoder(email.getToken()), "OK"));
+                EmailTokenResponse.toDto(tokenEncoder(email.getToken()), "OK"));
     }
 
     @Transactional
@@ -88,6 +90,15 @@ public class EmailService {
         }
         temp.updateAuth(req);
         return ResultResponse.toDto("OK");
+    }
+
+    public static String createCode(int num) {
+        StringBuilder key = new StringBuilder();
+
+        for (int i = 0; i < num; i++) {
+            key.append(new Random().nextInt(10));
+        }
+        return key.toString();
     }
 
     private String tokenEncoder(String token){
