@@ -40,6 +40,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 //        request url -> ws://localhost:8080/chatting
 //        stomp subscription url -> /topic/chat/{채팅방id}
 //        destination queue url -> /app/chat/send
+//
 //        const sse = new EventSource("http://localhost:8080/chat/rooms/send");
 
     }
