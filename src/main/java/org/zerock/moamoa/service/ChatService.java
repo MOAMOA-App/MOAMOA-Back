@@ -43,8 +43,8 @@ public class ChatService {
     private final SimpMessagingTemplate template;   //특정 브로커로 메세지 전달
 
     public Page<ChatRoomResponse> getPageByProjectId(Long pid, String username, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
         Product product = productRepository.findByIdOrThrow(pid);
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
 
         User user = userRepository.findByEmailOrThrow(username);
         if (product.getUser() != user){
@@ -63,9 +63,9 @@ public class ChatService {
     public Page<ChatRoomResponse> getPageByUserId(String username, int pageNo, int pageSize) {
         User user = userRepository.findByEmailOrThrow(username);
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        // 채팅방 seller랑 user 둘다로 찾음!
-        Page<ChatRoom> rooms = chatRoomRepository.findAllBySellerIdAndUserId(user, user, pageable);
 
+        // 채팅방 seller랑 user 둘다로 찾음!
+        Page<ChatRoom> rooms = chatRoomRepository.findAllBySellerIdOrUserId(user, user, pageable);
         return rooms.map(room -> {
             ChatRoomResponse response = ChatRoomResponse.fromEntity(room);
             response.setMessages(findAllRoomMsg(room));
@@ -93,12 +93,16 @@ public class ChatService {
     }
 
     @Transactional
-    public ResultResponse saveChatRoom(ChatRoomRequest request) {
+    public ResultResponse saveChatRoom(ChatRoomRequest request, String username) {
+        User buyer = userRepository.findByEmailOrThrow(username);
+        if (!buyer.equals(userRepository.findByIdOrThrow(request.getUserId()))){
+            ResultResponse.toDto("권한이 없습니다.");
+        }
+
         if (checkChatRoomExists(request)) ResultResponse.toDto("ALREADY_EXIST");
 
         Product product = productRepository.findByIdOrThrow(request.getProductId());
         User seller = product.getUser();
-        User buyer = userRepository.findByIdOrThrow(request.getUserId());
 
         chatRoomRepository.save(new ChatRoom(product, seller, buyer));
         return ResultResponse.toDto("OK");
@@ -110,12 +114,8 @@ public class ChatService {
     }
 
 
-    public void saveChat(/*String username, */ChatMessageRequest req) {
-//        User sender = userRepository.findByEmailOrThrow(username);
+    public void saveChat(ChatMessageRequest req) {
         User sender = userRepository.findByIdOrThrow(req.getSender());
-//        req.setSender(sender.getId());
-
-        log.info("연결테스트");
         template.convertAndSend("/topic/chat/" + req.getId(), req);
 
         ChatRoom chatRoom = findByRoomId(req.getId());

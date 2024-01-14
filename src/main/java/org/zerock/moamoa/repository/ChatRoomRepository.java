@@ -21,7 +21,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     Page<ChatRoom> findAllByProductId(Product product, Pageable pageable);
 
-    Page<ChatRoom> findAllBySellerIdAndUserId(User seller, User user, Pageable pageable);
+    Page<ChatRoom> findAllBySellerIdOrUserId(User sellerId, User userId, Pageable pageable);
 
     boolean existsByProductIdAndUserId(Optional<Product> byId, Optional<User> byId2);
 }
