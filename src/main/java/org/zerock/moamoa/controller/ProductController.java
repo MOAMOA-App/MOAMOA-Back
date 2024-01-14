@@ -37,8 +37,8 @@ public class ProductController {
      * @param status   거래 상태 -> 거래 준비 | 거래 진행 | 거래 완효
      * @param search   검색 기준 -> sub 제목 |  descript 내용 | subdesc 제목 + 내용
      * @param order    정렬 기준
-     * @param pageNo   페이지 번호
-     * @param pageSize 페이지 크기
+     * @param no       페이지 번호
+     * @param size     페이지 크기
      */
     @GetMapping("")
     public Page<ProductListResponse> searchProducts(
@@ -48,12 +48,9 @@ public class ProductController {
             @RequestParam(required = false) List<Integer> status,
             @RequestParam(defaultValue = "subdesc") String search,
             @RequestParam(defaultValue = "recent") String order,
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(defaultValue = "20") int pageSize
+            @RequestParam(defaultValue = "0") int no,
+            @RequestParam(defaultValue = "20") int size
     ) {
-        if (status != null) {
-
-        }
         List<ProductStatus> productStatuses = (status == null) ? new ArrayList<>()
                 : status.stream().map(ProductStatus::fromCode).filter(Objects::nonNull).collect(Collectors.toSet()).stream().toList();
         List<Category> categories = (category == null) ? new ArrayList<>()
@@ -66,7 +63,7 @@ public class ProductController {
         if (keywords != null && !keywords[0].equals("")) SearchRedisUtils.addSearchKeyword(keywords);
         //
 
-        return productService.search(keywords, categories, productStatuses, search, order, pageNo, pageSize, username);
+        return productService.search(keywords, categories, productStatuses, search, order, no, size, username);
     }
 
     /**
