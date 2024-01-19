@@ -7,7 +7,6 @@ import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.party.PartyRequest;
 import org.zerock.moamoa.domain.DTO.party.PartyResponse;
 import org.zerock.moamoa.domain.DTO.party.PartyUpdateRequest;
-import org.zerock.moamoa.domain.DTO.party.PartyIdResponse;
 import org.zerock.moamoa.service.PartyService;
 
 @RequiredArgsConstructor
@@ -22,7 +21,7 @@ public class PartyController {
     }
 
     @PostMapping("/{pid}/party")
-    public PartyIdResponse addPartyMember(@PathVariable Long pid,
+    public ResultResponse addPartyMember(@PathVariable Long pid,
                                           Authentication auth,
                                           @RequestBody PartyRequest partyRequest) {
         return partyService.saveParty(auth.getPrincipal().toString(), partyRequest, pid);
