@@ -15,22 +15,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class NoticeResponse {
     private Long id;
-    private UserNickResponse senderID;
-    private Long receiverID;
+    private UserNickResponse sender;
+    private String receiver;
     private Boolean readOrNot;
     private NoticeType type;
-    private ProductTitleResponse referenceID;
+    private ProductTitleResponse reference;
     private LocalDateTime createdAt;
 
     @Builder
-    public NoticeResponse(Long id, UserNickResponse senderID, Long receiverID, Boolean readOrNot,
-                          NoticeType type, ProductTitleResponse referenceID, Instant createdAt) {
+    public NoticeResponse(Long id, UserNickResponse sender, String receiver, Boolean readOrNot,
+                          NoticeType type, ProductTitleResponse reference, Instant createdAt) {
         this.id = id;
-        this.senderID = senderID;
-        this.receiverID = receiverID;
+        this.sender = sender;
+        this.receiver = receiver;
         this.readOrNot = readOrNot;
         this.type = type;
-        this.referenceID = referenceID;
+        this.reference = reference;
         this.createdAt = TimeUtils.toLocalTime(createdAt);
     }
 }

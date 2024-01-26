@@ -5,11 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
-import org.zerock.moamoa.domain.DTO.chat.ChatMessageRequest;
-import org.zerock.moamoa.domain.DTO.chat.ChatMessageResponse;
-import org.zerock.moamoa.domain.DTO.chat.ChatRoomResponse;
-
-import java.time.Instant;
 
 @Entity
 @Getter

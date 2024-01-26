@@ -8,8 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import org.zerock.moamoa.common.exception.EntityNotFoundException;
-import org.zerock.moamoa.common.exception.ErrorCode;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.notice.*;
 import org.zerock.moamoa.domain.DTO.product.ProductTitleResponse;
@@ -17,7 +15,7 @@ import org.zerock.moamoa.domain.DTO.user.UserNickResponse;
 import org.zerock.moamoa.domain.entity.Notice;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
-import org.zerock.moamoa.repository.EmitterRepository;
+import org.zerock.moamoa.common.notice.EmitterRepository;
 import org.zerock.moamoa.repository.NoticeRepository;
 import org.zerock.moamoa.repository.UserRepository;
 
@@ -41,21 +39,21 @@ public class NoticeService {
     @Transactional
     public void saveAndSend(NoticeSaveRequest request) {
         Notice savedNotice = noticeRepository.save(noticeMapper.toEntity(request));
-        User senderID = savedNotice.getSenderID();
-        Product referenceID = savedNotice.getReferenceID();
+        User sender = savedNotice.getSender();
+        Product reference = savedNotice.getReference();
 
         // receiver에게 알림 발송
-        Long receiverId = request.getReceiverID().getId();
-        String eventId = request.getReceiverID().getId() + "_" + System.currentTimeMillis();
+        String receiverCode = request.getReceiver().getCode();
+        String eventId = request.getReceiver().getId() + "_" + System.currentTimeMillis();
 
-        Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByMemberId(receiverId);
+        Map<String, SseEmitter> sseEmitters = emitterRepository.findAllEmitterStartWithByMemberId(receiverCode);
         for (Map.Entry<String, SseEmitter> entry : sseEmitters.entrySet()) {
             String key = entry.getKey();
             SseEmitter emitter = entry.getValue();
             emitterRepository.saveEventCache(key, request);
             NoticeResponse res = new NoticeResponse(savedNotice.getId(),
-                    userToDto(senderID), receiverId, savedNotice.getReadOrNot(), savedNotice.getType(),
-                    productToDto(referenceID), savedNotice.getCreatedAt());
+                    userToDto(sender), receiverCode, savedNotice.getReadOrNot(), savedNotice.getType(),
+                    productToDto(reference), savedNotice.getCreatedAt());
             sendToClient(emitter, eventId, key, res);
 
         }
@@ -76,7 +74,7 @@ public class NoticeService {
         User receiver = userRepository.findByEmailOrThrow(receiverName);
         Pageable itemPage = PageRequest.of(pageNo, pageSize);
 
-        Page<Notice> noticePage = noticeRepository.findByReceiverID(receiver, itemPage);
+        Page<Notice> noticePage = noticeRepository.findByReceiver(receiver, itemPage);
 
         return noticePage.map(noticeMapper::toDto);
     }
@@ -84,7 +82,7 @@ public class NoticeService {
     public ResultResponse removeNotice(String username, Long id) {
         User user = userRepository.findByEmailOrThrow(username);
         Notice notice = noticeRepository.findByIdOrThrow(id);
-        if (!notice.getReceiverID().getId().equals(user.getId())) {
+        if (!notice.getReceiver().getId().equals(user.getId())) {
             return ResultResponse.toDto("권한이 없습니다.");
         }
         noticeRepository.delete(notice);
@@ -96,7 +94,7 @@ public class NoticeService {
     public ResultResponse updateRead(String username, Long nid) {
         User user = userRepository.findByEmailOrThrow(username);
         Notice temp = noticeRepository.findByIdOrThrow(nid);
-        if (temp.getReceiverID().getId().equals(user.getId())){
+        if (temp.getReceiver().getId().equals(user.getId())){
             temp.updateRead(true);
             return ResultResponse.toDto("OK");
         }
@@ -106,7 +104,7 @@ public class NoticeService {
     @Transactional
     public ResultResponse updateReadAll(String username) {
         User user = userRepository.findByEmailOrThrow(username);
-        List<Notice> notices = noticeRepository.findByReceiverID(user);
+        List<Notice> notices = noticeRepository.findByReceiver(user);
         if (notices != null)
             notices.forEach(notice -> notice.updateRead(true));
         return ResultResponse.toDto("OK");

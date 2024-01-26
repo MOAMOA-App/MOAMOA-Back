@@ -1,4 +1,4 @@
-package org.zerock.moamoa.repository;
+package org.zerock.moamoa.common.notice;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -27,18 +27,18 @@ public class EmitterRepositoryImpl implements EmitterRepository{
     }
 
     @Override
-    public Map<String, SseEmitter> findAllEmitterStartWithByMemberId(Long uid) {
+    public Map<String, SseEmitter> findAllEmitterStartWithByMemberId(String userCode) {
         // 어떤 회원이 접속한 모든 Emitter 찾음
         return emitters.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(String.valueOf(uid)))
+                .filter(entry -> entry.getKey().startsWith(userCode))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override
-    public Map<String, Object> findAllEventCacheStartWithByMemberId(Long uid) {
+    public Map<String, Object> findAllEventCacheStartWithByMemberId(String userCode) {
         // 어떤 회원에게 수신된 이벤트를 캐시에서 모두 찾음
         return eventCache.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(String.valueOf(uid)))
+                .filter(entry -> entry.getKey().startsWith(userCode))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

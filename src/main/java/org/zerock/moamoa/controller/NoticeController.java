@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.zerock.moamoa.domain.DTO.ResultResponse;
 import org.zerock.moamoa.domain.DTO.notice.NoticeResponse;
-import org.zerock.moamoa.service.EmitterService;
+import org.zerock.moamoa.common.notice.EmitterService;
 import org.zerock.moamoa.service.NoticeService;
 
 @Slf4j

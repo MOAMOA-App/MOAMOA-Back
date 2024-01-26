@@ -7,7 +7,7 @@ import org.zerock.moamoa.domain.entity.ChatMessage;
 public class ChatMessageResponse {
     private Long id;
     private Long chatRoomId;
-    private Long sender;
+    private String senderCode;
     private String message;
     private Boolean readOrNot;
 
@@ -15,7 +15,7 @@ public class ChatMessageResponse {
         ChatMessageResponse res = new ChatMessageResponse();
         res.chatRoomId = ChatRoomResponse.fromEntity(chatMessage.getChatRoom()).getId();
         res.message = chatMessage.getMessage();
-        res.sender = chatMessage.getSender().getId();
+        res.senderCode = chatMessage.getSender().getCode();
         res.readOrNot = chatMessage.getReadOrNot();
         return res;
     }

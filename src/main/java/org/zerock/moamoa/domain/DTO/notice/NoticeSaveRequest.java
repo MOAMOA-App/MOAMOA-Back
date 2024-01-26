@@ -6,21 +6,19 @@ import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
 import org.zerock.moamoa.domain.enums.NoticeType;
 
-import java.time.Instant;
-
 @Data
 public class NoticeSaveRequest {
-    private User senderID;
-    private User receiverID;
+    private User sender;
+    private User receiver;
     private Boolean readOrNot = false;
     private NoticeType type;
-    private Product referenceID;
+    private Product reference;
 
     @Builder
-    public NoticeSaveRequest(User senderID, User receiverID, NoticeType type, Product referenceID) {
-        this.senderID = senderID;
-        this.receiverID = receiverID;
+    public NoticeSaveRequest(User sender, User receiver, NoticeType type, Product reference) {
+        this.sender = sender;
+        this.receiver = receiver;
         this.type = type;
-        this.referenceID = referenceID;
+        this.reference = reference;
     }
 }

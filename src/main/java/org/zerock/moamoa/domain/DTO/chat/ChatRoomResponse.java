@@ -11,9 +11,9 @@ import java.util.List;
 @Data
 public class ChatRoomResponse {
     private Long id;
-    private ProductTitleResponse productId;
-    private UserResponse sellerId;
-    private UserResponse userId;
+    private ProductTitleResponse product;
+    private UserResponse seller;
+    private UserResponse user;
     private List<ChatMessageResponse> messages;
 
     private String roomName;
@@ -22,10 +22,10 @@ public class ChatRoomResponse {
     public static ChatRoomResponse fromEntity(ChatRoom chatRoom) {
         ChatRoomResponse response = new ChatRoomResponse();
         response.id = chatRoom.getId();
-        response.productId = ProductMapper.INSTANCE.toTitleDto(chatRoom.getProductId());
-        response.sellerId = UserResponse.builder(chatRoom.getSellerId());
-        response.userId = UserResponse.builder(chatRoom.getUserId());
-        response.roomName = chatRoom.getProductId().getTitle();
+        response.product = ProductMapper.INSTANCE.toTitleDto(chatRoom.getProduct());
+        response.seller = UserResponse.builder(chatRoom.getSeller());
+        response.user = UserResponse.builder(chatRoom.getUser());
+        response.roomName = chatRoom.getProduct().getTitle();
         return response;
     }
 

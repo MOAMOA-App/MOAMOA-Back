@@ -18,11 +18,11 @@ public class Notice extends BaseEntity {
 
     @ManyToOne  // 외래키 어노테이션
     @JoinColumn(name = "sender_id", nullable = false)
-    private User senderID;    // 보내는 회원
+    private User sender;    // 보내는 회원
 
     @ManyToOne
     @JoinColumn(name = "receiver_id", nullable = false)
-    private User receiverID;    // 받는 회원. 0622 Long->User로 타입 변경해줌
+    private User receiver;    // 받는 회원. 0622 Long->User로 타입 변경해줌
 
     @Column(name = "read_or_not", nullable = false) // id가 아닌 다른 칼럼에는 @Column 붙여 표현할 수 있음
     private Boolean readOrNot = false;
@@ -32,14 +32,14 @@ public class Notice extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "reference_id", nullable = false)
-    private Product referenceID;    // 게시글
+    private Product reference;    // 게시글
 
     @Builder
-    public Notice(User senderID, User receiverID, NoticeType type, Product referenceID) {
-        this.senderID = senderID;
-        this.receiverID = receiverID;
+    public Notice(User sender, User receiver, NoticeType type, Product reference) {
+        this.sender = sender;
+        this.receiver = receiver;
         this.type = type;
-        this.referenceID = referenceID;
+        this.reference = reference;
     }
 
     public void updateRead(Boolean readOrNot) {

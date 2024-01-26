@@ -19,9 +19,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorCode.CHATROOM_NOT_FOUND));
     }
 
-    Page<ChatRoom> findAllByProductId(Product product, Pageable pageable);
+    Page<ChatRoom> findAllByProduct(Product product, Pageable pageable);
 
-    Page<ChatRoom> findAllBySellerIdOrUserId(User sellerId, User userId, Pageable pageable);
+    Page<ChatRoom> findAllBySellerOrUser(User seller, User user, Pageable pageable);
 
-    boolean existsByProductIdAndUserId(Optional<Product> byId, Optional<User> byId2);
+    boolean existsByProductAndUser(Optional<Product> byId, Optional<User> byId2);
 }
