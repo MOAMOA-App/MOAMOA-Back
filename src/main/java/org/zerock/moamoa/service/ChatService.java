@@ -51,7 +51,7 @@ public class ChatService {
             throw new AuthException(ErrorCode.AUTH_NOT_FOUND);
         }
 
-        Page<ChatRoom> rooms = chatRoomRepository.findAllByProductId(product, pageable);
+        Page<ChatRoom> rooms = chatRoomRepository.findAllByProduct(product, pageable);
         return rooms.map(room -> {
             ChatRoomResponse response = ChatRoomResponse.fromEntity(room);
             response.setMessages(findAllRoomMsg(room));
@@ -65,7 +65,7 @@ public class ChatService {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
 
         // 채팅방 seller랑 user 둘다로 찾음!
-        Page<ChatRoom> rooms = chatRoomRepository.findAllBySellerIdOrUserId(user, user, pageable);
+        Page<ChatRoom> rooms = chatRoomRepository.findAllBySellerOrUser(user, user, pageable);
         return rooms.map(room -> {
             ChatRoomResponse response = ChatRoomResponse.fromEntity(room);
             response.setMessages(findAllRoomMsg(room));
@@ -95,7 +95,7 @@ public class ChatService {
     @Transactional
     public ResultResponse saveChatRoom(ChatRoomRequest request, String username) {
         User buyer = userRepository.findByEmailOrThrow(username);
-        if (!buyer.equals(userRepository.findByIdOrThrow(request.getUserId()))){
+        if (!buyer.equals(userRepository.findByCodeOrThrow(request.getUserCode()))){
             ResultResponse.toDto("권한이 없습니다.");
         }
 
@@ -108,30 +108,30 @@ public class ChatService {
         return ResultResponse.toDto("OK");
     }
     boolean checkChatRoomExists(ChatRoomRequest request){
-        return (chatRoomRepository.existsByProductIdAndUserId(
+        return (chatRoomRepository.existsByProductAndUser(
                 productRepository.findById(request.getProductId()),
-                userRepository.findById(request.getUserId())));
+                userRepository.findByCode(request.getUserCode())));
     }
 
 
     public void saveChat(ChatMessageRequest req) {
-        User sender = userRepository.findByIdOrThrow(req.getSender());
+        User sender = userRepository.findByCodeOrThrow(req.getSenderCode());
         template.convertAndSend("/topic/chat/" + req.getId(), req);
 
         ChatRoom chatRoom = findByRoomId(req.getId());
         ChatMessage chatMessage = new ChatMessage(chatRoom, sender, req.getMessage(), false);
         chatMessageRepository.save(chatMessage);
 
-        User receiver = sender.getId().equals(chatRoom.getSellerId().getId()) ?
-                chatRoom.getUserId() : chatRoom.getSellerId();
+        User receiver = sender.getId().equals(chatRoom.getSeller().getId()) ?
+                chatRoom.getUser() : chatRoom.getSeller();
         eventPublisher.publishEvent(
-                new NoticeSaveRequest(sender, receiver, NoticeType.NEW_CHAT, chatRoom.getProductId()));
+                new NoticeSaveRequest(sender, receiver, NoticeType.NEW_CHAT, chatRoom.getProduct()));
     }
 
     public ChatRoomResponse findRoomById(String username, Long id) {
         User user = userRepository.findByEmailOrThrow(username);
         ChatRoom room = findByRoomId(id);
-        if (!room.getSellerId().equals(user) && !room.getUserId().equals(user)) {
+        if (!room.getSeller().equals(user) && !room.getUser().equals(user)) {
             return ChatRoomResponse.toClient("권한이 없습니다.");
         }
         ChatRoomResponse res = ChatRoomResponse.fromEntity(room);

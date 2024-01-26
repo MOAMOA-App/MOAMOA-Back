@@ -6,6 +6,6 @@ import lombok.Data;
 public class ChatRoomRequest {
     private Long productId;
 
-    private Long userId;
+    private String userCode;
 
 }

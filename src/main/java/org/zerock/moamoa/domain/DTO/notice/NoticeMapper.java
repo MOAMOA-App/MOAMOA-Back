@@ -11,6 +11,6 @@ public interface NoticeMapper {
 
     Notice toEntity(NoticeSaveRequest noticeSaveRequest);
 
-    @Mapping(source = "receiverID.id", target = "receiverID")
+    @Mapping(source = "receiver.id", target = "receiver")
     NoticeResponse toDto(Notice notice);
 }

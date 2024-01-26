@@ -70,8 +70,6 @@ public class PartyService {
         ResultResponse res = checkParty(product, "참여", request.getCount());
         if (res != null) return res;
 
-//        checkParty(product, request.getCount(), "참여");
-
         request.setBuyer(user);
         request.setProduct(product);
         Party party = partyMapper.INSTANCE.toEntity(request);
@@ -103,7 +101,6 @@ public class PartyService {
         Product product = productRepository.findByIdOrThrow(pid);
         Party temp = partyRepository.findByBuyerAndProductOrThrow(user, product);
 
-//        checkParty(product, req.getCount(), "참여 상태를 변경");
         ResultResponse res = checkParty(product, "참여 상태를 변경", req.getCount());
         if (res != null) return res;
 
@@ -132,13 +129,13 @@ public class PartyService {
         return ResultResponse.toDto("OK");
     }
 
-    private static ResultResponse checkParty(Product product, String x, Integer req) {
+    private static ResultResponse checkParty(Product product, String msg, Integer req) {
         if (product.getActivate().equals(false)) {
             return ResultResponse.toDto("삭제된 게시글입니다.");
         }
         if (!product.getStatus().equals(ProductStatus.READY)) {
             return ResultResponse.toDto(
-                    x + "할 수 없는 게시글입니다. (게시글 상태: " + product.getStatus().getMessage() + ")");
+                    msg + "할 수 없는 게시글입니다. (게시글 상태: " + product.getStatus().getMessage() + ")");
         }
         if (req == 0) {
             return ResultResponse.toDto("최소 참여 개수는 1개입니다.");
@@ -147,7 +144,7 @@ public class PartyService {
         int currentCount = product.getMaxCount() - (product.getSellCount() + req);
         if (currentCount < 0) {
             return ResultResponse.toDto(
-                    x + "할 수 없는 게시글입니다. (참여 가능한 갯수: " + ableToGet + "개)");
+                    msg + "할 수 없는 게시글입니다. (참여 가능한 갯수: " + ableToGet + "개)");
         }
         return null;
     }

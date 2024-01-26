@@ -16,9 +16,13 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "PD_001", "상품을 찾을 수 없습니다."),
     PRODUCT_AUTH_FAIL(HttpStatus.BAD_REQUEST, "PD_002", "상품 인증에 실패했습니다."),
 
-    ANNOUNCE_NOT_FOUND(HttpStatus.NOT_FOUND, "AN_001", "공지을 찾을 수 없습니다."),
+    INVALID_VALUE_COUNT(HttpStatus.BAD_REQUEST, "PD_003", "상품 개수는 1개 이상이어야 합니다."),
+    INVALID_VALUE_PRICE(HttpStatus.BAD_REQUEST, "PD_004", "상품 가격은 0원 이상이어야 합니다."),
+    INVALID_VALUE_DATE(HttpStatus.BAD_REQUEST, "PD_005", "지난 날짜는 지정할 수 없습니다."),
 
-    PARTY_NOT_FOUND(HttpStatus.NOT_FOUND, "PT_001", "파티을 찾을 수 없습니다."),
+    ANNOUNCE_NOT_FOUND(HttpStatus.NOT_FOUND, "AN_001", "공지를 찾을 수 없습니다."),
+
+    PARTY_NOT_FOUND(HttpStatus.NOT_FOUND, "PT_001", "파티를 찾을 수 없습니다."),
 
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "NO_001", "알림을 찾을 수 없습니다."),
 
@@ -40,6 +44,8 @@ public enum ErrorCode {
 
 
     SEARCH_KEYWORD_NOT_FOUND(HttpStatus.BAD_REQUEST, "SK_001", "검색어가 없습니다.");
+
+
 
     //------------------------------------------------------------------------//
     private final HttpStatus httpStatus;

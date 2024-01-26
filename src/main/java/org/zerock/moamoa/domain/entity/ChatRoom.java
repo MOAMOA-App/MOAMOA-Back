@@ -1,7 +1,6 @@
 package org.zerock.moamoa.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
@@ -20,28 +19,28 @@ public class ChatRoom extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private Product productId;
+    private Product product;
 
     @ManyToOne
     @JoinColumn(name = "seller_id")
-    private User sellerId;
+    private User seller;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User userId;
+    private User user;
 
     @OneToMany(mappedBy = "chatRoom", fetch = FetchType.LAZY)
     private List<ChatMessage> messages;
 
-    public ChatRoom(Product productId, User sellerId, User userId) {
-        this.productId = productId;
-        this.sellerId = sellerId;
-        this.userId = userId;
+    public ChatRoom(Product product, User seller, User user) {
+        this.product = product;
+        this.seller = seller;
+        this.user = user;
     }
 
     public void build(Product product, User seller, User user) {
-        this.productId = product;
-        this.sellerId = seller;
-        this.userId = user;
+        this.product = product;
+        this.seller = seller;
+        this.user = user;
     }
 }

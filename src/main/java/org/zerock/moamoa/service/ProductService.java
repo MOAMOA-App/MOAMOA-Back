@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zerock.moamoa.common.exception.AuthException;
 import org.zerock.moamoa.common.exception.ErrorCode;
+import org.zerock.moamoa.common.exception.InvalidValueException;
 import org.zerock.moamoa.domain.DTO.notice.NoticeSaveRequest;
 import org.zerock.moamoa.domain.DTO.product.*;
 import org.zerock.moamoa.domain.entity.Product;
@@ -22,7 +23,9 @@ import org.zerock.moamoa.domain.enums.NoticeType;
 import org.zerock.moamoa.domain.enums.ProductStatus;
 import org.zerock.moamoa.repository.ProductRepository;
 import org.zerock.moamoa.repository.UserRepository;
+import org.zerock.moamoa.utils.TimeUtils;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,6 +66,10 @@ public class ProductService {
     @Transactional
     public ProductResponse saveProduct(ProductSaveRequest request, String username) {
         User user = userRepository.findByEmailOrThrow(username);
+
+        checkProduct(request.getMaxCount(), request.getSellPrice(),
+                TimeUtils.toInstant(request.getFinishedAt()));
+
         request.setUser(user);
         Product product = productRepository.save(productMapper.toEntity(request));
 
@@ -84,6 +91,7 @@ public class ProductService {
         Product product = productRepository.findByIdOrThrow(request.getProductId());
         User user = userRepository.findByEmailOrThrow(username);
         checkAuth(product, user);
+        checkProduct(request.getMaxCount(), request.getSellPrice(), request.getFinishedAt());
 
         product.updateInfo(request);
 
@@ -218,5 +226,15 @@ public class ProductService {
 
     public void checkAuth(Product product, User user) {
         if (!product.getUser().equals(user)) throw new AuthException(ErrorCode.PRODUCT_AUTH_FAIL);
+    }
+
+    private static void checkProduct(int maxCount, int sellPrice, Instant finishedAt) {
+        if (maxCount < 1){
+            throw new InvalidValueException(ErrorCode.INVALID_VALUE_COUNT);
+        } else if (sellPrice < 0){
+            throw new InvalidValueException(ErrorCode.INVALID_VALUE_PRICE);
+        } else if (finishedAt.isBefore(Instant.now())){
+            throw new InvalidValueException(ErrorCode.INVALID_VALUE_DATE);
+        }
     }
 }
