@@ -225,15 +225,15 @@ public class ProductService {
     }
 
     public void checkAuth(Product product, User user) {
-        if (!product.getUser().equals(user)) throw new AuthException(ErrorCode.PRODUCT_AUTH_FAIL);
+        if (!product.getUser().getId().equals(user.getId())) throw new AuthException(ErrorCode.PRODUCT_AUTH_FAIL);
     }
 
     private static void checkProduct(int maxCount, int sellPrice, Instant finishedAt) {
-        if (maxCount < 1){
+        if (maxCount < 1) {
             throw new InvalidValueException(ErrorCode.INVALID_VALUE_COUNT);
-        } else if (sellPrice < 0){
+        } else if (sellPrice < 0) {
             throw new InvalidValueException(ErrorCode.INVALID_VALUE_PRICE);
-        } else if (finishedAt.isBefore(Instant.now())){
+        } else if (finishedAt.isBefore(Instant.now())) {
             throw new InvalidValueException(ErrorCode.INVALID_VALUE_DATE);
         }
     }

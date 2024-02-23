@@ -19,9 +19,9 @@ import java.time.Instant;
 public class BaseEntity {
     @CreatedDate
     @Column(updatable = false)
-    private Instant createdAt;
+    public Instant createdAt;
 
     @LastModifiedDate
     @Column(updatable = true)
-    private Instant updatedAt;
+    public Instant updatedAt;
 }

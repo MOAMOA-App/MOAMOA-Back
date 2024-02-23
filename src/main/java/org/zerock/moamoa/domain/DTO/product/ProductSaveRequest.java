@@ -25,7 +25,7 @@ public class ProductSaveRequest {
     @Builder
     public ProductSaveRequest(String title, String description, String category, String sellingArea,
                               String detailArea, Integer maxCount, String choiceSend,
-                              String finishedAt, ProductStatus productStatus) {
+                              String finishedAt, ProductStatus productStatus, int sellPrice) {
         this.title = title;
         this.description = description;
         this.category = category;
@@ -34,6 +34,7 @@ public class ProductSaveRequest {
         this.maxCount = maxCount;
         this.choiceSend = choiceSend;
         this.finishedAt = finishedAt;
+        this.sellPrice = sellPrice;
         this.status = productStatus != null ? productStatus : ProductStatus.READY;
     }
 }
