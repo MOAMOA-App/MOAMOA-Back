@@ -72,7 +72,7 @@ public class Product extends BaseEntity {
     private Instant deletedAt;
 
     @Setter
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProductImages> productImages;
 
     public void delete() {
@@ -96,6 +96,7 @@ public class Product extends BaseEntity {
         this.maxCount = product.getMaxCount();
         this.choiceSend = product.getChoiceSend();
     }
+
 
     @Builder
     public Product(User user, String category, String sellingArea, String detailArea, String title,
