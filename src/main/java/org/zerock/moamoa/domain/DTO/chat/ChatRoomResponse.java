@@ -23,8 +23,8 @@ public class ChatRoomResponse {
         ChatRoomResponse response = new ChatRoomResponse();
         response.id = chatRoom.getId();
         response.product = ProductMapper.INSTANCE.toTitleDto(chatRoom.getProduct());
-        response.seller = UserResponse.builder(chatRoom.getSeller());
-        response.user = UserResponse.builder(chatRoom.getUser());
+        response.seller = UserResponse.toDTO(chatRoom.getSeller());
+        response.user = UserResponse.toDTO(chatRoom.getUser());
         response.roomName = chatRoom.getProduct().getTitle();
         return response;
     }

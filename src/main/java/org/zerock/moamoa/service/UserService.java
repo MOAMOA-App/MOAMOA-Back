@@ -75,7 +75,7 @@ public class UserService {
 
             return userMapper.INSTANCE.toDto(user);
         } else {
-            user = userMapper.toEntity(request);
+            user = userMapper.INSTANCE.toEntity(request);
             user.updateNick(StringMaker.verifyEmptyNick(request.getNick()));
 
             User savedUser = userRepository.save(user);
@@ -127,13 +127,14 @@ public class UserService {
     public ResultResponse updatePwLogin(UserPwChangeRequest req, String username) {
         if (!Objects.equals(req.getEmail(), username))
             throw new AuthException(ErrorCode.USER_ACCESS_REJECTED);
+        if (Objects.equals(req.getOldPassword(), req.getNewPassword())){
+            return ResultResponse.toDto("SAME_PW");
+        }
 
         User user = userRepository.findByEmailOrThrow(username);
         if (!passwordEncoder.matches(req.getOldPassword(), user.getPassword()))
             return ResultResponse.toDto("INCORRECT_PW");
-        if (Objects.equals(req.getOldPassword(), req.getNewPassword())){
-            return ResultResponse.toDto("SAME_PW");
-        }
+
         user.updatePw(req.getNewPassword(), passwordEncoder);
 
         return ResultResponse.toDto("OK");

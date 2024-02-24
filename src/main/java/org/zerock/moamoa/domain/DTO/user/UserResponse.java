@@ -3,7 +3,6 @@ package org.zerock.moamoa.domain.DTO.user;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.zerock.moamoa.common.user.StringMaker;
 import org.zerock.moamoa.domain.entity.User;
 
 @Data
@@ -16,6 +15,7 @@ public class UserResponse {
     private String address;
     private String detailAddress;
 
+    @Builder
     public UserResponse(String code, String nick, String profImg, String email, String address,
                         String detailAddress) {
         this.code = code;
@@ -25,8 +25,8 @@ public class UserResponse {
         this.address = address;
         this.detailAddress = detailAddress;
     }
-    @Builder
-    public static UserResponse builder(User user) {
+
+    public static UserResponse toDTO(User user) {
         UserResponse response = new UserResponse();
         response.code = user.getCode();
         response.nick = user.getNick();

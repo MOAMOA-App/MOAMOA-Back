@@ -16,12 +16,12 @@ class PartyServiceTest {
 
 	@Test
 	void findById() {
-		System.out.println(partyService.findById(Long.valueOf(2)));
+//		System.out.println(partyService.findById(Long.valueOf(2)));
 	}
 
 	@Test
 	void findAll() {
-		System.out.println(partyService.findAll());
+//		System.out.println(partyService.findAll());
 	}
 	//     @Test
 	//     void saveParty() {

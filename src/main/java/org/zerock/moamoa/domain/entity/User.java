@@ -56,12 +56,24 @@ public class User extends BaseEntity {
     private Instant deletedAt;
 
     @Builder
+    public User(long id, String email, String password, String nick, String code) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.nick = nick;
+        this.code = code;
+        this.activate = true;
+    }
+
+    @Builder
     public User(String email, String password, String nick, String code) {
         this.email = email;
         this.password = password;
         this.nick = nick;
         this.code = code;
+        this.activate = true;
     }
+
 
     public void delete() {
         this.activate = false;
