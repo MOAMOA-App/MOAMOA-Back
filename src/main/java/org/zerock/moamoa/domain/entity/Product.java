@@ -118,6 +118,22 @@ public class Product extends BaseEntity {
         this.finishedAt = TimeUtils.toInstant(finishedAt);
     }
 
+    @Builder
+    public Product(User user, Category category, String sellingArea, String detailArea,
+                   String title, Integer sellPrice, String description, Integer maxCount,
+                   String choiceSend, Instant finishedAt) {
+        this.user = user;
+        this.category = category;
+        this.sellingArea = sellingArea;
+        this.detailArea = detailArea;
+        this.title = title;
+        this.sellPrice = sellPrice;
+        this.description = description;
+        this.maxCount = maxCount;
+        this.choiceSend = choiceSend;
+        this.finishedAt = finishedAt;
+    }
+
     public Product(Long id) {
         this.id = id;
     }

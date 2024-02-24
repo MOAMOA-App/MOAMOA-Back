@@ -1,17 +1,9 @@
 package org.zerock.moamoa.service;
 
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.zerock.moamoa.domain.entity.WishList;
-import org.zerock.moamoa.repository.ProductRepository;
-import org.zerock.moamoa.repository.UserRepository;
-import org.zerock.moamoa.repository.WishListRepository;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class WishListServiceTest {
@@ -29,8 +21,8 @@ class WishListServiceTest {
 
     @Test
     void findAll() {
-        List<WishList> wishListList =  wishListService.findAll();
-        System.out.println(wishListList.size());
+//        List<WishList> wishListList =  wishListService.findAll();
+//        System.out.println(wishListList.size());
     }
 
     @Test

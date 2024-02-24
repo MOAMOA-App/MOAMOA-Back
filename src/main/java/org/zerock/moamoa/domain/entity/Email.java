@@ -1,14 +1,13 @@
 package org.zerock.moamoa.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.zerock.moamoa.common.domain.entity.BaseEntity;
 import org.zerock.moamoa.domain.DTO.email.EmailAuthUpdateRequest;
 import org.zerock.moamoa.domain.DTO.email.EmailRequest;
 import org.zerock.moamoa.domain.enums.EmailType;
-
-import java.time.Instant;
 
 @Entity
 @Getter
@@ -33,6 +32,15 @@ public class Email extends BaseEntity {
 
     @Column(name = "authenticate", nullable = false)
     private Boolean authenticate = false;
+
+    @Builder
+    public Email(String email, String token, EmailType type, String code, Boolean authenticate) {
+        this.email = email;
+        this.token = token;
+        this.type = type;
+        this.code = code;
+        this.authenticate = authenticate;
+    }
 
     public static Email toEntity(EmailRequest req) {
         Email email = new Email();

@@ -1,31 +1,20 @@
-package org.zerock.moamoa.contoller;
+package org.zerock.moamoa.controller;
 
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.zerock.moamoa.common.auth.CustomUserDetails;
 import org.zerock.moamoa.common.auth.JwtTokenProvider;
-import org.zerock.moamoa.common.exception.AuthException;
-import org.zerock.moamoa.common.exception.ErrorCode;
-import org.zerock.moamoa.controller.NoticeController;
 import org.zerock.moamoa.domain.entity.User;
-import org.zerock.moamoa.repository.UserRepository;
 import org.zerock.moamoa.service.UserService;
 
-import java.util.Objects;
-
-import static org.junit.Assert.assertEquals;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 

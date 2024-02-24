@@ -33,14 +33,14 @@ public class NoticeListener {
             List<Party> partyList = partyRepository.findByProductAndStatus(req.getReference(), true);
             if (!partyList.isEmpty()){
                 for (Party party : partyList) {
-                    req.setReceiver(party.getBuyer());    // null값이었던 receiverID에 uid값 넣어줌
+                    req.setReceiver(party.getBuyer());    // null값이었던 receiver에 유저 정보 넣어줌
                     noticeService.saveAndSend(req);
                 }
             }
             List<WishList> wishList =  wishListRepository.findByProduct(req.getReference());
             if (!wishList.isEmpty()){
                 wishList.forEach(wish -> {
-                    req.setReceiver(wish.getUser());    // null값이었던 receiverID에 uid값 넣어줌
+                    req.setReceiver(wish.getUser());    // null값이었던 receiver에 유저 정보 넣어줌
                     noticeService.saveAndSend(req);
                 });
             }

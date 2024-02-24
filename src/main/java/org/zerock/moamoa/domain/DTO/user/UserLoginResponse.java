@@ -19,7 +19,7 @@ public class UserLoginResponse {
         this.tokenType = entity.getTokenType();
         this.accessToken = entity.getAccessToken();
         this.refreshToken = entity.getRefreshToken();
-        this.user = UserResponse.builder(user);
+        this.user = UserResponse.toDTO(user);
     }
 
     @Builder
