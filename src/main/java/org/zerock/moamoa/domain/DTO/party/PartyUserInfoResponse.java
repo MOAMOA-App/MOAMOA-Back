@@ -17,13 +17,16 @@ public class PartyUserInfoResponse {
     private Integer count;
     private LocalDateTime createdAt;
     private UserResponse buyer;
+    private Boolean status;
 
     @Builder
-    public PartyUserInfoResponse(Long id, String address, Integer count, Instant createdAt, UserResponse buyer) {
+    public PartyUserInfoResponse(Long id, String address, Integer count,
+                                 Instant createdAt, UserResponse buyer, Boolean status) {
         this.id = id;
         this.address = address;
         this.count = count;
         this.createdAt = TimeUtils.toLocalTime(createdAt);
         this.buyer = buyer;
+        this.status = status;
     }
 }
