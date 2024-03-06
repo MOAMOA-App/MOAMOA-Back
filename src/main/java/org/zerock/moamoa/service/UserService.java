@@ -23,8 +23,8 @@ import java.util.Objects;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
     private final EmailRepository emailRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponse getMyProfile(String email) {
         User user = userRepository.findByEmailOrThrow(email);
@@ -55,7 +55,7 @@ public class UserService {
             user.updateNick(StringMaker.verifyEmptyNick(request.getNick()));
 
             User savedUser = userRepository.save(user);
-            savedUser.updateCode(StringMaker.idto62Code(user.getId()));
+            savedUser.updateCode(StringMaker.idto62Code(savedUser.getId()));
 
             return userMapper.INSTANCE.toDto(savedUser);
         }
@@ -132,6 +132,7 @@ public class UserService {
         }
 
         User user = userRepository.findByEmailOrThrow(username);
+        System.out.println("User: "+user.getId() + " " + user.getEmail());
         if (!passwordEncoder.matches(req.getOldPassword(), user.getPassword()))
             return ResultResponse.toDto("INCORRECT_PW");
 
