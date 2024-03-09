@@ -47,7 +47,7 @@ public class UserController {
      */
     @GetMapping("/oauth")
     public Claims val(@RequestParam("accessToken") String accessToken
-                      /*, @RequestParam("refreshToken") String refreshToken*/) {
+                     , @RequestParam("refreshToken") String refreshToken) {
         return jwtTokenProvider.parseClaims(accessToken);
     }
 
@@ -101,12 +101,12 @@ public class UserController {
         return userService.updatePwEmail(req);
     }
 
-    @GetMapping("/nick/check")
-    public ResultResponse checkNick(@RequestParam String usernick){
-        return ResultResponse.toDto(userService.verifyRepeatedNick(usernick));
-    }
+//    @GetMapping("/nick/check")
+//    public ResultResponse checkNick(@RequestParam String usernick){
+//        return ResultResponse.toDto(userService.verifyRepeatedNick(usernick));
+//    }
 
-    void emailCheck(EmailAddrRequest req) throws InvalidValueException {
+    private void emailCheck(EmailAddrRequest req) throws InvalidValueException {
         if (req.type.equals(EMAIL_JOIN)) {
             if (userService.isEmailExist(req.getEmail()))
                 throw new AssertionError(ErrorCode.INVALID_EMAIL_EXIST);
