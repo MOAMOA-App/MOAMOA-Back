@@ -4,9 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.MockitoAnnotations;
 import org.zerock.moamoa.common.user.StringMaker;
 import org.zerock.moamoa.domain.DTO.email.EmailUserPwRequest;
-import org.zerock.moamoa.domain.DTO.user.UserProfileUpdateRequest;
-import org.zerock.moamoa.domain.DTO.user.UserPwChangeRequest;
-import org.zerock.moamoa.domain.DTO.user.UserSignupRequest;
+import org.zerock.moamoa.domain.DTO.user.*;
+import org.zerock.moamoa.domain.entity.Auth;
 import org.zerock.moamoa.domain.entity.Email;
 import org.zerock.moamoa.domain.entity.Product;
 import org.zerock.moamoa.domain.entity.User;
@@ -19,9 +18,11 @@ public class UserTestFixture {
     public final static String WRONG_EMAIL = "wrongUser@email.com";
     public final static String WRONG_PASSWORD = "wrongtestpassword";
     public final static String PASSWORD = "testpassword";
+    public final static String ENCODED_PASSWORD = "testencodedpassword";
     public final static String TOKEN = "testtoken";
     public final static String NEW_PASSWORD = "newtestpassword";
     public final static String CODE = "testcode";
+    public final static String TYPE = "testtype";
 
     @BeforeEach
     void setUp() {
@@ -34,7 +35,7 @@ public class UserTestFixture {
                 .id(id)
                 .email(EMAIL)
                 .nick(NICK)
-                .password(PASSWORD)
+                .password(ENCODED_PASSWORD)
                 .code(StringMaker.idto62Code(id))
                 .build();
     }
@@ -44,7 +45,7 @@ public class UserTestFixture {
         return User.builder()
                 .email(email)
                 .nick(NICK)
-                .password(PASSWORD)
+                .password(ENCODED_PASSWORD)
                 .code("testcode")
                 .build();
     }
@@ -54,7 +55,7 @@ public class UserTestFixture {
                 .id(id)
                 .email(email)
                 .nick(NICK)
-                .password(PASSWORD)
+                .password(ENCODED_PASSWORD)
                 .code(StringMaker.idto62Code(id))
                 .build();
     }
@@ -73,7 +74,7 @@ public class UserTestFixture {
                 .email(email)
                 .nick(NICK)
                 .nick(NICK)
-                .password(PASSWORD)
+                .password(ENCODED_PASSWORD)
                 .build();
     }
 
@@ -81,7 +82,7 @@ public class UserTestFixture {
         return UserSignupRequest.builder()
                 .email(email)
                 .nick(NICK)
-                .password(PASSWORD)
+                .password(ENCODED_PASSWORD)
                 .build();
     }
 
@@ -116,6 +117,33 @@ public class UserTestFixture {
                 .email(email)
                 .oldPassword(PASSWORD)
                 .newPassword(NEW_PASSWORD)
+                .build();
+    }
+
+    public static UserResponse createUserResp(String email) {
+        return UserResponse.builder()
+                .email(email)
+                .nick(NICK)
+                .code(null)
+                .profImg(null)
+                .address(null)
+                .detailAddress(null)
+                .build();
+    }
+
+    public static UserCheckRequest createUserCheckReq(String email) {
+        return UserCheckRequest.builder()
+                .email(email)
+                .password(PASSWORD)
+                .build();
+    }
+
+    public static Auth createTestAuth(){
+        return Auth.builder()
+                .user(createTestUser(100L))
+                .accessToken(TOKEN)
+                .refreshToken(TOKEN)
+                .tokenType(TYPE)
                 .build();
     }
 

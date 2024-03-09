@@ -1,8 +1,11 @@
 package org.zerock.moamoa.service;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.zerock.moamoa.common.exception.AuthException;
@@ -22,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.zerock.moamoa.common.fixture.UserTestFixture.*;
 
+@RunWith(MockitoJUnitRunner.class)
 @SpringBootTest
 class UserServiceTest {
     @InjectMocks
@@ -30,8 +34,25 @@ class UserServiceTest {
     private UserRepository userRepository;
     @Mock
     private EmailRepository emailRepository;
+
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Test
+    @DisplayName("패스워드 암호화 테스트")
+    void passwordEncode() {
+        // given
+        String rawPassword = "12345678";
+
+        // when
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+
+        // then
+        assertAll(
+                () -> assertNotEquals(rawPassword, encodedPassword),
+                () -> assertTrue(passwordEncoder.matches(rawPassword, encodedPassword))
+        );
+    }
 
     @Test
     public void getMyProfile_유저res_리턴(){
@@ -334,10 +355,13 @@ class UserServiceTest {
         // Given
         UserPwChangeRequest request = new UserPwChangeRequest(EMAIL, PASSWORD, NEW_PASSWORD);
         User user = UserTestFixture.createTestUser(EMAIL);
-        user.updatePw(user.getPassword(), passwordEncoder);
+//        user.updatePw(user.getPassword(), passwordEncoder);
         when(userRepository.findByEmailOrThrow(EMAIL)).thenReturn(user);
+//        when(BCrypt.hashpw(request.getOldPassword(), anyString())).thenReturn(ENCODED_PASSWORD);
 
         // 암호화 설정이 잘 안돼서 임시로 막아놓음...
+        System.out.println("pw - request.getOldPassword(): " + request.getOldPassword());
+        System.out.println("pw - user.getPassword(): " + user.getPassword());
         when(passwordEncoder.matches(request.getOldPassword(), user.getPassword())).thenReturn(true);
 
         // When

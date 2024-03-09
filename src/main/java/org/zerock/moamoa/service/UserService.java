@@ -155,14 +155,14 @@ public class UserService {
     }
 
     // 아이디 중복검사로 바꿔야됨
-    public String verifyRepeatedNick(String usernick) {
-        Boolean nickcheck = userRepository.existsByNick(usernick);
-        if (!nickcheck){
-            return "OK";
-        } else {
-            return "이미 존재하는 닉네임입니다.";
-        }
-    }
+//    public String verifyRepeatedNick(String usernick) {
+//        Boolean nickcheck = userRepository.existsByNick(usernick);
+//        if (!nickcheck){
+//            return "OK";
+//        } else {
+//            return "이미 존재하는 닉네임입니다.";
+//        }
+//    }
 
 //    UserResponse getUserResponse(User user){
 //        return UserResponse.builder()
