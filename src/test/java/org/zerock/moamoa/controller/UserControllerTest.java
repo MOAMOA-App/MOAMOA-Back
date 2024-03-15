@@ -2,6 +2,8 @@ package org.zerock.moamoa.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.zerock.moamoa.common.fixture.UserTestFixture.*;
@@ -92,7 +94,8 @@ class UserControllerTest {
                         .characterEncoding("UTF-8")
                         .content(body))
                 // Then
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
 
@@ -113,7 +116,8 @@ class UserControllerTest {
                         .content(body))
 
                 // Then
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
     }
 
     @Test
@@ -132,7 +136,8 @@ class UserControllerTest {
                         .content(body))
 
                 // Then
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
     }
 
     @Test
@@ -150,7 +155,8 @@ class UserControllerTest {
                         .characterEncoding("UTF-8")
                         .content(body))
                 // Then
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
@@ -164,10 +170,10 @@ class UserControllerTest {
 
         // When
         mockMvc.perform(post(BASE_URL + "/signup")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .accept(MediaType.APPLICATION_JSON)
-                                .characterEncoding("UTF-8")
-                                .content(body))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
+                        .content(body))
                 // Then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").exists())
@@ -177,7 +183,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.code").doesNotExist())
                 .andExpect(jsonPath("$.profImg").doesNotExist())
                 .andExpect(jsonPath("$.address").doesNotExist())
-                .andExpect(jsonPath("$.detailAdress").doesNotExist());
+                .andExpect(jsonPath("$.detailAdress").doesNotExist())
+                .andDo(print());
 
     }
 
@@ -195,7 +202,8 @@ class UserControllerTest {
                         .characterEncoding("UTF-8")
                         .content(body))
                 // Then
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().is4xxClientError())
+                .andDo(print());
     }
 
     @Test
@@ -214,7 +222,8 @@ class UserControllerTest {
                         .characterEncoding("UTF-8")
                         .content(body))
                 // Then
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
@@ -233,7 +242,8 @@ class UserControllerTest {
                         .characterEncoding("UTF-8")
                         .content(body))
                 // Then
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
@@ -257,7 +267,8 @@ class UserControllerTest {
                 // Then
                 .andExpect(status().isOk())
                 .andExpect(result ->
-                        CompletableFuture.completedFuture(EmailTokenResponse.toDto(TOKEN, "OK")));
+                        CompletableFuture.completedFuture(EmailTokenResponse.toDto(TOKEN, "OK")))
+                .andDo(print());
         }
 
     @Test
@@ -269,14 +280,15 @@ class UserControllerTest {
         given(emailService.updateAuth(request)).willReturn(ResultResponse.toDto("OK"));
 
         // When
-        mockMvc.perform(post(BASE_URL + "/email/response")
+        mockMvc.perform(put(BASE_URL + "/email/response")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
                         .content(body))
                 // Then
                 .andExpect(status().isOk())
-                .andExpect(result -> ResultResponse.toDto("OK"));
+                .andExpect(result -> ResultResponse.toDto("OK"))
+                .andDo(print());
     }
 
     @Test
@@ -288,14 +300,15 @@ class UserControllerTest {
         given(userService.updatePwEmail(request)).willReturn(ResultResponse.toDto("OK"));
 
         // When
-        mockMvc.perform(post(BASE_URL + "/password")
+        mockMvc.perform(put(BASE_URL + "/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
                         .content(body))
                 // Then
                 .andExpect(status().isOk())
-                .andExpect(result -> ResultResponse.toDto("OK"));
+                .andExpect(result -> ResultResponse.toDto("OK"))
+                .andDo(print());
     }
 
     @Test
@@ -307,14 +320,15 @@ class UserControllerTest {
         given(userService.updatePwEmail(request)).willReturn(ResultResponse.toDto("SAME_PASSWORD"));
 
         // When
-        mockMvc.perform(post(BASE_URL + "/password")
+        mockMvc.perform(put(BASE_URL + "/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
                         .content(body))
                 // Then
                 .andExpect(status().isOk())
-                .andExpect(result -> ResultResponse.toDto("SAME_PASSWORD"));
+                .andExpect(result -> ResultResponse.toDto("SAME_PASSWORD"))
+                .andDo(print());
     }
 
     @Test
@@ -326,13 +340,14 @@ class UserControllerTest {
         given(userService.updatePwEmail(request)).willReturn(ResultResponse.toDto("소셜로그인한 회원입니다."));
 
         // When
-        mockMvc.perform(post(BASE_URL + "/password")
+        mockMvc.perform(put(BASE_URL + "/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
                         .content(body))
                 // Then
-                .andExpect(status().is4xxClientError()) // 이거왜4XX되는지...몰겟음
-                .andExpect(result -> ResultResponse.toDto("소셜로그인한 회원입니다."));
+                .andExpect(status().isOk())
+                .andExpect(result -> ResultResponse.toDto("소셜로그인한 회원입니다."))
+                .andDo(print());
     }
 }
